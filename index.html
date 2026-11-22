@@ -252,7 +252,11 @@ dialog .ic{padding:16px}
  <h2 style="margin-top:0">Projeler</h2>
  <div class="plist" id="plist"></div>
  <div class="satir" style="margin:8px 0 14px"><button class="btn dolu" id="pYeni">＋ Boş proje</button><button class="btn" id="pOrnek">Örnek proje</button><button class="btn" id="pKopya">Kopyala</button><button class="btn kirmizi" id="pSil">Sil</button></div>
- <div class="satir"><button class="btn" id="pDisa">Yedek al (JSON)</button><label class="btn" style="flex-direction:row">Yedekten yükle<input type="file" id="pIce" accept="application/json,.json" hidden></label></div>
+ <h3 style="margin:6px 0">Başka cihaza / uygulamaya aktar</h3>
+ <p class="not" style="margin-top:0">Önizleme, telefondaki uygulama ve tarayıcı projeleri ayrı ayrı saklar. Aktarmak için: burada “Kopyala”ya basın, diğer yerde bu pencereyi açıp “Yapıştır”a basın.</p>
+ <div class="satir"><button class="btn dolu" id="pKopyala">📋 Tüm projeleri kopyala</button><button class="btn" id="pYapistirAc">📥 Yapıştırarak yükle</button></div>
+ <div id="pAktar" hidden style="margin-top:8px"><textarea id="pMetin" rows="5" placeholder="Kopyaladığınız proje metnini buraya yapıştırın" style="font-size:13px"></textarea><div class="satir" style="margin-top:6px"><button class="btn dolu" id="pYukle">Yükle</button><span class="not" id="pAktarNot"></span></div></div>
+ <div class="satir" style="margin-top:10px"><button class="btn" id="pDisa">Yedek dosyası indir (JSON)</button><label class="btn" style="flex-direction:row">Yedek dosyasından yükle<input type="file" id="pIce" accept="application/json,.json" hidden></label></div>
  <p class="not">Projeler bu cihazda saklanır. Başka cihaza taşımak için yedek alıp diğer cihazda yükleyin.</p>
  <div class="satir" style="justify-content:flex-end"><button class="btn" id="pKapat">Kapat</button></div>
 </div></dialog>
@@ -260,7 +264,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-11';
+const APP_VERSION = '2026.11.22-12';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1304,6 +1308,16 @@ $('#pYeni').onclick=()=>projeEkle(bosProje());$('#pOrnek').onclick=()=>projeEkle
 $('#pKopya').onclick=()=>{const p=JSON.parse(JSON.stringify(st));p.meta.ad+=' (kopya)';projeEkle(p)};
 $('#pSil').onclick=()=>{if(!confirm(`"${st.meta.ad}" silinsin mi?`))return;delete DB.projeler[DB.aktif];const ids=Object.keys(DB.projeler);if(!ids.length){projeEkle(bosProje());return}projeAc(ids[0]);$('#dlgProje').close()};
 $('#pDisa').onclick=()=>{const b=new Blob([JSON.stringify(st,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(st.meta.ad||'proje').replace(/[^\wçğıöşüÇĞİÖŞÜ-]+/g,'_')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
+function aktarMetni(){return JSON.stringify({bostanMimari:1,surum:APP_VERSION,projeler:Object.values(DB.projeler)})}
+$('#pKopyala').onclick=async()=>{const m=aktarMetni();try{await navigator.clipboard.writeText(m);toast(`${Object.keys(DB.projeler).length} proje panoya kopyalandı; diğer yerde “Yapıştırarak yükle”yi kullanın`)}
+ catch(e){$('#pAktar').hidden=false;$('#pMetin').value=m;$('#pMetin').select();$('#pAktarNot').textContent='Otomatik kopyalanamadı: metin seçili, uzun basıp “Kopyala” deyin.'}};
+$('#pYapistirAc').onclick=async()=>{$('#pAktar').hidden=false;$('#pMetin').value='';$('#pAktarNot').textContent='';try{const t=await navigator.clipboard.readText();if(t&&t.includes('"gruplar"'))$('#pMetin').value=t}catch(e){}$('#pMetin').focus()};
+$('#pYukle').onclick=()=>{let v;try{v=JSON.parse($('#pMetin').value.trim())}catch(e){$('#pAktarNot').textContent='Metin okunamadı; tamamını yapıştırdığınızdan emin olun.';return}
+ const liste=Array.isArray(v.projeler)?v.projeler:v.gruplar?[v]:[];if(!liste.length){$('#pAktarNot').textContent='Proje bulunamadı.';return}
+ const mevcut=new Set(Object.values(DB.projeler).map(p=>JSON.stringify(p)));let n=0,sonId=null;
+ liste.forEach(p=>{const q=onar(p);if(mevcut.has(JSON.stringify(q)))return;const id=uid();DB.projeler[id]=q;sonId=id;n++});
+ if(!n){$('#pAktarNot').textContent='Bu projeler zaten burada.';return}
+ projeAc(sonId);$('#pMetin').value='';$('#pAktar').hidden=true;$('#dlgProje').close();toast(`${n} proje yüklendi`)};
 $('#pIce').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const p=JSON.parse(t);if(!p.gruplar)throw 0;projeEkle(onar(p))}catch(x){toast('Dosya okunamadı')}});e.target.value=''};
 
 /* ---------- Başlat ---------- */
