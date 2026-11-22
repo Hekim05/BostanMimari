@@ -81,6 +81,9 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .bulgu b{display:block;margin-bottom:3px}
 .bulgu p{margin:2px 0;font-size:14px}
 .bulgu .on{color:#2c4a31;font-size:13.5px}
+.bulgu.gizli{opacity:.55}
+.gizleKut{flex-direction:row;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;color:var(--sl);min-height:36px;cursor:pointer}
+.gizleKut input{width:20px;min-height:20px;height:20px;margin:0}
 .not{font-size:13px;color:var(--sl)}
 .uckutu{position:relative;width:100%;aspect-ratio:4/3;background:linear-gradient(#cfe0ee,#eef3e6);border-radius:12px;overflow:hidden;border:1px solid var(--cz);touch-action:none}
 .uckutu img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:none}
@@ -254,7 +257,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-8';
+const APP_VERSION = '2026.11.22-9';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -584,7 +587,7 @@ function denetle(st,H){
  if(o.mixL>0&&o.ekim>0){const kgm2=o.kg/o.ekim;ek(kgm2>300?'uyari':'ok',`Yük: ~${fmt(kgm2,0)} kg/m² (kuru)`,`Islak karışım bunun yaklaşık 1,3 katıdır (~${fmt(kgm2*1.3,0)} kg/m²).`,kgm2>300?'Teras/çatı kurulumunda statik uygunluk mutlaka kontrol edilmeli.':'')}
  const sira={kritik:0,uyari:1,ok:2};B.sort((a,b)=>sira[a.sev]-sira[b.sev]);return B}
 
-function mimarNotu(st,H){const o=H.top,kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sorun.filter(b=>b.sev==='uyari').length;
+function mimarNotu(st,H,liste){const o=H.top,L=liste||H.sorun,kr=L.filter(b=>b.sev==='kritik').length,uy=L.filter(b=>b.sev==='uyari').length;
  let s=`<b>${esc(st.meta.ad)}</b> — ${st.meta.tur==='ek'?'mevcut bostana ek kasa':'yeni bostan'} kurulumu. `;
  s+=`Toplam ${o.kasa} kasa (${o.kasaYeni} yeni), ${fmt(o.ekim,1)} m² ekim alanı. `;
  if(o.mixL>0)s+=`Kasalara oturma payıyla ${fmt(o.mixL/1000,2)} m³ karışım gerekiyor (~${fmt(o.kg/1000,1)} ton). `;
@@ -1063,16 +1066,22 @@ $('#btnAyir').onclick=()=>{const sk=seciliKasalar();if(sk.length!==1)return;cons
 $('#btnDondur').onclick=()=>{const g=st.gruplar[yer.secili];if(!g)return;g.yon=g.yon==='dikey'?'yatay':'dikey';degisti();renderForm();cizimCiz(true);toast(`${harf(yer.secili)} grubu ${g.yon==='dikey'?'dikey':'yatay'} yerleştirildi`)};
 
 /* ---------- Denetim sekmesi ---------- */
-function denetimCiz(){$('#mimarNot').innerHTML=mimarNotu(st,H);$('#bulgular').innerHTML=H.sorun.map(b=>`<div class="bulgu ${b.sev}"><b>${b.sev==='kritik'?'⛔ ':b.sev==='uyari'?'⚠️ ':'✓ '}${b.baslik}</b><p>${b.mesaj}</p>${b.oneri?`<p class="on">→ ${b.oneri}</p>`:''}</div>`).join('');kirli.denetim=0}
+function raporGizli(){if(!Array.isArray(st.raporGizli))st.raporGizli=[];return st.raporGizli}
+function raporBulgulari(){const gz=raporGizli();return H.sorun.filter(b=>b.sev!=='ok'&&!gz.includes(b.baslik))}
+function denetimCiz(){const gz=raporGizli(),gizliSay=H.sorun.filter(b=>b.sev!=='ok'&&gz.includes(b.baslik)).length;
+ $('#mimarNot').innerHTML=mimarNotu(st,H)+(gizliSay?`<br><span class="not">${gizliSay} bulgu raporda gösterilmeyecek olarak işaretli.</span>`:'');
+ $('#bulgular').innerHTML=H.sorun.map(b=>{const gizli=b.sev!=='ok'&&gz.includes(b.baslik);return`<div class="bulgu ${b.sev}${gizli?' gizli':''}"><b>${b.sev==='kritik'?'⛔ ':b.sev==='uyari'?'⚠️ ':'✓ '}${b.baslik}</b><p>${b.mesaj}</p>${b.oneri?`<p class="on">→ ${b.oneri}</p>`:''}${b.sev!=='ok'?`<label class="gizleKut"><input type="checkbox" data-gizle="${esc(b.baslik)}"${gizli?' checked':''}> Raporda gösterme</label>`:''}</div>`}).join('');kirli.denetim=0}
+$('#bulgular').addEventListener('change',e=>{const c=e.target.closest('[data-gizle]');if(!c)return;const gz=raporGizli(),k=c.dataset.gizle,i=gz.indexOf(k);
+ if(c.checked&&i<0)gz.push(k);if(!c.checked&&i>=0)gz.splice(i,1);kaydet();kirli.rapor=1;denetimCiz();toast(c.checked?'Bu bulgu raporda gösterilmeyecek':'Bulgu yeniden raporda')});
 
 /* ---------- Rapor ---------- */
 let ucGorsel=null;
 function raporCiz(){const o=H.top,M=st.meta,S=st.sulama,T=st.toprak;
  const antet=(baslik)=>`<div class="antet"><svg width="44" height="44" viewBox="0 0 40 40"><circle cx="20" cy="20" r="19" fill="#2e6b3a"/><rect x="9" y="19" width="22" height="9" rx="1.5" fill="#d2a76c"/><path d="M14 16c0-4 2-6 4-7M20 16c0-5 1-7 3-8M26 16c0-3-1-5-3-6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg><div class="yazi"><b>${esc(M.ad)}</b><br><small>${esc(M.bostan||'')} · ${baslik}</small></div><small>${esc(M.tarih||'')}</small></div>`;
- const kr=H.sorun.filter(b=>b.sev!=='ok');
+ const kr=raporBulgulari();
  let r=`<div class="sayfa">${antet('Kurulum raporu')}<h1>Bostan kurulum projesi</h1><p>${M.tur==='ek'?'Mevcut bostana ek kasa kurulumu':'Yeni bostan kurulumu'}${M.hazirlayan?' · Hazırlayan: '+esc(M.hazirlayan):''}</p>
  <div class="kutu4"><div><b>${o.kasa}</b><span>kasa (${o.kasaYeni} yeni)</span></div><div><b>${fmt(o.ekim,1)} m²</b><span>ekim alanı</span></div><div><b>${fmt(o.mixL/1000,2)} m³</b><span>karışım toprak</span></div><div><b>${fmt(o.Q,0)} L/sa</b><span>sulama debisi</span></div></div>
- <h2>Özet</h2><p>${mimarNotu(st,H)}</p>
+ <h2>Özet</h2><p>${mimarNotu(st,H,raporBulgulari())}</p>
  <h2>Kasa grupları</h2><table><tr><th>Grup</th><th>Durum</th><th class="s">Adet</th><th>Şekil · dış ölçü (cm)</th><th>Malzeme</th><th>MK</th><th>Uzanım</th><th class="s">Ekim m²</th></tr>${H.gr.map(G=>{const ys=yonSapma(st,G.g);return`<tr><td>${G.kod} · ${esc(G.g.ad)}</td><td>${G.g.durum==='yeni'?'Yeni':'Mevcut'}</td><td class="s">${G.n} (${G.sira}×${G.sut})</td><td>${G.k.sekil} · ${fmt(G.k.L)}×${fmt(G.k.W)}×${fmt(G.k.Hr)}${G.k.sekil!=='I'?` (kol ${fmt(G.k.W2)}×${fmt(G.k.K)})`:''}</td><td>${MALZ[G.g.malzeme].ad}</td><td>${G.k.mk==='yok'?'—':G.k.mk==='ic'?'İçte':'Ek'}</td><td>${yonAdi(ys.bearing)}</td><td class="s">${fmt(G.area*G.n,1)}</td></tr>`}).join('')}</table>
  <h2>Denetim bulguları</h2>${kr.length?`<table><tr><th>Düzey</th><th>Bulgu</th><th>Öneri</th></tr>${kr.map(b=>`<tr><td>${b.sev==='kritik'?'Kritik':'Uyarı'}</td><td><b>${b.baslik}</b><br>${b.mesaj}</td><td>${b.oneri}</td></tr>`).join('')}</table>`:'<p>Kritik sorun ya da uyarı yok.</p>'}
  ${M.not?`<h2>Notlar</h2><p>${esc(M.not).replace(/\n/g,'<br>')}</p>`:''}</div>`;
