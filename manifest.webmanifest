@@ -1,0 +1,15 @@
+{
+ "name": "Bostan Mimarı — Kasa, Sulama ve Toprak Planlayıcı",
+ "short_name": "Bostan Mimarı",
+ "description": "Kent bostanı kasa yerleşimi, damla sulama, montaj, toprak karışımı ve 3D görünüm planlayıcı",
+ "start_url": "./",
+ "scope": "./",
+ "display": "standalone",
+ "lang": "tr",
+ "background_color": "#f5f6f2",
+ "theme_color": "#2e6b3a",
+ "icons": [
+  {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+  {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+ ]
+}
