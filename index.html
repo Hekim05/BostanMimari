@@ -87,6 +87,7 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .bulgu.gizli{opacity:.55}
 .malzLink{text-decoration:underline dotted #7a9a80;text-underline-offset:3px;cursor:pointer}.malzLink::after{content:" 🖼";font-size:.8em}
 .pdfKap{position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1}.pdfKap .sayfa{width:794px;max-width:none!important;margin:0!important;box-shadow:none!important;border-radius:0!important;padding:40px 36px!important;overflow:visible!important}.pdfKap .iki{grid-template-columns:1fr 1fr!important}.pdfKap .kutu4{grid-template-columns:repeat(4,1fr)!important}.pdfKap .cizim>svg{max-height:880px}.pdfKap .malzLink{text-decoration:none}.pdfKap .malzLink::after{content:""}
+#piyasaListe td{vertical-align:top;overflow-wrap:anywhere}#piyasaListe table{table-layout:fixed;width:100%}#piyasaListe th:first-child{width:42px}#piyasaListe th:last-child{width:38%}#piyasaListe td.s,#piyasaListe th.s{white-space:normal}.piyAra{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.piyKay{padding-left:20px;font-size:13px}.piyKay li{margin-bottom:4px}.piyAra a{font-size:11.5px;padding:2px 7px;border:1px solid var(--cz);border-radius:10px;text-decoration:none;color:var(--y)}
 #ihaleFiyat td,#ihaleFiyat th{vertical-align:middle;padding:6px 4px}#ihaleFiyat td:first-child{font-size:11px;white-space:nowrap}
 @media print{.malzLink{text-decoration:none}.malzLink::after{content:""}}
 .gizleKut{flex-direction:row;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;color:var(--sl);min-height:36px;cursor:pointer}
@@ -248,6 +249,7 @@ dialog .ic{padding:16px}
  <p class="not" style="margin-top:-4px">Proje verilerinden teknik şartname, metraj ve yaklaşık maliyet cetvelleri, çizimler ve kurulum raporunu tek klasörde (ZIP) hazırlar. Ajan dosyaları hazırlamadan önce veriyi, hazırladıktan sonra her dosyayı yeniden açarak kaynakla karşılaştırır; sorun bulursa dosyaları yeniden üretip bir kez daha kontrol eder.</p>
  <div class="kart"><h3 style="margin-top:0">İdare ve iş bilgileri</h3><div class="alanlar" id="ihaleForm"></div></div>
  <details class="kart"><summary style="padding:14px;font-weight:700;cursor:pointer">Birim fiyatlar (isteğe bağlı)</summary><div style="padding:0 14px 14px"><p class="not" style="margin-top:0">Piyasa araştırmasından elde ettiğiniz birim fiyatları (KDV hariç) girerseniz yaklaşık maliyet tutarı dosyaya hazır yazılır.</p><div id="ihaleFiyat"></div></div></details>
+ <details class="kart" open id="piyasaKart"><summary style="padding:14px;font-weight:700;cursor:pointer">🔎 Piyasa fiyatları (ajan araştırması)</summary><div style="padding:0 14px 14px" id="piyasaListe"></div></details>
  <div class="kart"><h3 style="margin-top:0">Klasör içeriği</h3><div id="ihaleListe"></div>
   <div class="satir"><button class="btn dolu" id="btnIhale">📦 İhale dosyasını hazırla</button><button class="btn" id="btnIhaleTaslak" hidden>Yine de taslak hazırla</button></div>
   <p class="not" id="ihaleDurum" aria-live="polite"></p>
@@ -289,7 +291,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-14';
+const APP_VERSION = '2026.11.22-15';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1371,7 +1373,7 @@ const MALZ_GOR={
  profil:{ad:'Galvaniz köşe / ara profili',s:`<path d="M70 10 L100 20 L100 130 L70 120Z" ${GZ}/><path d="M100 20 L130 10 L130 120 L100 130Z" fill="#aeb8bf" stroke="#5f6870" stroke-width="2"/>${[0,1,2,3,4,5].map(i=>DL(85,30+i*16,3)+DL(115,30+i*16,3)).join('')}`,a:'Sac panellerin köşede ve arada birleştiği galvaniz L profil.',i:'Toprağa giren kısmı ayrıca boyanabilir.'},
  genel:{ad:'Malzeme',s:`<path d="M50 50 L100 30 L150 50 L100 70Z" fill="#e6dcc8" stroke="#8a7a5a" stroke-width="2"/><path d="M50 50 L100 70 L100 120 L50 100Z" fill="#d4c6aa" stroke="#8a7a5a" stroke-width="2"/><path d="M100 70 L150 50 L150 100 L100 120Z" fill="#c2b38f" stroke="#8a7a5a" stroke-width="2"/>`,a:'',i:''}
 };
-const MALZ_KURAL=[[/vida/i,'vida'],[/köşeben/i,'kosebent'],[/ek plaka/i,'ekplaka'],[/köşe kapağı/i,'kosekapak'],[/T plaka/i,'tplaka'],[/lama/i,'lama'],[/cıvata/i,'civata'],[/vida/i,'vida'],[/menteşe/i,'mentese'],[/tutamağı|tutamak/i,'tutamak'],[/zincir/i,'zincir'],[/kilit/i,'kilit'],[/takoz/i,'takoz'],[/gergi/i,'gergi'],[/çıta/i,'takoz'],[/kapak|kontrplak/i,'kontrplak'],[/kenar koruma/i,'kenarprofil'],[/kemirgen/i,'tel'],[/jeotekstil/i,'jeotekstil'],[/briket/i,'briket'],[/harç|beton/i,'harc'],[/oluklu sac|sac panel|panel \(oluklu|yan panel|ön panel|bölme paneli|duvar paneli/i,'sac'],[/profil/i,'profil'],[/dikme/i,'dikme'],[/tahta/i,'tahta'],
+const MALZ_KURAL=[[/işçili|kurulumu|hazırlanması, taşınması/i,'genel'],[/vida/i,'vida'],[/köşeben/i,'kosebent'],[/ek plaka/i,'ekplaka'],[/köşe kapağı/i,'kosekapak'],[/T plaka/i,'tplaka'],[/(^|[\s·])lama\b/i,'lama'],[/cıvata/i,'civata'],[/vida/i,'vida'],[/menteşe/i,'mentese'],[/tutamağı|tutamak/i,'tutamak'],[/zincir/i,'zincir'],[/kilit/i,'kilit'],[/takoz/i,'takoz'],[/gergi/i,'gergi'],[/çıta/i,'takoz'],[/kapak|kontrplak/i,'kontrplak'],[/kenar koruma/i,'kenarprofil'],[/kemirgen/i,'tel'],[/jeotekstil/i,'jeotekstil'],[/briket/i,'briket'],[/harç|beton/i,'harc'],[/oluklu sac|sac panel|panel \(oluklu|yan panel|ön panel|bölme paneli|duvar paneli/i,'sac'],[/profil/i,'profil'],[/dikme/i,'dikme'],[/tahta/i,'tahta'],
  [/PE ana boru/i,'peboru'],[/damlalı boru/i,'damlali'],[/kör boru/i,'korboru'],[/başlangıç conta/i,'conta'],[/mini vana/i,'minivana'],[/küresel vana/i,'kuresel'],[/ T$|Ø\d+ T\b/i,'tee'],[/dirsek/i,'dirsek'],[/tapa/i,'tapa'],[/filtre/i,'filtre'],[/basınç düşürücü/i,'regulator'],[/adaptör/i,'adaptor'],[/kazığı|kazık/i,'kazik'],
  [/solucan/i,'solucan'],[/torf/i,'torf'],[/kompost/i,'kompost'],[/perlit/i,'perlit'],[/pomza/i,'pomza'],[/gübre/i,'gubre'],[/kum/i,'kum'],[/toprak|toprağ/i,'toprak']];
 function malzAnahtar(ad){for(const[r,k]of MALZ_KURAL)if(r.test(ad))return k;return'genel'}
@@ -1479,8 +1481,8 @@ function ihaleSayfalari(K,I){const B=(v,s=1)=>({v,s}),bas=4;const toplamSatir=ba
  const tk={ad:'Teklif Cetveli',gen:[6,50,8,11,16,17],yatay:true,birlesik:['A1:F1','A2:F2','A3:F3'],satirlar:[...ust(I.teklif==='goturu'?'GÖTÜRÜ BEDEL TEKLİF CETVELİ (EK: İŞ KALEMLERİ)':'BİRİM FİYAT TEKLİF CETVELİ'),['Sıra','İş kalemi','Birim','Miktar','Teklif edilen birim fiyat (TL)','Tutarı (TL)'].map(x=>B(x)),
   ...K.map((k,i)=>{const r=bas+1+i;return[k.no,k.kalem+(k.olcu?` (${k.olcu})`:''),k.birim,{f:`Metraj!G${r}`,v:k.miktar},{v:'',s:3},{f:`D${r}*E${r}`,v:0}]}),
   ['','Toplam tutar (KDV hariç)','','','',{f:`SUM(F${bas+1}:F${bas+K.length})`,s:4}],[],['','Teklif verenin adı soyadı / ticaret unvanı:'],['','Tarih:'],['','İmza / kaşe:']]};
- const pa={ad:'Piyasa Araştırması',gen:[6,46,8,11,14,14,14,15],yatay:true,birlesik:['A1:H1','A2:H2','A3:H3'],satirlar:[...ust('PİYASA FİYAT ARAŞTIRMASI TUTANAĞI'),['Sıra','İş kalemi','Birim','Miktar','1. firma BF (TL)','2. firma BF (TL)','3. firma BF (TL)','Ortalama BF (TL)'].map(x=>B(x)),
-  ...K.map((k,i)=>{const r=bas+1+i;return[k.no,k.kalem,k.birim,{f:`Metraj!G${r}`,v:k.miktar},{v:'',s:3},{v:'',s:3},{v:'',s:3},{f:`IFERROR(AVERAGE(E${r}:G${r}),"")`}]}),[],
+ const pa={ad:'Piyasa Araştırması',gen:[6,46,8,11,14,14,14,15,15,40],yatay:true,birlesik:['A1:J1','A2:J2','A3:J3'],satirlar:[...ust('PİYASA FİYAT ARAŞTIRMASI TUTANAĞI'),['Sıra','İş kalemi','Birim','Miktar','1. firma BF (TL)','2. firma BF (TL)','3. firma BF (TL)','Firma ortalaması BF (TL)',`İnternet referansı BF (TL, KDV hariç, ${PIYASA_TARIH})`,'Referans kaynağı'].map(x=>B(x)),
+  ...K.map((k,i)=>{const r=bas+1+i,p=piyasaFiyat(k);return[k.no,k.kalem,k.birim,{f:`Metraj!G${r}`,v:k.miktar},{v:'',s:3},{v:'',s:3},{v:'',s:3},{f:`IFERROR(AVERAGE(E${r}:G${r}),"")`},p?{v:Math.round(p.haric*100)/100,s:3}:{v:'',s:3},p?`${p.ref.kaynak}: ${p.ref.ad} (${p.hesap}) ${p.ref.url}`:'bulunamadı']}),[],
   ['','Firma unvanları: 1) ……………… 2) ……………… 3) ………………'],[],['','Araştırmayı yapan(lar) adı soyadı, unvanı, imza:']]};
  return[metraj,ym,tk,pa]}
 
@@ -1549,7 +1551,7 @@ function ihaleKontrol1(K,I){const R=[],ek=(d,x)=>R.push({d,x});const M=st.meta,o
  const ot=(st.toprak.bil||[]).reduce((s,b)=>s+n0(b.oran),0);if(Math.abs(ot-100)>0.5)ek('kritik',`Toprak karışımı oranları toplamı %${fmt(ot)} (100 olmalı).`);
  const top=K.filter(k=>k.bolum.startsWith('C')&&k.birim==='m³'&&!/işçilik|Drenaj/i.test(k.kalem)).reduce((s,k)=>s+k.miktar,0);if(o.mixL>0&&Math.abs(top-o.mixL/1000)>0.02)ek('kritik',`Toprak bileşenleri toplamı (${fmt(top,2)} m³) karışım hacmiyle (${fmt(o.mixL/1000,2)} m³) tutmuyor.`);
  const kr=raporBulgulari().filter(b=>b.sev==='kritik');if(kr.length)ek('uyari',`Denetimde ${kr.length} kritik bulgu açık: ${kr.map(b=>b.baslik).join('; ')}. İhaleden önce çözülmesi önerilir.`);
- const fy=K.filter(k=>ihFiyat(I,k)!=null).length;ek(fy===K.length?'ok':'bilgi',fy===K.length?'Tüm kalemlerin birim fiyatı girilmiş; yaklaşık maliyet tutarı hesaplanır.':`${K.length-fy} kalemin birim fiyatı boş; yaklaşık maliyet cetvelinde fiyat sütunu doldurulunca tutarlar Excel’de kendiliğinden hesaplanır.`);
+ const pr=K.filter(k=>piyasaFiyat(k)).length;ek('bilgi',`İnternet piyasa referansı ${pr}/${K.length} kalem için bulundu (${PIYASA_TARIH}); Piyasa Araştırması sayfasına ayrı sütun olarak yazılır.`);const fy=K.filter(k=>ihFiyat(I,k)!=null).length;ek(fy===K.length?'ok':'bilgi',fy===K.length?'Tüm kalemlerin birim fiyatı girilmiş; yaklaşık maliyet tutarı hesaplanır.':`${K.length-fy} kalemin birim fiyatı boş; yaklaşık maliyet cetvelinde fiyat sütunu doldurulunca tutarlar Excel’de kendiliğinden hesaplanır.`);
  if(!R.some(r=>r.d==='kritik'||r.d==='uyari'))ek('ok',`${K.length} iş kalemi, proje bilgileri ve karışım oranları tutarlı.`);
  return R}
 async function ihaleKontrol2(zipBlob,beklenen,K){const R=[],ek=(d,x)=>R.push({d,x}),JZ=window.JSZip;let z;
@@ -1614,11 +1616,11 @@ function kontrolGoster(tur){const k=$('#ihaleKontrol');k.hidden=false;
 function ihaleCiz(){const I=ihaleAyar(),K=metrajKalemleri(),f=(k,a,tip='text',ek='')=>`<label>${a}<input data-ih="${k}" type="${tip}" ${tip==='number'?'inputmode="decimal" step="any"':''} value="${esc(I[k]??'')}" ${ek}></label>`,s=(k,a,o)=>`<label>${a}<select data-ih="${k}">${o.map(([v,t])=>`<option value="${v}"${I[k]===v?' selected':''}>${t}</option>`).join('')}</select></label>`;
  $('#ihaleForm').innerHTML=`<label class="tam">İdare<input data-ih="idare" type="text" value="${esc(I.idare)}"></label><label class="tam">İşin adı<input data-ih="isAdi" type="text" value="${esc(I.isAdi||'')}" placeholder="${esc(isAdi({}))}"></label>${f('yer','İşin yeri','text',`placeholder="${esc(st.meta.bostan||'')}"`)}${f('sure','İşin süresi (gün)','number')}${s('usul','Alım usulü',Object.entries(USUL).map(([v,t])=>[v,t.split(' (')[0]]))}${s('teklif','Teklif türü',[['birim','Birim fiyat'],['goturu','Götürü bedel']])}${f('garanti','Garanti (ay)','number')}${f('kdv','KDV (%)','number')}${s('ekPdf','Kurulum raporu PDF’i',[['evet','Klasöre ekle'],['hayir','Ekleme']])}`;
  let top=0,dolu=0;$('#ihaleFiyat').innerHTML=K.length?`<div class="tablo"><table><tr><th>Poz</th><th>Kalem</th><th class="s">Miktar</th><th class="s">BF (TL)</th></tr>${K.map(k=>{const v=ihFiyat(I,k);if(v!=null){top+=v*k.miktar;dolu++}return`<tr><td>${k.poz}</td><td>${mzL(esc(k.kalem))}${k.olcu?`<br><small class="not">${esc(k.olcu)}</small>`:''}</td><td class="s">${fmt(k.miktar,2)} ${esc(k.birim)}</td><td class="s"><input data-ihf="${esc(k.anahtar)}" type="number" inputmode="decimal" step="any" min="0" value="${esc(I.fiyat[k.anahtar]??'')}" style="width:70px;min-height:38px;padding:4px 6px" aria-label="${esc(k.kalem)} birim fiyatı"></td></tr>`}).join('')}</table></div><p class="not" id="ihaleToplam"></p>`:'<p class="not">Önce kasa grubu ekleyin.</p>';
- ihaleToplamYaz(K);
+ ihaleToplamYaz(K);piyasaCiz();
  $('#ihaleListe').innerHTML=`<ul style="margin:4px 0 8px;padding-left:20px;font-size:14px"><li><b>00</b> İçindekiler ve ajan kontrol raporu (txt)</li><li><b>01</b> Teknik şartname (docx) — ${K.length} kalemlik Ek-1 ile</li><li><b>02</b> Metraj, yaklaşık maliyet, teklif cetveli, piyasa araştırması (xlsx)</li><li><b>03</b> Çizimler klasörü (svg) — plan${H.top.Q>0?', sulama':''}, ${H.gr.length} grup detayı</li>${I.ekPdf!=='hayir'?'<li><b>04</b> Kurulum raporu (pdf)</li>':''}<li><b>05</b> Proje verisi (json)</li></ul>`}
 function ihaleToplamYaz(K){const I=ihaleAyar();K=K||metrajKalemleri();let t=0,d=0;K.forEach(k=>{const v=ihFiyat(I,k);if(v!=null){t+=v*k.miktar;d++}});const e=$('#ihaleToplam');if(!e)return;const kdv=n0(I.kdv,20);
  e.innerHTML=d?`Fiyatı girilen ${d}/${K.length} kalem: <b>${fmt(t,2)} TL</b> (KDV hariç) · KDV dahil <b>${fmt(t*(1+kdv/100),2)} TL</b>`:'Fiyat girmek zorunlu değil; boş bırakılan fiyatlar Excel’de doldurulunca tutarlar kendiliğinden hesaplanır.'}
-$('#t-ihale').addEventListener('input',e=>{const el=e.target,I=ihaleAyar();if(el.dataset.ih){I[el.dataset.ih]=el.value;kaydet();if(el.dataset.ih==='kdv')ihaleToplamYaz();if(el.dataset.ih==='ekPdf')ihaleCiz()}
+$('#t-ihale').addEventListener('input',e=>{const el=e.target,I=ihaleAyar();if(el.dataset.ih){I[el.dataset.ih]=el.value;kaydet();if(el.dataset.ih==='kdv'){ihaleToplamYaz();piyasaCiz()}if(el.dataset.ih==='ekPdf')ihaleCiz()}
  else if(el.dataset.ihf!=null){if(el.value==='')delete I.fiyat[el.dataset.ihf];else I.fiyat[el.dataset.ihf]=el.value;kaydet();ihaleToplamYaz()}});
 $('#t-ihale').addEventListener('change',e=>{if(e.target.dataset.ih==='ekPdf'){ihaleAyar().ekPdf=e.target.value;kaydet();ihaleCiz()}});
 $('#btnIhale').onclick=()=>ihaleUret(false);
@@ -1627,6 +1629,49 @@ $('#ihIndir').onclick=async()=>{if(!ihaleSon)return;const s=await dosyaVer(ihale
 $('#ihPaylas').onclick=async()=>{if(!ihaleSon)return;const s=await dosyaVer(ihaleSon.blob,ihaleSon.ad,true);if(s!=='iptal')toast(`ZIP ${s}`)};
 $('#ihPaylas').hidden=!paylasilir();
 
+/* ---------- Piyasa fiyatları (ajan araştırması, internet perakende, KDV dahil) ---------- */
+const PIYASA_TARIH='22.11.2026';
+const PIYASA={
+ kereste:{f:13010,b:'m³',ad:'Silinmiş Sibirya çam kereste 5×15 — m³ fiyatı',kaynak:'karekod.org (Kereste Fiyatları 2026)',url:'https://www.karekod.org/blog/kereste-fiyatlari/',not:'Toptan m³ fiyatı, emprenyesiz. Emprenyeli malda ve tek tek parça alımında fiyat daha yüksek olur.'},
+ kontrplak:{f:1659,b:'m²',ad:'Sveza filmli plywood 18 mm, 125×250 cm = 5.185,35 TL',kaynak:'n11',url:'https://www.n11.com/arama?m=Sveza'},
+ kosebent:{f:109.9,b:'adet',ad:'Ermo asimetrik köşebent 40×80×120 mm',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/ermo-kosebent-asimetrik-90-derece/p/1000038816',not:'Projedeki ölçü bulunamadı; en yakın ürün.'},
+ kosebentK:{f:79.99,b:'adet',ad:'Ermo asimetrik köşebent 30×40×80 mm',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/ermo-kosebent-asimetrik-90-derece/p/1000064164',not:'Küçük köşebent için en yakın ürün.'},
+ vida:{f:4.03,b:'adet',ad:'Sunta vidası 5×100, 100 adet = 402,60 TL',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/sunta-vidasi-5x100-100-adet/p/5001228101',not:'Çinko kaplı sunta vidası; dış ortam (galvaniz/paslanmaz) vidası daha pahalıdır.'},
+ tel:{f:101.67,b:'m²',ad:'12×12 mm galvaniz puntalı tel, 120 cm × 25 m = 3.050 TL',kaynak:'Trendyol',url:'https://www.trendyol.com/kumes-teli-y-s4502?pi=8'},
+ damlali:{f:6,b:'m',ad:'16 mm damlama borusu, 400 m = 2.400 TL',kaynak:'n11 (Valmen)',url:'https://www.n11.com/arama?m=Valmen'},
+ minivana:{f:12.3,b:'adet',ad:'Arangül 16×16 kurtağızlı mini vana',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/arangul-16-x-16-damlama-kurtagizli-mini-vana/p/5000313015'},
+ dirsek:{f:10.32,b:'adet',ad:'Damla sulama dirsek 16×16, 30 adet = 309,67 TL',kaynak:'Akakçe',url:'https://www.akakce.com/hortum-baglanti-aparati/dam.html',not:'Ø20 dirsek daha pahalıdır.'},
+ filtre:{f:414.54,b:'adet',ad:'Damla sulama filtresi 32 mm (kangal boru ekli)',kaynak:'Akakçe',url:'https://www.akakce.com/hortum-baglanti-aparati/dam.html',not:'Projedeki disk filtreyle aynı model değil; yaklaşık.'},
+ torf:{f:6372.5,b:'m³',ad:'Torf toprak 40 L = 254,90 TL',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/torf-toprak/p/1000142963',not:'Perakende torba; balya ya da toptan alımda daha ucuz olabilir.'},
+ perlit:{f:13000,b:'m³',ad:'Tarım perliti 50 L = 650 TL',kaynak:'Koçtaş',url:'https://www.koctas.com.tr/diger-tarim-perliti-50-litre/p/5003178672'},
+ gubre:{f:3675,b:'m³',ad:'Yanmış elenmiş hayvan gübresi 40 L = 147 TL',kaynak:'Trendyol',url:'https://www.trendyol.com/700-800-ml-gubre-x-c105625-a43-vgroup-27'}
+};
+const PIYASA_ISCILIK={usta:344.80,yrd:255.82,kaynak:'ÇŞB 2026 Haziran rayiç listesi',url:'https://webdosya.csb.gov.tr/v2/yfk/2026/06/n-aat-Rayi-ler-2026-Haziran-20260605134725.pdf'};
+const sayiTR=s=>parseFloat(String(s).replace(',','.'));
+function piyasaFiyat(k){const ad=k.kalem,mk=malzAnahtar(ad),txt=ad+' '+k.olcu;
+ const kesit=()=>{const m=txt.match(/(\d+(?:[.,]\d+)?)\s*×\s*(\d+(?:[.,]\d+)?)\s*cm/);if(!m)return null;const kalan=txt.replace(m[0],' '),l=kalan.match(/(\d+(?:[.,]\d+)?)\s*cm/);if(!l)return null;return sayiTR(m[1])*sayiTR(m[2])*sayiTR(l[1])/1e6};
+ let ref=null,carp=null,hesap='';
+ if(['tahta','dikme','takoz'].includes(mk)||(mk==='gergi'&&/çıta/i.test(ad))){if(/alümin|kompozit/i.test(ad))return null;const v=kesit();if(!v)return null;ref=PIYASA.kereste;carp=v;hesap=`${fmt(v,4)} m³ × ${fmt(ref.f,0)} TL/m³`}
+ else if(mk==='kontrplak'){const m=k.olcu.match(/(\d+(?:[.,]\d+)?)\s*×\s*(\d+(?:[.,]\d+)?)\s*cm/);if(!m)return null;const a=sayiTR(m[1])*sayiTR(m[2])/1e4;ref=PIYASA.kontrplak;carp=a;hesap=`${fmt(a,2)} m² × ${fmt(ref.f,0)} TL/m²`}
+ else if(mk==='tel'){const m=k.olcu.match(/(\d+(?:[.,]\d+)?)\s*m²/),m2=k.olcu.match(/(\d+(?:[.,]\d+)?)\s*×\s*(\d+(?:[.,]\d+)?)\s*m\b/);if(!m&&!m2)return null;const a=m?sayiTR(m[1]):sayiTR(m2[1])*sayiTR(m2[2]);ref=PIYASA.tel;carp=a;hesap=`${fmt(a,2)} m² × ${fmt(ref.f,2)} TL/m²`}
+ else if(mk==='vida'){const m=txt.match(/(\d+(?:[.,]\d+)?)\s*×\s*(\d+)\s*mm/);if(!m||+m[2]<80)return null;ref=PIYASA.vida;carp=1;hesap=`${fmt(ref.f,2)} TL/adet`}
+ else if(mk==='dirsek'&&!/Ø16/.test(ad))return null;
+ else if(mk==='kosebent'&&/60×60|30×40/.test(ad)){ref=PIYASA.kosebentK;carp=1;hesap=`${fmt(ref.f,2)} TL/adet`}
+ else if(PIYASA[mk]){ref=PIYASA[mk];if(ref.b==='m³'){if(k.birim!=='m³')return null}else if(ref.b==='m'){if(k.birim!=='m')return null}else if(!/^(adet|takım)$/.test(k.birim))return null;carp=1;hesap=`${fmt(ref.f,2)} TL/${ref.b}`}
+ if(!ref||!(carp>0))return null;
+ const kdv=n0(ihaleAyar().kdv,20),dahil=ref.f*carp;return{ref,dahil,haric:dahil/(1+kdv/100),hesap}}
+const aramaLink=(site,q)=>({akakce:`https://www.akakce.com/arama/?q=${encodeURIComponent(q)}`,cimri:`https://www.cimri.com/arama?q=${encodeURIComponent(q)}`,google:`https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q)}`})[site];
+const aramaMetni=k=>(k.kalem.replace(/^(Malzeme kasası|Vana bölmesi)\s*·\s*/,'')+' '+(k.olcu||'').replace(/·.*$/,'')).replace(/\s+/g,' ').trim();
+function piyasaCiz(){const K=metrajKalemleri(),I=ihaleAyar(),kdv=n0(I.kdv,20);let say=0,top=0;const kay=[];
+ const sat=K.map(k=>{const p=piyasaFiyat(k);let n=0;if(p){say++;top+=p.haric*k.miktar;n=kay.indexOf(p.ref)+1;if(!n){kay.push(p.ref);n=kay.length}}const q=aramaMetni(k);
+  return`<tr><td><small>${k.poz}</small></td><td>${mzL(esc(k.kalem))}${k.olcu?`<br><small class="not">${esc(k.olcu)}</small>`:''}<div class="piyAra"><a href="${aramaLink('akakce',q)}" target="_blank" rel="noopener">Akakçe</a><a href="${aramaLink('cimri',q)}" target="_blank" rel="noopener">Cimri</a><a href="${aramaLink('google',q)}" target="_blank" rel="noopener">Google</a></div></td><td class="s">${p?`<b>${fmt(p.haric,2)}</b> <sup><a href="#piyK${n}">[${n}]</a></sup><br><small class="not">${fmt(k.miktar,2)} ${esc(k.birim)} → ${fmt(p.haric*k.miktar,0)} TL</small><br><small class="not">${esc(p.hesap)}</small>`:'<small class="not">bulunamadı</small>'}</td></tr>`}).join('');
+ $('#piyasaListe').innerHTML=K.length?`<p class="not" style="margin-top:0">Araştırma tarihi <b>${PIYASA_TARIH}</b>. İnternetteki perakende fiyatlar (KDV dahil) %${fmt(kdv)} KDV düşülerek gösterildi. <b>${say}/${K.length}</b> kalem için referans bulundu; toplamı ≈ <b>${fmt(top,0)} TL</b> (KDV hariç, yalnızca bulunan kalemler). Bulunamayanlar için satırdaki arama düğmelerini kullanın.</p>
+  <div class="satir" style="margin-bottom:8px"><button class="btn dolu kucuk" id="btnPiyAktar">↧ Boş birim fiyatlara aktar</button><button class="btn kucuk" id="btnPiyUstune">Tümünün üzerine yaz</button></div>
+  <div class="tablo"><table><tr><th>Poz</th><th>Kalem · güncel ara</th><th class="s">Ref. BF (TL)</th></tr>${sat}</table></div>
+  <h4 style="margin:12px 0 4px">Kaynaklar</h4><ol class="piyKay">${kay.map((r,i)=>`<li id="piyK${i+1}"><a href="${r.url}" target="_blank" rel="noopener">${esc(r.kaynak)}</a> — ${esc(r.ad)}${r.not?` <i class="not">(${esc(r.not)})</i>`:''}</li>`).join('')}</ol>
+  <p class="not">İşçilik için resmî referans: ${PIYASA_ISCILIK.kaynak} — usta ${fmt(PIYASA_ISCILIK.usta,2)} TL/sa, usta yardımcısı ${fmt(PIYASA_ISCILIK.yrd,2)} TL/sa (<a href="${PIYASA_ISCILIK.url}" target="_blank" rel="noopener">PDF</a>). Bu fiyatlar perakende referanstır; yaklaşık maliyette mevzuat gereği firmalardan alınan teklifler esas alınır.</p>`:'<p class="not">Önce kasa grubu ekleyin.</p>'}
+function piyasaAktar(ustune){const K=metrajKalemleri(),I=ihaleAyar();let n=0;K.forEach(k=>{const p=piyasaFiyat(k);if(!p)return;if(!ustune&&I.fiyat[k.anahtar]!=null&&I.fiyat[k.anahtar]!=='')return;I.fiyat[k.anahtar]=String(Math.round(p.haric*100)/100);n++});kaydet();ihaleCiz();piyasaCiz();toast(n?`${n} kalemin birim fiyatı referanstan dolduruldu`:'Aktarılacak boş kalem yok')}
+$('#t-ihale').addEventListener('click',e=>{if(e.target.id==='btnPiyAktar')piyasaAktar(false);if(e.target.id==='btnPiyUstune')piyasaAktar(true)});
 /* ---------- Projeler ---------- */
 function plistCiz(){$('#plist').innerHTML=Object.entries(DB.projeler).map(([id,p])=>`<button class="p ${id===DB.aktif?'on':''}" data-pid="${id}"><b>${esc(p.meta.ad)}</b><small>${esc(p.meta.bostan||'')} · ${p.gruplar.length} grup · ${esc(p.meta.tarih||'')}</small></button>`).join('')}
 $('#btnProje').onclick=()=>{plistCiz();$('#dlgProje').showModal()};
