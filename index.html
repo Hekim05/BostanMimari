@@ -50,6 +50,13 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--y2);border-color
 .grup-bas{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .rozet{display:inline-grid;place-items:center;min-width:30px;height:30px;border-radius:8px;background:var(--y);color:#fff;font-weight:700}
 .grup.mevcut .rozet{background:#8a8a8a}
+.sekilEd{position:relative;width:100%;max-height:70vh;margin:2px 0 6px;background:#fff;border:1px solid var(--cz);border-radius:12px;overflow:hidden}
+.sekilEd svg{position:absolute;inset:0;width:100%;height:100%}
+.sekilEd .olc{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:1px;z-index:2}
+.sekilEd .olc span{font-size:10.5px;color:var(--sl);line-height:1.1;background:rgba(255,255,255,.9);padding:0 4px;border-radius:4px;white-space:nowrap}
+.sekilEd .olc input{width:68px;min-height:36px;height:36px;padding:2px 4px;font-size:16px;font-weight:600;text-align:center;border:1.5px solid var(--y2);border-radius:8px;background:#fff}
+.sekilEd .olc input:placeholder-shown{border-style:dashed;border-color:var(--uy);background:#fffaf0}
+.sekilOzet{font-size:12.5px;color:var(--sl);margin:0 0 10px}
 .ozet{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
 .ozet div{background:#fff;border:1px solid var(--cz);border-radius:12px;padding:10px}
 .ozet b{display:block;font-size:18px}
@@ -231,7 +238,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-2';
+const APP_VERSION = '2026.11.22-3';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -250,7 +257,7 @@ const MALZ={
 };
 const TURLER=[['toprak','Bahçe toprağı'],['kompost','Kompost'],['torf','Torf'],['gubre','Hayvan gübresi'],['solucan','Solucan gübresi'],['perlit','Perlit'],['pomza','Pomza'],['kum','Dere kumu'],['diger','Diğer']];
 const BORU_IC={16:13.6,20:16.6,25:21,32:27.2,40:34};
-function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:300,W:120,H:45,aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:120,kolBoy:240,mk:'yok',mkUc:'bas',mkD:40,mkH:45},o)}
+function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkUc:'bas',mkD:'',mkH:''},o)}
 function varsayilanBilesen(){return[
  {ad:'Bahçe toprağı (elenmiş)',tur:'toprak',oran:40,paket:1000,pAd:'m³',yog:1.25},
  {ad:'Olgun kompost',tur:'kompost',oran:25,paket:50,pAd:'çuval',yog:0.55},
@@ -260,7 +267,7 @@ function varsayilanBilesen(){return[
  {ad:'Pomza',tur:'pomza',oran:5,paket:50,pAd:'çuval',yog:0.6}]}
 function bosProje(){return{v:1,meta:{ad:'Yeni bostan projesi',bostan:'',tur:'yeni',hazirlayan:'',tarih:bugun(),not:''},alan:{en:15,boy:10,kuzey:0,enlem:39.9},gruplar:[yeniGrup(0,{x:1.5,y:1.5,sira:2,sutun:3})],sulama:{kx:0.5,ky:0.5,basinc:2,kaynakDebi:0,damlaAr:40,damlaDebi:2,hatAr:30,anaCap:20,kenar:15},toprak:{bos:3,drenaj:0,ust:15,oturma:10,bil:varsayilanBilesen()}}}
 function ornekProje(){const p=bosProje();p.meta={ad:'Örnek: mevcut bostana ek kasa',bostan:'Örnek bostan',tur:'ek',hazirlayan:'',tarih:bugun(),not:''};p.alan={en:18,boy:12,kuzey:15,enlem:39.9};
- p.gruplar=[yeniGrup(0,{ad:'Mevcut kasalar',durum:'mevcut',x:1.5,y:1.5,sutun:3,sira:1,toprak:'ust',dip:'yok',icKaplama:'hayir'}),yeniGrup(1,{ad:'Yeni kasalar',x:1.5,y:4.8,sutun:3,sira:2})];return p}
+ p.gruplar=[yeniGrup(0,{ad:'Mevcut kasalar',durum:'mevcut',L:300,W:120,H:45,x:1.5,y:1.5,sutun:3,sira:1,toprak:'ust',dip:'yok',icKaplama:'hayir'}),yeniGrup(1,{ad:'Yeni kasalar',L:300,W:120,H:45,x:1.5,y:4.8,sutun:3,sira:2})];return p}
 function onar(p){const b=bosProje();for(const k of['meta','alan','sulama','toprak'])p[k]=Object.assign({},b[k],p[k]||{});if(!Array.isArray(p.toprak.bil))p.toprak.bil=varsayilanBilesen();if(!Array.isArray(p.gruplar))p.gruplar=[];p.gruplar=p.gruplar.map((g,i)=>Object.assign(yeniGrup(i),g));return p}
 
 /* ---------- Depolama ---------- */
@@ -382,8 +389,9 @@ function ahsapHacim(k,sadeceMK){if(k.m!=='ahsap')return 0;let v=0;
  return v/1e6}
 
 function hesapla(st){
- const S=st.sulama,T=st.toprak,out={gr:[],top:{kasa:0,kasaYeni:0,ekim:0,mixL:0,mixNet:0,drenL:0,Q:0,damla:0,latM:0,korM:0,anaM:0,ahsap:0,inisSay:0,lateralSay:0}};
+ const S=st.sulama,T=st.toprak,out={gr:[],eksik:[],top:{kasa:0,kasaYeni:0,ekim:0,mixL:0,mixNet:0,drenL:0,Q:0,damla:0,latM:0,korM:0,anaM:0,ahsap:0,inisSay:0,lateralSay:0}};
  st.gruplar.forEach((g,gi)=>{
+  if(!grupHazir(g)){out.eksik.push({gi,kod:harf(gi),ad:g.ad,liste:eksikler(g)});return}
   const k=kasaHesap(g),kod=harf(gi),L=k.Ls/100,V=k.Vs/100,ar=Math.max(0,n0(g.aralik))/100,sa=Math.max(0,n0(g.siraArasi))/100,sira=Math.max(1,Math.round(n0(g.sira,1))),sut=Math.max(1,Math.round(n0(g.sutun,1))),gx=n0(g.x),gy=n0(g.y);
   const U=sut*L+(sut-1)*ar,VV=sira*V+(sira-1)*sa;
   const T2=(u,v)=>g.yon==='dikey'?[gx+v,gy+u]:[gx+u,gy+v];
@@ -437,7 +445,8 @@ function denetle(st,H){
  const B=[],S=st.sulama,T=st.toprak,A=st.alan,o=H.top;
  const ek=(sev,baslik,mesaj,oneri='')=>B.push({sev,baslik,mesaj,oneri});
  const en=n0(A.en),boy=n0(A.boy);
- if(!H.gr.length)ek('kritik','Kasa grubu yok','Planlamak için en az bir kasa grubu ekleyin.');
+ (H.eksik||[]).forEach(e=>ek('kritik',`${e.kod} · ${e.ad}: ölçüler eksik`,`Eksik: ${e.liste.join(', ')}. Bu grup doldurulana kadar çizime ve hesaplara girmez.`,'Girdi › Kasa grupları’nda şekil üzerindeki boş kutulara ölçüleri girin.'));
+ if(!H.gr.length&&!(H.eksik||[]).length)ek('kritik','Kasa grubu yok','Planlamak için en az bir kasa grubu ekleyin.');
  H.gr.forEach(G=>{const g=G.g,k=G.k,b=G.bb,adı=`${G.kod} · ${g.ad}`;
   k.notlar.forEach(n=>ek('uyari',`${adı}: otomatik düzeltme`,n));
   if(k.sekil!=='I'){
@@ -746,6 +755,49 @@ function sulamaListe(st,H){const S=st.sulama,o=H.top,L=[];if(o.Q<=0)return L;con
  ad('Disk filtre 3/4" (120 mesh)','adet',1);if(n0(S.basinc)>2)ad('Basınç düşürücü 1,5–2 bar','adet',1);ad('Musluk adaptörü + kaplin','takım',1);
  ad('Boru sabitleme kazığı (U)','adet',Math.ceil(o.latM/1));return L}
 
+/* ---------- Şekil üzerinde ölçü girişi ---------- */
+const pozitif=v=>{const x=parseFloat(v);return Number.isFinite(x)&&x>0};
+function grupHazir(g){return pozitif(g.L)&&pozitif(g.W)&&pozitif(g.H)&&(g.sekil==='I'||!g.sekil||(pozitif(g.kolEn)&&pozitif(g.kolBoy)))&&(!g.mk||g.mk==='yok'||pozitif(g.mkD))}
+function eksikler(g){const e=[];if(!pozitif(g.L))e.push(g.sekil&&g.sekil!=='I'?'taban boyu':'boy');if(!pozitif(g.W))e.push(g.sekil&&g.sekil!=='I'?'taban eni':'en');if(!pozitif(g.H))e.push('yükseklik');
+ if(g.sekil&&g.sekil!=='I'){if(!pozitif(g.kolEn))e.push('kol eni');if(!pozitif(g.kolBoy))e.push('kol boyu')}if(g.mk&&g.mk!=='yok'&&!pozitif(g.mkD))e.push('malzeme kasası derinliği');return e}
+function sekilHTML(g,i){const p=`gruplar.${i}.`,kut=(a,et,ph)=>`<div class="olc" data-olc="${a}"><span>${et}</span><input data-k="${p}${a}" type="number" inputmode="decimal" step="any" placeholder="${ph}" value="${esc(g[a]??'')}" aria-label="${et} (cm)"></div>`;
+ let s=`<div class="sekilEd" id="se${i}"><svg></svg>`+kut('L',g.sekil&&g.sekil!=='I'?'Taban boyu':'Boy','cm')+kut('W',g.sekil&&g.sekil!=='I'?'Taban eni':'En','cm')+kut('H','Yükseklik','cm');
+ if(g.sekil==='L'||g.sekil==='U')s+=kut('kolEn','Kol eni','cm')+kut('kolBoy','Kol boyu','cm');
+ if(g.mk&&g.mk!=='yok')s+=kut('mkD','MK derinliği','cm');
+ return s+`</div><div class="sekilOzet" id="so${i}"></div>`}
+function sekilCiz(i){const g=st.gruplar[i],box=$('#se'+i);if(!g||!box)return;
+ const sayi=v=>pozitif(v)?+v:null,L=sayi(g.L),W=sayi(g.W),W2=sayi(g.kolEn),K=sayi(g.kolBoy),mkD=sayi(g.mkD);
+ const Ld=L||300,Wd=W||120,gg={...g,L:Ld,W:Wd,H:sayi(g.H)||45,kolEn:W2||Math.min(Wd,100),kolBoy:K||Math.max(Wd+80,Wd*2),mkD:mkD||40};
+ const k=kasaHesap(gg),o=k.bodyU,Ls=k.Ls,Vs=k.Vs,M=Math.max(Ls,Vs),pad=M*0.2,mkOn=k.mk!=='yok',solK=k.sekil==='U'||(k.sekil==='L'&&k.kolUc==='bas');
+ const padT=pad*(mkOn?1.75:1.15),padB=pad*(k.sekil==='I'?1.3:1.2),padL=pad*(solK?1.25:0.45),padR=pad*(k.sekil==='L'&&k.kolUc==='son'?1.9:1.2);
+ const vb=[-padL,-padT,Ls+padL+padR,Vs+padT+padB];if(vb[3]<vb[2]*0.55){const e=vb[2]*0.55-vb[3];vb[1]-=e/2;vb[3]+=e}
+ box.style.aspectRatio=`${vb[2]} / ${vb[3]}`;
+ const sw=M*0.006,f=M*0.042,mz=MALZ[g.malzeme]||MALZ.ahsap,rc=(r,fill,ex='')=>`<rect x="${r.ua}" y="${r.va}" width="${r.ub-r.ua}" height="${r.vb-r.va}" fill="${fill}" ${ex}/>`;
+ let s='';
+ k.icler.forEach(r=>s+=rc(r,'#8d6a48','fill-opacity="0.55"'));
+ k.duvar.forEach(w=>s+=rc(w,mz.renk));
+ if(mkOn){mkDuvar(k).forEach(w=>s+=rc(w,mz.renk));s+=rc({ua:k.icA,ub:k.icB,va:k.t,vb:k.W-k.t},'#ecd7ae',`stroke="#8a6a3a" stroke-width="${sw}"`)+`<text x="${(k.icA+k.icB)/2}" y="${k.W/2+f*0.35}" text-anchor="middle" font-size="${f}" font-weight="700" fill="#6b4a2a">MK</text>`;
+  if(k.mk==='dis')s+=rc({ua:k.kutuA,ub:k.kutuB,va:0,vb:k.W},'none',`stroke="${mz.koyu}" stroke-width="${sw*1.5}"`)}
+ s+=`<polygon points="${k.P.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${mz.koyu}" stroke-width="${sw*1.6}"/>`;
+ const olc=(x1,y1,x2,y2,bos)=>{const t=M*0.018,yat=Math.abs(y2-y1)<1e-6,r=bos?'#c98a00':'#2e6b3a',da=bos?`stroke-dasharray="${M*0.015} ${M*0.01}"`:'';
+  const uc=(x,y)=>yat?`<line x1="${x}" y1="${y-t}" x2="${x}" y2="${y+t}"/>`:`<line x1="${x-t}" y1="${y}" x2="${x+t}" y2="${y}"/>`;
+  return`<g stroke="${r}" stroke-width="${sw*1.3}"><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" ${da}/>${uc(x1,y1)}${uc(x2,y2)}</g>`};
+ const yer={};
+ const yL=-pad*0.55;s+=olc(o,yL,o+k.L,yL,!L);yer.L=[o+k.L/2,yL];
+ const xW=Ls+pad*0.6;s+=olc(xW,0,xW,k.W,!W);yer.W=[xW,k.W/2];
+ if(k.sekil!=='I'){const xK=solK?-pad*0.65:Ls+pad*1.45;s+=olc(xK,0,xK,k.K,!K);yer.kolBoy=[xK,solK?k.K/2:Math.max(k.K/2,k.W+pad*0.95)];
+  const kol=k.sekil==='L'&&k.kolUc==='son'?[o+k.L-k.W2,o+k.L]:[o,o+k.W2],yK=k.K+pad*0.6;s+=olc(kol[0],yK,kol[1],yK,!W2);yer.kolEn=[(kol[0]+kol[1])/2,yK];
+  yer.H=k.sekil==='U'?[o+k.L/2,(k.W+k.K)/2]:k.kolUc==='bas'?[o+(k.W2+k.L)/2,(k.W+k.K)/2]:[o+(k.L-k.W2)/2,(k.W+k.K)/2]}
+ else yer.H=[Ls/2,k.W+pad*0.75];
+ if(mkOn){const a=k.uc==='bas'?k.kutuA:k.kutuB-k.mkD,b=a+k.mkD,yM=-pad*1.3;s+=olc(a,yM,b,yM,!mkD);yer.mkD=[(a+b)/2,yM]}
+ const yU=-padT+f*1.3;s+=`<text x="${-padL+f*0.4}" y="${yU}" font-size="${f*0.85}" fill="#5d6b60">◀ ön uç</text><text x="${Ls+padR-f*0.4}" y="${yU}" font-size="${f*0.85}" fill="#5d6b60" text-anchor="end">arka uç ▶</text>`;
+ box.querySelector('svg').outerHTML=`<svg viewBox="${vb.join(' ')}" preserveAspectRatio="none" font-family="DejaVu Sans,Arial,sans-serif">${s}</svg>`;
+ box.querySelectorAll('.olc').forEach(el=>{const p=yer[el.dataset.olc];if(!p){el.style.display='none';return}el.style.display='';
+  el.style.left=Math.min(85,Math.max(15,(p[0]-vb[0])/vb[2]*100))+'%';el.style.top=Math.min(90,Math.max(10,(p[1]-vb[1])/vb[3]*100))+'%'});
+ const oz=$('#so'+i),e=eksikler(g),G=H&&H.gr.find(x=>x.gi===i);
+ oz.innerHTML=e.length?`<span style="color:var(--uy)">Şekil üzerindeki boş kutuları doldurun: ${e.join(', ')}.</span>`:G?`Kasa başı ekim alanı <b>${fmt(G.area,2)} m²</b> · karışım <b>${fmt(G.mixL,0)} L</b>${G.d?` · ${G.d.damla} damlatıcı`:''}${k.mk!=='yok'?` · malzeme kasası ≈ ${fmt(G.k.mkHacim,0)} L`:''}${k.sekil!=='I'?` · kapladığı yer ${fmt(G.k.Ls)}×${fmt(G.k.Vs)} cm`:''}`:''}
+function sekilleriCiz(){st.gruplar.forEach((g,i)=>sekilCiz(i))}
+
 /* ---------- ARAYÜZ: formlar ---------- */
 function fld(k,label,val,o={}){const sec=o.sec?`<select data-k="${k}">${o.sec.map(([v,t])=>`<option value="${v}"${String(v)===String(val)?' selected':''}>${t}</option>`).join('')}</select>`:o.tip==='alan'?`<textarea data-k="${k}">${esc(val)}</textarea>`:`<input data-k="${k}" ${o.tip==='text'?'type="text"':o.tip==='date'?'type="date"':'type="number" inputmode="decimal" step="any"'} value="${esc(val)}">`;
  return`<label${o.tam?' class="tam"':''}>${label}${o.i?`<i>${o.i}</i>`:''}${sec}</label>`}
@@ -759,23 +811,23 @@ function renderForm(){
  renderGruplar();renderBilesen()}
 function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const p=`gruplar.${i}.`;const gal=g.malzeme==='galvaniz',bet=g.malzeme==='beton';
  return`<div class="grup ${g.durum==='mevcut'?'mevcut':''}"><div class="grup-bas"><span class="rozet">${harf(i)}</span><input data-k="${p}ad" type="text" value="${esc(g.ad)}" style="flex:1"><button class="btn kucuk" data-kopya="${i}" aria-label="Grubu kopyala">⧉</button><button class="btn kucuk kirmizi" data-sil="${i}" aria-label="Grubu sil">✕</button></div>
- <div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+(g.sekil&&g.sekil!=='I'?fld(p+'kolEn','Kol eni (cm)',g.kolEn)+fld(p+'kolBoy','Kol dış boyu (cm)',g.kolBoy,{i:'tabanın dış kenarından'}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)
- +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'L',g.sekil&&g.sekil!=='I'?'Taban boyu (cm)':'Kasa boyu (cm)',g.L)+fld(p+'W',g.sekil&&g.sekil!=='I'?'Taban eni (cm)':'Kasa eni (cm)',g.W)+fld(p+'H','Kasa yüksekliği (cm)',g.H)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi)
+ ${sekilHTML(g,i)}<div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)
+ +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi)
  +fld(p+'malzeme','Malzeme',g.malzeme,{sec:Object.entries(MALZ).map(([k,v])=>[k,v.ad])})+(gal?'':fld(p+'t',bet?'Duvar kalınlığı (cm)':'Tahta kalınlığı (cm)',g.t))+(gal?'':fld(p+'tahtaH',bet?'Sıra yüksekliği (cm)':'Tahta yüksekliği (cm)',g.tahtaH))+(bet?'':fld(p+'dikme','Dikme kesiti (cm)',g.dikme,{i:'kare'})+fld(p+'gomme','Dikme gömme (cm)',g.gomme,{i:'0 = zemine oturur'}))
-  +fld(p+'mk','Malzeme kasası',g.mk,{sec:[['yok','Yok'],['ic','Kasa içinde (bölmeli)'],['dis','Kasaya ek (dışta)']]})+(g.mk&&g.mk!=='yok'?fld(p+'mkUc','Malzeme kasası yeri',g.mkUc,{sec:[['bas','Ön uç'],['son','Arka uç']]})+fld(p+'mkD','MK derinliği (cm)',g.mkD,{i:'dış yüzden bölmeye'})+(g.mk==='dis'?fld(p+'mkH','MK yüksekliği (cm)',g.mkH):''):'')
- +fld(p+'dip','Taban',g.dip,{sec:[['tel','Kemirgen teli'],['jeotekstil','Jeotekstil'],['yok','Yok']]})+(bet?'':fld(p+'icKaplama','İç jeotekstil',g.icKaplama,{sec:EH}))+fld(p+'sulama','Damla sulama',g.sulama,{sec:EH})+fld(p+'toprak','Toprak',g.toprak,{sec:[['tam','Tam dolum'],['ust','Üst katman yenileme'],['yok','Hesaplama']]})}</div></div>`}).join('')}
+  +fld(p+'mk','Malzeme kasası',g.mk,{sec:[['yok','Yok'],['ic','Kasa içinde (bölmeli)'],['dis','Kasaya ek (dışta)']]})+(g.mk&&g.mk!=='yok'?fld(p+'mkUc','Malzeme kasası yeri',g.mkUc,{sec:[['bas','Ön uç'],['son','Arka uç']]})+(g.mk==='dis'?fld(p+'mkH','MK yüksekliği (cm)',g.mkH,{i:'boş = kasa ile aynı'}):''):'')
+ +fld(p+'dip','Taban',g.dip,{sec:[['tel','Kemirgen teli'],['jeotekstil','Jeotekstil'],['yok','Yok']]})+(bet?'':fld(p+'icKaplama','İç jeotekstil',g.icKaplama,{sec:EH}))+fld(p+'sulama','Damla sulama',g.sulama,{sec:EH})+fld(p+'toprak','Toprak',g.toprak,{sec:[['tam','Tam dolum'],['ust','Üst katman yenileme'],['yok','Hesaplama']]})}</div></div>`}).join('');sekilleriCiz()}
 function renderBilesen(){const b=st.toprak.bil;$('#f-bilesen').innerHTML=b.map((x,i)=>{const p=`toprak.bil.${i}.`;return`<div class="grup" style="border-left-color:#8d6a48"><div class="grup-bas"><input data-k="${p}ad" type="text" value="${esc(x.ad)}" style="flex:1"><button class="btn kucuk kirmizi" data-bsil="${i}" aria-label="Bileşeni sil">✕</button></div><div class="alanlar">${fld(p+'tur','Tür',x.tur,{sec:TURLER})+fld(p+'oran','Oran (%)',x.oran)+fld(p+'paket','Paket hacmi (L)',x.paket)+fld(p+'pAd','Paket adı',x.pAd,{tip:'text'})+fld(p+'yog','Yoğunluk (kg/L)',x.yog,{i:'kuru, gevşek'})}</div></div>`}).join('')}
 function setPath(o,p,v){const a=p.split('.');let x=o;for(let i=0;i<a.length-1;i++)x=x[a[i]];x[a[a.length-1]]=v}
 const SAYI_DEGIL=/\.(ad|tur|pAd|durum|yon|malzeme|dip|icKaplama|sulama|toprak|sekil|kolUc|mk|mkUc)$|^meta\./;
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.k;if(!k)return;let v=el.value;
- if(!SAYI_DEGIL.test(k)||k==='sulama.anaCap'){v=parseFloat(String(v).replace(',','.'));if(!Number.isFinite(v))return}
+ if((!SAYI_DEGIL.test(k)||k==='sulama.anaCap')&&!(v===''&&/^gruplar\./.test(k))){v=parseFloat(String(v).replace(',','.'));if(!Number.isFinite(v))return}
  setPath(st,k,v);
- const mm=k.match(/^gruplar\.(\d+)\.(malzeme|durum|sekil|mk)$/);if(mm){const g=st.gruplar[+mm[1]];if(mm[2]==='malzeme'){const z=MALZ[v];g.t=z.t;g.tahtaH=z.tahtaH;g.dikme=z.dikme;if(v==='beton')g.gomme=0}renderGruplar()}
+ const mm=k.match(/^gruplar\.(\d+)\.(malzeme|durum|sekil|mk|kolUc|mkUc)$/);if(mm){const g=st.gruplar[+mm[1]];if(mm[2]==='malzeme'){const z=MALZ[v];g.t=z.t;g.tahtaH=z.tahtaH;g.dikme=z.dikme;if(v==='beton')g.gomme=0}renderGruplar()}
  if(k.startsWith('toprak.bil'))oranGoster();
- degisti()});
+ degisti();const gm2=k.match(/^gruplar\.(\d+)\./);if(gm2&&!mm)sekilCiz(+gm2[1])});
 document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
  if(b.dataset.sil!=null){if(st.gruplar.length<=1&&!confirm('Son grubu silmek istiyor musunuz?'))return;st.gruplar.splice(+b.dataset.sil,1);renderGruplar();degisti()}
- if(b.dataset.kopya!=null){const g=JSON.parse(JSON.stringify(st.gruplar[+b.dataset.kopya]));g.id=uid();g.ad+=' (kopya)';const G=H.gr[+b.dataset.kopya];if(g.yon==='dikey')g.x=r2(n0(g.x)+G.bb.w+0.8);else g.y=r2(n0(g.y)+G.bb.h+0.8);st.gruplar.push(g);renderGruplar();degisti();toast('Grup kopyalandı, konumunu kontrol edin')}
+ if(b.dataset.kopya!=null){const g=JSON.parse(JSON.stringify(st.gruplar[+b.dataset.kopya]));g.id=uid();g.ad+=' (kopya)';const G=H.gr.find(x=>x.gi===+b.dataset.kopya);if(G){if(g.yon==='dikey')g.x=r2(n0(g.x)+G.bb.w+0.8);else g.y=r2(n0(g.y)+G.bb.h+0.8)}st.gruplar.push(g);renderGruplar();degisti();toast('Grup kopyalandı, konumunu kontrol edin')}
  if(b.dataset.bsil!=null){st.toprak.bil.splice(+b.dataset.bsil,1);renderBilesen();oranGoster();degisti()}});
 const r2=x=>Math.round(x*100)/100;
 $('#btnGrupEkle').onclick=()=>{const i=st.gruplar.length;let y=0.8;H.gr.forEach(G=>y=Math.max(y,G.bb.y+G.bb.h+1.1));st.gruplar.push(yeniGrup(i,{y:r2(y)}));renderGruplar();degisti();toast('Grup eklendi')};
@@ -802,8 +854,8 @@ function cizimCiz(zorla){
  const sel=$('#selGrupCizim'),eski=sel.value;sel.innerHTML=H.gr.map(G=>`<option value="${G.gi}">${G.kod} · ${esc(G.g.ad)}${G.g.durum==='mevcut'?' (mevcut)':''}</option>`).join('');if(eski&&H.gr[+eski])sel.value=eski;
  sel.style.display=(cizimMod==='plan'||cizimMod==='sulama')?'none':'';
  if(!eski){const y=H.gr.find(x=>x.g.durum==='yeni');if(y)sel.value=y.gi}
- if(cizimMod==='mk'&&H.gr[+sel.value]&&H.gr[+sel.value].k.mk==='yok'){const y=H.gr.find(x=>x.k.mk!=='yok');if(y)sel.value=y.gi}
- const G=H.gr[+sel.value||0],kutu=$('#cizimKutu');let alt='',lj='';
+ const gsec=()=>H.gr.find(x=>x.gi===+sel.value);if(cizimMod==='mk'&&gsec()&&gsec().k.mk==='yok'){const y=H.gr.find(x=>x.k.mk!=='yok');if(y)sel.value=y.gi}
+ const G=gsec()||H.gr[0],kutu=$('#cizimKutu');let alt='',lj='';
  if(!G){kutu.innerHTML='<p class="not" style="padding:16px">Önce bir kasa grubu ekleyin.</p>';return}
  if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
   if(cizimMod==='sulama')alt=sulamaTablo(st,H)}
