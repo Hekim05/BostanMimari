@@ -11,22 +11,22 @@
 <link rel="apple-touch-icon" href="./icon-192.png">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
-:root{--y:#2e6b3a;--y2:#4f8f5b;--ac:#e9f3ea;--tu:#e07b28;--bg:#f5f6f2;--kart:#fff;--cz:#dfe3dc;--yz:#1f2a21;--sl:#5d6b60;--mv:#1f6fb2;--uy:#b97f00;--kr:#c0392b}
+:root{--y:#2e6b3a;--y2:#4f8f5b;--ac:#e9f3ea;--tu:#e07b28;--bg:#cfdac9;--kart:#fff;--cz:#dfe3dc;--yz:#1f2a21;--sl:#5d6b60;--mv:#1f6fb2;--uy:#b97f00;--kr:#c0392b}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--yz);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"DejaVu Sans",sans-serif;font-size:16px;-webkit-text-size-adjust:100%;line-height:1.4}
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
 button{font:inherit;cursor:pointer}
-.ust{position:sticky;top:0;z-index:30;background:var(--y);color:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top))}
-.ust .marka{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
-.ust b{display:block;font-size:17px}
-.ust small{display:block;opacity:.85;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ust{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,#24572f,#2e6b3a);color:#fff;display:flex;align-items:center;gap:12px;padding:18px 16px 16px;padding-top:calc(18px + env(safe-area-inset-top));min-height:92px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.ust .marka{display:flex;align-items:center;gap:10px;flex:1;min-width:0}.ust .marka>div{min-width:0;flex:1}
+.ust b{display:block;font-size:20px;letter-spacing:.2px}.ust .marka svg{width:46px;height:46px;flex:0 0 46px}
+.ust small{display:block;opacity:.9;font-size:14px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ikbtn{min-width:44px;min-height:44px;border:0;border-radius:12px;background:rgba(255,255,255,.15);color:#fff;display:grid;place-items:center}
 main{max-width:980px;margin:0 auto;padding:14px 16px}
 .tab{display:none}.tab.aktif{display:block}
 h2{font-size:19px;margin:6px 0 12px}
 h3{font-size:16px;margin:16px 0 8px}
-.kart{background:var(--kart);border:1px solid var(--cz);border-radius:14px;padding:14px;margin-bottom:12px}
+.kart{background:var(--kart);border:1px solid #c3cfbd;border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(30,50,30,.12)}
 details.kart{padding:0}
 details.kart>summary{list-style:none;padding:14px;font-weight:700;display:flex;align-items:center;gap:8px;min-height:48px;cursor:pointer}
 details.kart>summary::-webkit-details-marker{display:none}
@@ -61,7 +61,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--y2);border-color
 .mkOn.su{border-color:var(--tu);background:#fff8f0}.mkOn .art{color:#2e6b3a}.mkOn .eks{color:#8a5a1a}.rozet2{background:var(--tu);color:#fff;border-radius:6px;padding:0 6px;font-size:11px}
 .sekilOzet{font-size:12.5px;color:var(--sl);margin:0 0 10px}
 .ozet{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
-.ozet div{background:#fff;border:1px solid var(--cz);border-radius:12px;padding:10px}
+.ozet div{background:#fff;box-shadow:0 1px 3px rgba(30,50,30,.12);border:1px solid #c3cfbd;border-radius:12px;padding:10px}
 .ozet b{display:block;font-size:18px}
 .ozet span{font-size:12px;color:var(--sl)}
 @media(min-width:700px){.ozet{grid-template-columns:repeat(4,1fr)}.alanlar{grid-template-columns:repeat(4,1fr)}}
@@ -88,6 +88,20 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .malzLink{text-decoration:underline dotted #7a9a80;text-underline-offset:3px;cursor:pointer}.malzLink::after{content:" 🖼";font-size:.8em}
 .pdfKap{position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1}.pdfKap .sayfa{width:794px;max-width:none!important;margin:0!important;box-shadow:none!important;border-radius:0!important;padding:40px 36px!important;overflow:visible!important}.pdfKap .iki{grid-template-columns:1fr 1fr!important}.pdfKap .kutu4{grid-template-columns:repeat(4,1fr)!important}.pdfKap .cizim>svg{max-height:880px}.pdfKap .malzLink{text-decoration:none}.pdfKap .malzLink::after{content:""}
 #piyasaListe td{vertical-align:top;overflow-wrap:anywhere}#piyasaListe table{table-layout:fixed;width:100%}#piyasaListe th:first-child{width:42px}#piyasaListe th:last-child{width:38%}#piyasaListe td.s,#piyasaListe th.s{white-space:normal}.piyAra{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.piyKay{padding-left:20px;font-size:13px}.piyKay li{margin-bottom:4px}.piyAra a{font-size:11.5px;padding:2px 7px;border:1px solid var(--cz);border-radius:10px;text-decoration:none;color:var(--y)}
+
+body.ev .alt{display:none}body.ev{padding-bottom:24px}
+.evListe{display:grid;gap:10px;margin:12px 0}@media(min-width:700px){.evListe{grid-template-columns:1fr 1fr}}
+.evKart{background:#fff;border:1px solid #c3cfbd;border-radius:16px;box-shadow:0 1px 4px rgba(30,50,30,.14);overflow:hidden;display:flex;flex-direction:column}
+.evKart.on{border-color:var(--y);box-shadow:0 0 0 2px var(--y)}
+.evAc{border:0;background:none;text-align:left;padding:14px 14px 10px;display:block;width:100%;color:inherit}
+.evAc b{font-size:17px;display:block}.evAc small{color:var(--sl);display:block;margin-top:2px}
+.evSay{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.evSay span{background:var(--ac);border-radius:10px;padding:3px 8px;font-size:12.5px}
+.rozet{display:inline-block;border-radius:10px;padding:3px 8px;font-size:12.5px;font-weight:600;margin-top:8px}.rozet.kr{background:#fbe3e0;color:var(--kr)}.rozet.uy{background:#fff1d0;color:#8a5d00}.rozet.ok{background:#dcefdc;color:var(--y)}
+.evIs{display:flex;border-top:1px solid #e3e8df}.evIs button{flex:1;border:0;background:none;min-height:44px;font-size:14px;color:var(--sl)}.evIs button+button{border-left:1px solid #e3e8df}.evIs .sil{color:var(--kr)}
+.adimlar{background:#fff;border:1px solid #c3cfbd;border-radius:14px;padding:10px 12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(30,50,30,.12)}
+.adimlar .sira{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.adimlar button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:18px;padding:6px 10px;font-size:13px;min-height:38px;display:flex;align-items:center;gap:5px}
+.adimlar button.ok{border-color:#9cc8a2;background:#eef7ee}.adimlar button.kr{border-color:#e8a59d;background:#fdeeec}.adimlar button.uy{border-color:#e6c77d;background:#fff6e0}.adimlar button.sonra{border-color:var(--y);box-shadow:0 0 0 2px rgba(46,107,58,.35)}
+.adimlar p{margin:8px 2px 0;font-size:13.5px}
 #dlgIhaleOn{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;background:#eef1ec;display:none;flex-direction:column}#dlgIhaleOn[open]{display:flex}
 .onUst{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--y);color:#fff}.onUst .btn{background:#fff}
 .onSekmeler{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:1px solid var(--cz);flex:0 0 auto}.onSekmeler button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:16px;padding:7px 12px;font-size:13px;min-height:36px;color:var(--sl)}.onSekmeler button.on{background:var(--y);color:#fff;border-color:var(--y);font-weight:700}
@@ -101,7 +115,7 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .uckutu img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:none}
 .uckutu canvas{position:absolute;inset:0;width:100%!important;height:100%!important}
 .uckutu .mesaj{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;color:var(--sl)}
-.alt{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#fff;border-top:1px solid var(--cz);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom)}
+.alt{position:fixed;left:0;right:0;bottom:0;z-index:30;background:#f8faf6;border-top:1px solid #b9c6b3;box-shadow:0 -2px 8px rgba(0,0,0,.08);display:grid;grid-template-columns:repeat(6,1fr);padding-bottom:env(safe-area-inset-bottom)}
 .alt button{border:0;background:none;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:11px;padding:0 1px;color:var(--sl);position:relative}
 .alt button svg{width:24px;height:24px}
 .alt button.on{color:var(--y);font-weight:700}
@@ -171,16 +185,31 @@ dialog .ic{padding:16px}
   <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff"/><rect x="9" y="19" width="22" height="9" rx="1.5" fill="#c49a63"/><rect x="11" y="16.5" width="18" height="3" fill="#6b4a2a"/><path d="M14 16c0-4 2-6 4-7M20 16c0-5 1-7 3-8M26 16c0-3-1-5-3-6" stroke="#2e6b3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M8 31h24" stroke="#1f6fb2" stroke-width="2" stroke-dasharray="2 2"/></svg>
   <div><b>Bostan Mimarı</b><small id="projeAdUst">—</small></div>
  </div>
- <button class="ikbtn" id="btnProje" aria-label="Projeler"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M3 7h6l2 2h10v10H3z"/></svg></button>
+ <button class="ikbtn" id="btnProje" aria-label="Çalışmalarım" style="padding:0 12px;gap:6px;display:flex;align-items:center;font-size:14px;font-weight:600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Çalışmalar</span></button>
 </header>
 
 <main>
+<!-- ÇALIŞMALAR -->
+<section id="t-ev" class="tab">
+ <h2 style="margin-bottom:4px">Çalışmalarım</h2>
+ <p class="not" style="margin-top:0">Her bostan planı bir çalışmadır. Açmak için karta dokunun.</p>
+ <div class="satir"><button class="btn dolu" id="evYeni">＋ Yeni çalışma</button><button class="btn" id="evOrnek">Örnek çalışma</button></div>
+ <div class="evListe" id="evListe"></div>
+ <details class="kart"><summary>Yedekleme ve başka cihaza aktarma</summary><div class="ic">
+ <p class="not" style="margin-top:0">Önizleme, telefondaki uygulama ve tarayıcı projeleri ayrı ayrı saklar. Aktarmak için: burada “Kopyala”ya basın, diğer yerde Çalışmalar sayfasında bu bölümü açıp “Yapıştır”a basın.</p>
+ <div class="satir"><button class="btn dolu" id="pKopyala">📋 Tüm çalışmaları kopyala</button><button class="btn" id="pYapistirAc">📥 Yapıştırarak yükle</button></div>
+ <div id="pAktar" hidden style="margin-top:8px"><textarea id="pMetin" rows="5" placeholder="Kopyaladığınız proje metnini buraya yapıştırın" style="font-size:13px"></textarea><div class="satir" style="margin-top:6px"><button class="btn dolu" id="pYukle">Yükle</button><span class="not" id="pAktarNot"></span></div></div>
+ <div class="satir" style="margin-top:10px"><button class="btn" id="pDisa">Yedek dosyası indir (JSON)</button><label class="btn" style="flex-direction:row">Yedek dosyasından yükle<input type="file" id="pIce" accept="application/json,.json" hidden></label></div>
+ <p class="not">Çalışmalar bu cihazda saklanır. Önizleme, ana ekrandaki uygulama ve tarayıcı ayrı ayrı saklar.</p></div></details>
+</section>
+
 <!-- GİRDİ -->
-<section id="t-girdi" class="tab aktif">
+<section id="t-girdi" class="tab">
+ <div class="adimlar" id="adimlar"></div>
  <div class="ozet" id="ozet"></div>
- <details class="kart" open><summary>1 · Proje bilgisi</summary><div class="ic alanlar" id="f-proje"></div></details>
- <details class="kart" open><summary>2 · Alan ve yön</summary><div class="ic"><div class="alanlar" id="f-alan"></div><p class="not">Konumlar, alanın <b>sol üst köşesinden</b> metre olarak verilir (x sağa, y aşağı). Kuzey açısı: planın üst kenarından saat yönünde kuzey okuna kadar olan açı (kuzey tam yukarıdaysa 0°).</p></div></details>
- <details class="kart" open><summary>3 · Kasa grupları</summary><div class="ic"><div id="f-gruplar"></div><div class="satir"><button class="btn" id="btnGrupEkle">＋ Yeni grup ekle</button></div><p class="not">Her grup aynı ölçüdeki kasaların sıra × sütun dizisidir. Bir bostana ek yapılıyorsa var olan kasaları "Mevcut" grup olarak girin; bunlar çizimde gri görünür, imalat listesine girmez.</p></div></details>
+ <details class="kart" open id="d-proje"><summary>1 · Proje bilgisi</summary><div class="ic alanlar" id="f-proje"></div></details>
+ <details class="kart" open id="d-alan"><summary>2 · Alan ve yön</summary><div class="ic"><div class="alanlar" id="f-alan"></div><p class="not">Konumlar, alanın <b>sol üst köşesinden</b> metre olarak verilir (x sağa, y aşağı). Kuzey açısı: planın üst kenarından saat yönünde kuzey okuna kadar olan açı (kuzey tam yukarıdaysa 0°).</p></div></details>
+ <details class="kart" open id="d-gruplar"><summary>3 · Kasa grupları</summary><div class="ic"><div id="f-gruplar"></div><div class="satir"><button class="btn" id="btnGrupEkle">＋ Yeni grup ekle</button></div><p class="not">Her grup aynı ölçüdeki kasaların sıra × sütun dizisidir. Bir bostana ek yapılıyorsa var olan kasaları "Mevcut" grup olarak girin; bunlar çizimde gri görünür, imalat listesine girmez.</p></div></details>
  <details class="kart"><summary>4 · Damla sulama</summary><div class="ic"><div class="alanlar" id="f-sulama"></div><p class="not">Kaynak debisi bilinmiyorsa 0 bırakın; 10 litrelik kova dolum süresinden hesaplanabilir: debi (L/saat) = 36000 ÷ saniye.</p></div></details>
  <details class="kart"><summary>5 · Toprak karışımı</summary><div class="ic"><div class="alanlar" id="f-toprak"></div><h3>Karışım bileşenleri</h3><div id="f-bilesen"></div><div class="satir"><button class="btn kucuk" id="btnBilEkle">＋ Bileşen ekle</button><span class="not" id="oranTop"></span></div><p class="not">Paket hacmi: çuval/torba/balya başına litre. Sıkıştırılmış torf balyasında etiketteki "açılmış hacim" değerini girin.</p></div></details>
 </section>
@@ -247,15 +276,15 @@ dialog .ic{padding:16px}
  <div id="rapor"></div>
 </section>
 
-<!-- İHALE -->
+<!-- HAZIRLIK KLASÖRÜ -->
 <section id="t-ihale" class="tab">
- <h2>İhale dosyası</h2>
- <p class="not" style="margin-top:-4px">Proje verilerinden teknik şartname, metraj ve yaklaşık maliyet cetvelleri, çizimler ve kurulum raporunu tek klasörde (ZIP) hazırlar. Ajan dosyaları hazırlamadan önce veriyi, hazırladıktan sonra her dosyayı yeniden açarak kaynakla karşılaştırır; sorun bulursa dosyaları yeniden üretip bir kez daha kontrol eder.</p>
+ <h2>Hazırlık klasörü</h2>
+ <p class="not" style="margin-top:-4px">Çalışmadan teknik şartname, metraj ve yaklaşık maliyet cetvelleri, çizimler ve kurulum raporunu tek klasörde (ZIP) hazırlar. Satın alma, ihale ya da doğrudan temin için kullanılabilir. Ajan dosyaları hazırlamadan önce veriyi, hazırladıktan sonra her dosyayı yeniden açarak kaynakla karşılaştırır; sorun bulursa dosyaları yeniden üretip bir kez daha kontrol eder.</p>
  <div class="kart"><h3 style="margin-top:0">İdare ve iş bilgileri</h3><div class="alanlar" id="ihaleForm"></div></div>
  <details class="kart"><summary style="padding:14px;font-weight:700;cursor:pointer">Birim fiyatlar (isteğe bağlı)</summary><div style="padding:0 14px 14px"><p class="not" style="margin-top:0">Piyasa araştırmasından elde ettiğiniz birim fiyatları (KDV hariç) girerseniz yaklaşık maliyet tutarı dosyaya hazır yazılır.</p><div id="ihaleFiyat"></div></div></details>
- <details class="kart" open id="piyasaKart"><summary style="padding:14px;font-weight:700;cursor:pointer">🔎 Piyasa fiyatları (ajan araştırması)</summary><div style="padding:0 14px 14px" id="piyasaListe"></div></details>
+ <details class="kart" id="piyasaKart"><summary style="padding:14px;font-weight:700;cursor:pointer">🔎 Piyasa fiyatları (ajan araştırması)</summary><div style="padding:0 14px 14px" id="piyasaListe"></div></details>
  <div class="kart"><h3 style="margin-top:0">Klasör içeriği</h3><div id="ihaleListe"></div>
-  <div class="satir"><button class="btn" id="btnIhaleOn">👁 Sayfada önizle</button><button class="btn dolu" id="btnIhale">📦 İhale dosyasını hazırla</button><button class="btn" id="btnIhaleTaslak" hidden>Yine de taslak hazırla</button></div>
+  <div class="satir"><button class="btn" id="btnIhaleOn">👁 Sayfada önizle</button><button class="btn dolu" id="btnIhale">📦 Hazırlık klasörünü oluştur</button><button class="btn" id="btnIhaleTaslak" hidden>Yine de taslak hazırla</button></div>
   <p class="not" id="ihaleDurum" aria-live="polite"></p>
   <div class="satir" id="ihaleCikti" hidden><button class="btn dolu" id="ihIndir">⬇ ZIP klasörü indir</button><button class="btn" id="ihPaylas">↗ Paylaş (Drive, e-posta…)</button></div>
  </div>
@@ -270,33 +299,22 @@ dialog .ic{padding:16px}
  <button data-t="3d"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M12 22V12M21 7l-9 5-9-5"/></svg>3D</button>
  <button data-t="denetim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/><path d="M8.5 12l2.5 2.5 4.5-5"/></svg>Denetim<span class="sayac" id="sayac" hidden></span></button>
  <button data-t="rapor"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h8"/></svg>Rapor</button>
- <button data-t="ihale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h6l2 2h10v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 7V5a1 1 0 0 1 1-1h5l2 2"/><path d="M9 14h6"/></svg>İhale</button>
+ <button data-t="ihale"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h6l2 2h10v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M3 7V5a1 1 0 0 1 1-1h5l2 2"/><path d="M9 14h6"/></svg>Klasör</button>
 </nav>
 
-<dialog id="dlgProje"><div class="ic">
- <h2 style="margin-top:0">Projeler</h2>
- <div class="plist" id="plist"></div>
- <div class="satir" style="margin:8px 0 14px"><button class="btn dolu" id="pYeni">＋ Boş proje</button><button class="btn" id="pOrnek">Örnek proje</button><button class="btn" id="pKopya">Kopyala</button><button class="btn kirmizi" id="pSil">Sil</button></div>
- <h3 style="margin:6px 0">Başka cihaza / uygulamaya aktar</h3>
- <p class="not" style="margin-top:0">Önizleme, telefondaki uygulama ve tarayıcı projeleri ayrı ayrı saklar. Aktarmak için: burada “Kopyala”ya basın, diğer yerde bu pencereyi açıp “Yapıştır”a basın.</p>
- <div class="satir"><button class="btn dolu" id="pKopyala">📋 Tüm projeleri kopyala</button><button class="btn" id="pYapistirAc">📥 Yapıştırarak yükle</button></div>
- <div id="pAktar" hidden style="margin-top:8px"><textarea id="pMetin" rows="5" placeholder="Kopyaladığınız proje metnini buraya yapıştırın" style="font-size:13px"></textarea><div class="satir" style="margin-top:6px"><button class="btn dolu" id="pYukle">Yükle</button><span class="not" id="pAktarNot"></span></div></div>
- <div class="satir" style="margin-top:10px"><button class="btn" id="pDisa">Yedek dosyası indir (JSON)</button><label class="btn" style="flex-direction:row">Yedek dosyasından yükle<input type="file" id="pIce" accept="application/json,.json" hidden></label></div>
- <p class="not">Projeler bu cihazda saklanır. Başka cihaza taşımak için yedek alıp diğer cihazda yükleyin.</p>
- <div class="satir" style="justify-content:flex-end"><button class="btn" id="pKapat">Kapat</button></div>
-</div></dialog>
+
 <dialog id="dlgMalz"><div class="ic">
  <h2 style="margin:0 0 2px" id="malzBaslik"></h2><div class="not" id="malzTur" style="margin-bottom:8px"></div>
  <div id="malzGorsel"></div><div id="malzAcik" style="font-size:14.5px"></div>
  <p class="not" id="malzFotoNot"></p>
  <div class="satir"><label class="btn" style="flex-direction:row">📷 Kendi fotoğrafımı ekle<input type="file" id="malzFoto" accept="image/*" hidden></label><button class="btn kirmizi" id="malzFotoSil" hidden>Fotoğrafı kaldır</button><button class="btn dolu" id="malzKapat" style="margin-left:auto">Kapat</button></div>
 </div></dialog>
-<dialog id="dlgIhaleOn"><div class="onUst"><b>İhale dosyası önizleme</b><button class="btn kucuk" id="onKapat">Kapat ✕</button></div><div class="onSekmeler" id="onSekmeler"></div><div id="onIcerik"></div></dialog>
+<dialog id="dlgIhaleOn"><div class="onUst"><b>Hazırlık klasörü önizleme</b><button class="btn kucuk" id="onKapat">Kapat ✕</button></div><div class="onSekmeler" id="onSekmeler"></div><div id="onIcerik"></div></dialog>
 <div id="toast"></div>
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-16';
+const APP_VERSION = '2026.11.22-17';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1103,13 +1121,13 @@ function oranGoster(){const t=st.toprak.bil.reduce((s,b)=>s+n0(b.oran),0);$('#or
 
 /* ---------- Özet ve değişim ---------- */
 let kirli={cizim:1,uc:1,denetim:1,rapor:1},aktifTab='girdi';
-function degisti(){H=hesapla(st);kaydet();ozetCiz();if(!mkSur)sekilleriCiz();kirli={cizim:1,uc:1,denetim:1,rapor:1};$('#projeAdUst').textContent=st.meta.ad||'—';rozetCiz()}
+function degisti(){H=hesapla(st);st._t=Date.now();kaydet();ozetCiz();adimCiz();if(!mkSur)sekilleriCiz();kirli={cizim:1,uc:1,denetim:1,rapor:1};if(aktifTab!=='ev')$('#projeAdUst').textContent=st.meta.ad||'—';rozetCiz()}
 function ozetCiz(){const o=H.top;$('#ozet').innerHTML=`<div><b>${o.kasa}</b><span>kasa (${o.kasaYeni} yeni)</span></div><div><b>${fmt(o.ekim,1)} m²</b><span>ekim alanı</span></div><div><b>${fmt(o.mixL/1000,2)} m³</b><span>toprak karışımı</span></div><div><b>${fmt(o.Q,0)} L/sa</b><span>damla debisi${o.bolge>1?` · ${o.bolge} bölge`:''}</span></div>`}
 function rozetCiz(){const kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sorun.filter(b=>b.sev==='uyari').length,e=$('#sayac');if(kr||uy){e.hidden=false;e.textContent=kr||uy;e.classList.toggle('uy',!kr)}else e.hidden=true}
 
 /* ---------- Sekmeler ---------- */
 $$('#altNav button').forEach(b=>b.onclick=()=>sekme(b.dataset.t));
-function sekme(t){aktifTab=t;$$('#altNav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.tab').forEach(s=>s.classList.toggle('aktif',s.id==='t-'+t));window.scrollTo(0,0);
+function sekme(t){aktifTab=t;document.body.classList.toggle('ev',t==='ev');if(t==='ev'){$('#projeAdUst').textContent='Çalışmalarım';$('#btnProje').style.visibility='hidden';evCiz()}else{$('#projeAdUst').textContent=st.meta.ad||'—';$('#btnProje').style.visibility=''}$$('#altNav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.tab').forEach(s=>s.classList.toggle('aktif',s.id==='t-'+t));window.scrollTo(0,0);
  if(t==='cizim')cizimCiz();if(t==='denetim')denetimCiz();if(t==='rapor')raporCiz();if(t==='3d')uc3D();if(t==='ihale'){ihaleSon=null;ihaleTurSon=null;$('#ihaleCikti').hidden=true;$('#ihaleKontrol').hidden=true;$('#ihaleDurum').textContent='';$('#btnIhaleTaslak').hidden=true;ihaleCiz()}}
 
 /* ---------- Çizim sekmesi ---------- */
@@ -1556,7 +1574,7 @@ function ihaleKontrol1(K,I){const R=[],ek=(d,x)=>R.push({d,x});const M=st.meta,o
  const anah=new Map();K.forEach(k=>anah.set(k.anahtar,(anah.get(k.anahtar)||0)+1));[...anah].filter(([,n])=>n>1).forEach(([a])=>ek('uyari',`Aynı kalem birden fazla satırda: ${a.split('|')[0]}`));
  const ot=(st.toprak.bil||[]).reduce((s,b)=>s+n0(b.oran),0);if(Math.abs(ot-100)>0.5)ek('kritik',`Toprak karışımı oranları toplamı %${fmt(ot)} (100 olmalı).`);
  const top=K.filter(k=>k.bolum.startsWith('C')&&k.birim==='m³'&&!/işçilik|Drenaj/i.test(k.kalem)).reduce((s,k)=>s+k.miktar,0);if(o.mixL>0&&Math.abs(top-o.mixL/1000)>0.02)ek('kritik',`Toprak bileşenleri toplamı (${fmt(top,2)} m³) karışım hacmiyle (${fmt(o.mixL/1000,2)} m³) tutmuyor.`);
- const kr=raporBulgulari().filter(b=>b.sev==='kritik');if(kr.length)ek('uyari',`Denetimde ${kr.length} kritik bulgu açık: ${kr.map(b=>b.baslik).join('; ')}. İhaleden önce çözülmesi önerilir.`);
+ const kr=raporBulgulari().filter(b=>b.sev==='kritik');if(kr.length)ek('uyari',`Denetimde ${kr.length} kritik bulgu açık: ${kr.map(b=>b.baslik).join('; ')}. Klasörü paylaşmadan önce çözülmesi önerilir.`);
  const pr=K.filter(k=>piyasaFiyat(k)).length;ek('bilgi',`İnternet piyasa referansı ${pr}/${K.length} kalem için bulundu (${PIYASA_TARIH}); Piyasa Araştırması sayfasına ayrı sütun olarak yazılır.`);const fy=K.filter(k=>ihFiyat(I,k)!=null).length;ek(fy===K.length?'ok':'bilgi',fy===K.length?'Tüm kalemlerin birim fiyatı girilmiş; yaklaşık maliyet tutarı hesaplanır.':`${K.length-fy} kalemin birim fiyatı boş; yaklaşık maliyet cetvelinde fiyat sütunu doldurulunca tutarlar Excel’de kendiliğinden hesaplanır.`);
  if(!R.some(r=>r.d==='kritik'||r.d==='uyari'))ek('ok',`${K.length} iş kalemi, proje bilgileri ve karışım oranları tutarlı.`);
  return R}
@@ -1589,7 +1607,7 @@ async function ihaleUret(zorla){const I=ihaleAyar(),durum=$('#ihaleDurum'),btn=$
   if(kr&&!zorla){yaz(`1. kontrolde ${kr} kritik sorun var. Düzeltip yeniden deneyin ya da taslak olarak hazırlayın.`);$('#btnIhaleTaslak').hidden=false;return}
   $('#btnIhaleTaslak').hidden=true;const taslak=kr>0;
   yaz('Kütüphaneler yükleniyor…');const JZ=await kutuphane('zip');
-  const kok=dosyaAdi(st.meta.ad)+(taslak?'_TASLAK':'')+'_Ihale_Dosyasi/',dosyalar={},ad=dosyaAdi(st.meta.ad);
+  const kok=dosyaAdi(st.meta.ad)+(taslak?'_TASLAK':'')+'_Hazirlik_Klasoru/',dosyalar={},ad=dosyaAdi(st.meta.ad);
   const uret=async(tur)=>{yaz(`Dosyalar hazırlanıyor (${tur})…`);
    dosyalar['01_Teknik_Sartname.docx']=await docxYap(JZ,sartnameBloklari(K,I,taslak));
    dosyalar['02_Metraj_ve_Yaklasik_Maliyet.xlsx']=await xlsxYap(JZ,ihaleSayfalari(K,I));
@@ -1609,7 +1627,7 @@ async function ihaleUret(zorla){const I=ihaleAyar(),durum=$('#ihaleDurum'),btn=$
   yaz(sonKr?'Paket hazırlandı ancak dosya kontrolünde sorun kaldı; aşağıdaki listeye bakın.':`Hazır: ${ihaleSon.ad} · ${sayi} dosya. Ajan dosyaları ${tur.length} kez kontrol etti.`)}
  catch(e){console.error(e);yaz('Hazırlanamadı: '+(e.message||e))}finally{btn.disabled=false}}
 function ihaleIcindekiler(K,I,tur,taslak){const sat=[];const S=x=>sat.push(x);
- S(`${taslak?'TASLAK — ':''}İHALE DOSYASI: ${isAdi(I)}`);S(`İdare: ${I.idare||'—'} · Yer: ${isYeri(I)} · Tarih: ${st.meta.tarih||''} · Hazırlayan: ${st.meta.hazirlayan||'—'}`);S(`Usul: ${USUL[I.usul]||USUL.dogrudan} · Teklif: ${I.teklif==='goturu'?'götürü bedel':'birim fiyat'} · Süre: ${fmt(I.sure,0)} gün · Garanti: ${fmt(I.garanti,0)} ay`);S('');
+ S(`${taslak?'TASLAK — ':''}HAZIRLIK KLASÖRÜ: ${isAdi(I)}`);S(`İdare: ${I.idare||'—'} · Yer: ${isYeri(I)} · Tarih: ${st.meta.tarih||''} · Hazırlayan: ${st.meta.hazirlayan||'—'}`);S(`Usul: ${USUL[I.usul]||USUL.dogrudan} · Teklif: ${I.teklif==='goturu'?'götürü bedel':'birim fiyat'} · Süre: ${fmt(I.sure,0)} gün · Garanti: ${fmt(I.garanti,0)} ay`);S('');
  S('İÇİNDEKİLER');S('01_Teknik_Sartname.docx ............ Teknik şartname (Word’de düzenlenebilir), Ek-1 iş kalemleri');S('02_Metraj_ve_Yaklasik_Maliyet.xlsx . Metraj, Yaklaşık Maliyet, Teklif Cetveli, Piyasa Araştırması sayfaları');S('03_Cizimler/ ....................... Vaziyet planı, sulama şeması, kesit, görünüş, köşe ve malzeme kasası çizimleri (SVG; tarayıcıda açılır, Inkscape/Illustrator ile düzenlenir)');
  if(I.ekPdf!=='hayir')S('04_Kurulum_Raporu_*.pdf ............. Çizimli kurulum raporu (montaj sırası, sulama, toprak)');S('05_Proje_Verisi_*.json ............. Bostan Mimarı proje dosyası (Projeler › Yedek dosyasından yükle ile yeniden açılır)');S('');
  S(`İŞ KALEMLERİ (${K.length})`);K.forEach(k=>S(`${k.poz}  ${k.kalem}${k.olcu?` (${k.olcu})`:''} — ${fmt(k.miktar,3)} ${k.birim}`));S('');
@@ -1698,21 +1716,40 @@ function onizleCiz(){const I=ihaleAyar(),K=metrajKalemleri(),kr=ihaleKontrol1(K,
  else if(/^m\d$/.test(onSekme))h=onSayfa(S[+onSekme[1]]);
  else if(onSekme==='cizim')h=C.map(([f,a,s])=>`<div class="sayfa" style="padding:12px"><h3 style="margin:0 0 6px">${esc(a)}</h3><div class="cizim">${s}</div><p class="not" style="margin:4px 0 0;font-size:11px">03_Cizimler/${f}</p></div>`).join('');
  else if(onSekme==='rapor'){raporCiz();h=`<p class="not" style="padding:0 4px">Klasördeki PDF bu raporun sayfalarından oluşturulur.</p>`+$('#rapor').innerHTML}
- else h=`<div class="sayfa"><pre style="white-space:pre-wrap;font:12px/1.5 ui-monospace,Menlo,monospace;margin:0">${esc(ihaleIcindekiler(K,I,ihaleTurSon||[{ad:'1. kontrol — kaynak veri (önizleme anında)',R:ihaleKontrol1(K,I)}],kr>0))}</pre>${ihaleTurSon?'':'<p class="not">Dosya kontrolleri (2. tur) “İhale dosyasını hazırla” ile paket üretilince eklenir.</p>'}</div>`;
+ else h=`<div class="sayfa"><pre style="white-space:pre-wrap;font:12px/1.5 ui-monospace,Menlo,monospace;margin:0">${esc(ihaleIcindekiler(K,I,ihaleTurSon||[{ad:'1. kontrol — kaynak veri (önizleme anında)',R:ihaleKontrol1(K,I)}],kr>0))}</pre>${ihaleTurSon?'':'<p class="not">Dosya kontrolleri (2. tur) “Hazırlık klasörünü oluştur” ile paket üretilince eklenir.</p>'}</div>`;
  $('#onIcerik').innerHTML=h;$('#onIcerik').scrollTop=0}
 $('#btnIhaleOn').onclick=()=>{H=hesapla(st);onSekme='sartname';onizleCiz();$('#dlgIhaleOn').showModal()};
 $('#onSekmeler').addEventListener('click',e=>{const b=e.target.closest('[data-on]');if(!b)return;onSekme=b.dataset.on;onizleCiz()});
 $('#onKapat').onclick=()=>$('#dlgIhaleOn').close();
-/* ---------- Projeler ---------- */
-function plistCiz(){$('#plist').innerHTML=Object.entries(DB.projeler).map(([id,p])=>`<button class="p ${id===DB.aktif?'on':''}" data-pid="${id}"><b>${esc(p.meta.ad)}</b><small>${esc(p.meta.bostan||'')} · ${p.gruplar.length} grup · ${esc(p.meta.tarih||'')}</small></button>`).join('')}
-$('#btnProje').onclick=()=>{plistCiz();$('#dlgProje').showModal()};
-$('#pKapat').onclick=()=>$('#dlgProje').close();
-$('#plist').onclick=e=>{const b=e.target.closest('[data-pid]');if(!b)return;projeAc(b.dataset.pid);$('#dlgProje').close()};
-function projeAc(id){DB.aktif=id;st=onar(DB.projeler[id]);DB.projeler[id]=st;ucGorsel=null;renderForm();oranGoster();degisti();if(U3)U3.ilk=0;sekme('girdi')}
-function projeEkle(p){const id=uid();DB.projeler[id]=p;projeAc(id);$('#dlgProje').close();toast('Proje oluşturuldu')}
-$('#pYeni').onclick=()=>projeEkle(bosProje());$('#pOrnek').onclick=()=>projeEkle(ornekProje());
-$('#pKopya').onclick=()=>{const p=JSON.parse(JSON.stringify(st));p.meta.ad+=' (kopya)';projeEkle(p)};
-$('#pSil').onclick=()=>{if(!confirm(`"${st.meta.ad}" silinsin mi?`))return;delete DB.projeler[DB.aktif];const ids=Object.keys(DB.projeler);if(!ids.length){projeEkle(bosProje());return}projeAc(ids[0]);$('#dlgProje').close()};
+/* ---------- Çalışmalar (ana sayfa) ---------- */
+function calismaOzet(p){try{const q=onar(JSON.parse(JSON.stringify(p))),h=hesapla(q),kr=h.sorun.filter(b=>b.sev==='kritik').length,uy=h.sorun.filter(b=>b.sev==='uyari').length;return{h,kr,uy,eksik:(h.eksik||[]).length}}catch(e){return null}}
+function evCiz(){const L=Object.entries(DB.projeler).sort((a,b)=>(b[1]._t||0)-(a[1]._t||0));
+ $('#evListe').innerHTML=L.length?L.map(([id,p])=>{const o=calismaOzet(p),t=o&&o.h.top;
+  const roz=!o?'':o.eksik?`<span class="rozet kr">${o.eksik} grupta ölçü eksik</span>`:o.kr?`<span class="rozet kr">${o.kr} kritik bulgu</span>`:o.uy?`<span class="rozet uy">${o.uy} uyarı</span>`:`<span class="rozet ok">✓ Hazır</span>`;
+  const son=p._t?new Date(p._t).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
+  return`<div class="evKart${id===DB.aktif?' on':''}"><button class="evAc" data-pid="${id}"><b>${esc(p.meta.ad||'Adsız çalışma')}</b><small>${esc(p.meta.bostan||'Bostan belirtilmedi')}${p.meta.tur==='ek'?' · ek kurulum':''}${son?` · son değişiklik ${son}`:''}</small>${t?`<div class="evSay"><span>${t.kasa} kasa</span><span>${fmt(t.ekim,1)} m² ekim</span><span>${fmt(t.mixL/1000,2)} m³ toprak</span>${t.Q>0?`<span>${fmt(t.Q,0)} L/sa damla</span>`:''}</div>`:''}${roz}</button><div class="evIs"><button data-kopyap="${id}">Kopyala</button><button class="sil" data-silp="${id}">Sil</button></div></div>`}).join(''):'<div class="kart"><p style="margin:0">Henüz çalışma yok. “Yeni çalışma” ile başlayın ya da örneği açıp inceleyin.</p></div>'}
+function evAc(){sekme('ev')}
+$('#btnProje').onclick=evAc;
+$('#evListe').addEventListener('click',e=>{const a=e.target.closest('[data-pid]');if(a){projeAc(a.dataset.pid);return}
+ const k=e.target.closest('[data-kopyap]');if(k){const p=JSON.parse(JSON.stringify(DB.projeler[k.dataset.kopyap]));p.meta.ad+=' (kopya)';p._t=Date.now();DB.projeler[uid()]=p;kaydet();evCiz();toast('Kopya oluşturuldu');return}
+ const d=e.target.closest('[data-silp]');if(d){const id=d.dataset.silp,ad=DB.projeler[id].meta.ad;if(!confirm(`"${ad}" silinsin mi? Bu işlem geri alınamaz.`))return;delete DB.projeler[id];
+  if(!Object.keys(DB.projeler).length){const nid=uid();DB.projeler[nid]=bosProje();DB.aktif=nid}else if(DB.aktif===id)DB.aktif=Object.keys(DB.projeler)[0];
+  st=onar(DB.projeler[DB.aktif]);DB.projeler[DB.aktif]=st;H=hesapla(st);renderForm();oranGoster();kaydet();evCiz();toast('Silindi')}});
+function projeAc(id){DB.aktif=id;st=onar(DB.projeler[id]);DB.projeler[id]=st;ucGorsel=null;renderForm();oranGoster();const t0=st._t;degisti();st._t=t0;kaydet();if(U3)U3.ilk=0;sekme('girdi')}
+function projeEkle(p){const id=uid();p._t=Date.now();DB.projeler[id]=p;projeAc(id);toast('Çalışma oluşturuldu')}
+$('#evYeni').onclick=()=>projeEkle(bosProje());$('#evOrnek').onclick=()=>projeEkle(ornekProje());
+/* Adım rehberi */
+function adimCiz(){const M=st.meta,A=st.alan,kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sorun.filter(b=>b.sev==='uyari').length,ek=(H.eksik||[]).length;
+ const A_=[['proje','1 Bilgi',String(M.ad||'').trim()&&String(M.bostan||'').trim()?'ok':'uy','Proje adını ve bostan yerini yazın.'],
+  ['alan','2 Alan',n0(A.en)>0&&n0(A.boy)>0?'ok':'kr','Alanın enini ve boyunu girin.'],
+  ['gruplar','3 Kasalar',!H.gr.length||ek?'kr':'ok',ek?`${ek} grupta ölçü eksik; şekil üzerindeki kutuları doldurun.`:'En az bir kasa grubu ekleyin.'],
+  ['cizim','4 Yerleşim',H.gr.length?'ok':'',' Çizim sekmesinde kasaları yerine sürükleyin.'],
+  ['denetim','5 Denetim',kr?'kr':uy?'uy':'ok',kr?`Denetimde ${kr} kritik bulgu var; Denetim sekmesine bakın.`:`${uy} uyarı var; gerekirse düzeltin.`],
+  ['ihale','6 Klasör','','Rapor ve hazırlık klasörünü oluşturun.']];
+ const sonra=A_.find(x=>x[2]==='kr'||x[2]==='uy')||A_[5];
+ $('#adimlar').innerHTML=`<div class="sira">${A_.map(x=>`<button data-adim="${x[0]}" class="${x[2]}${x===sonra?' sonra':''}">${x[2]==='ok'?'✓':x[2]==='kr'?'!':x[2]==='uy'?'•':'›'} ${x[1]}</button>`).join('')}</div><p><b>Sıradaki adım:</b> ${sonra[3]}</p>`}
+$('#adimlar').addEventListener('click',e=>{const b=e.target.closest('[data-adim]');if(!b)return;const k=b.dataset.adim;
+ if(['proje','alan','gruplar'].includes(k)){const d=$('#d-'+k);d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'})}else sekme(k)});
 $('#pDisa').onclick=()=>{const b=new Blob([JSON.stringify(st,null,1)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=(st.meta.ad||'proje').replace(/[^\wçğıöşüÇĞİÖŞÜ-]+/g,'_')+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)};
 function aktarMetni(){return JSON.stringify({bostanMimari:1,surum:APP_VERSION,projeler:Object.values(DB.projeler)})}
 $('#pKopyala').onclick=async()=>{const m=aktarMetni();try{await navigator.clipboard.writeText(m);toast(`${Object.keys(DB.projeler).length} proje panoya kopyalandı; diğer yerde “Yapıştırarak yükle”yi kullanın`)}
@@ -1723,12 +1760,12 @@ $('#pYukle').onclick=()=>{let v;try{v=JSON.parse($('#pMetin').value.trim())}catc
  const mevcut=new Set(Object.values(DB.projeler).map(p=>JSON.stringify(p)));let n=0,sonId=null;
  liste.forEach(p=>{const q=onar(p);if(mevcut.has(JSON.stringify(q)))return;const id=uid();DB.projeler[id]=q;sonId=id;n++});
  if(!n){$('#pAktarNot').textContent='Bu projeler zaten burada.';return}
- projeAc(sonId);$('#pMetin').value='';$('#pAktar').hidden=true;$('#dlgProje').close();toast(`${n} proje yüklendi`)};
+ projeAc(sonId);$('#pMetin').value='';$('#pAktar').hidden=true;toast(`${n} çalışma yüklendi`)};
 $('#pIce').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const p=JSON.parse(t);if(!p.gruplar)throw 0;projeEkle(onar(p))}catch(x){toast('Dosya okunamadı')}});e.target.value=''};
 
 /* ---------- Başlat ---------- */
 $('#surum').textContent=APP_VERSION;
-yukle();H=hesapla(st);renderForm();oranGoster();degisti();
+yukle();H=hesapla(st);renderForm();oranGoster();{const t0=st._t;degisti();st._t=t0;kaydet()}sekme('ev');
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){let yenilendi=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(yenilendi)return;yenilendi=true;sessionStorage.setItem('bmYeni','1');location.reload()});navigator.serviceWorker.register('./sw.js').catch(()=>{})}
 try{if(sessionStorage.getItem('bmYeni')){sessionStorage.removeItem('bmYeni');toast('Yeni sürüm yüklendi: '+APP_VERSION)}}catch(e){}
 </script>
