@@ -93,6 +93,8 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .alt .sayac{position:absolute;top:6px;right:calc(50% - 22px);background:var(--kr);color:#fff;border-radius:9px;font-size:10.5px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
 .alt .sayac.uy{background:var(--uy)}
 #yerBilgi{display:block;flex-basis:100%;height:2.9em;overflow:hidden;line-height:1.45}
+.aciKut{flex-direction:row;align-items:center;gap:4px;font-size:13px}.aciKut input{width:72px;min-height:38px;padding:4px 6px;text-align:center}
+.svgkutu.tasima [data-dondur]{cursor:grab}
 .svgkutu.tasima svg{touch-action:none;cursor:grab}.svgkutu.tasima [data-grup],.svgkutu.tasima [data-kaynak]{cursor:move}.svgkutu.tasima{outline:2px solid var(--tu)}
 #toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:#22312a;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;opacity:0;pointer-events:none;transition:.25s;z-index:50;max-width:90vw}
 #toast.gor{opacity:1}
@@ -180,7 +182,13 @@ dialog .ic{padding:16px}
   <div class="satir"><button class="btn" id="btnTasi">✋ Taşıma modu: kapalı</button><span class="not" id="yerBilgi">Açınca kasa gruplarını ve su kaynağını (S) parmakla sürükleyebilirsiniz.</span></div>
   <div class="satir" id="yerSecili" hidden style="margin-top:8px"><b id="yerAd" style="flex-basis:100%"></b>
    <button class="btn kucuk" data-it="-0.1,0" aria-label="Sola 10 cm">←</button><button class="btn kucuk" data-it="0,-0.1" aria-label="Yukarı 10 cm">↑</button><button class="btn kucuk" data-it="0,0.1" aria-label="Aşağı 10 cm">↓</button><button class="btn kucuk" data-it="0.1,0" aria-label="Sağa 10 cm">→</button>
-   <button class="btn kucuk" id="btnDondur">⟳ 90° döndür</button><span class="not">Oklar 10 cm kaydırır</span></div>
+   <span class="not">Oklar 10 cm kaydırır</span>
+   <span style="flex-basis:100%;height:0"></span>
+   <button class="btn kucuk" data-aci="-15" aria-label="15 derece sola çevir">⟲15°</button><button class="btn kucuk" data-aci="-1" aria-label="1 derece sola çevir">⟲1°</button>
+   <label class="aciKut">Açı°<input id="yerAci" type="number" inputmode="decimal" step="1"></label>
+   <button class="btn kucuk" data-aci="1" aria-label="1 derece sağa çevir">1°⟳</button><button class="btn kucuk" data-aci="15" aria-label="15 derece sağa çevir">15°⟳</button>
+   <button class="btn kucuk" id="btnDondur">Yatay/dikey</button><button class="btn kucuk" id="btnAyir" hidden>✂ Kasayı ayır</button>
+   <span class="not" style="flex-basis:100%">Turuncu ⟳ tutamağını tutup çevirin ya da açıyı yazın. Tek kasayı çevirmek için önce kasaya dokunun, “Kasayı ayır” deyin.</span></div>
  </div>
  <div class="svgkutu" id="cizimKutu"></div>
  <div class="lejant" id="lejant"></div>
@@ -246,7 +254,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-6';
+const APP_VERSION = '2026.11.22-7';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -265,7 +273,7 @@ const MALZ={
 };
 const TURLER=[['toprak','Bahçe toprağı'],['kompost','Kompost'],['torf','Torf'],['gubre','Hayvan gübresi'],['solucan','Solucan gübresi'],['perlit','Perlit'],['pomza','Pomza'],['kum','Dere kumu'],['diger','Diğer']];
 const BORU_IC={16:13.6,20:16.6,25:21,32:27.2,40:34};
-function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:''},o)}
+function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:'',aci:0,haric:[]},o)}
 function varsayilanBilesen(){return[
  {ad:'Bahçe toprağı (elenmiş)',tur:'toprak',oran:40,paket:1000,pAd:'m³',yog:1.25},
  {ad:'Olgun kompost',tur:'kompost',oran:25,paket:50,pAd:'çuval',yog:0.55},
@@ -431,6 +439,11 @@ function ahsapHacim(k,sadeceMK){if(k.m!=='ahsap')return 0;let v=0;
  if(k.mk!=='yok')v+=k.mkDuv.reduce((a,r)=>a+Math.max(r.ub-r.ua,r.vb-r.va),0)*(k.mk==='ic'?k.kurs:k.kursB)*k.t*k.th+2*k.d*k.d*(k.mk==='ic'?k.Hr*k.bolmeler.length:k.Hb+k.gm);
  return v/1e6}
 
+function poliKes(A,B){for(const P of[A,B])for(let i=0;i<P.length;i++){const a=P[i],b=P[(i+1)%P.length],nx=b[1]-a[1],ny=a[0]-b[0];let a1=Infinity,a2=-Infinity,b1=Infinity,b2=-Infinity;A.forEach(q=>{const d=q[0]*nx+q[1]*ny;a1=Math.min(a1,d);a2=Math.max(a2,d)});B.forEach(q=>{const d=q[0]*nx+q[1]*ny;b1=Math.min(b1,d);b2=Math.max(b2,d)});const L=Math.hypot(nx,ny)||1;if(a2-b1<0.01*L||b2-a1<0.01*L)return false}return true}
+function nkMes(p,a,b){const dx=b[0]-a[0],dy=b[1]-a[1],l=dx*dx+dy*dy||1e-9;let t=((p[0]-a[0])*dx+(p[1]-a[1])*dy)/l;t=Math.max(0,Math.min(1,t));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)}
+function poliMes(A,B){if(poliKes(A,B))return 0;let m=Infinity;[[A,B],[B,A]].forEach(([X,Y])=>X.forEach(p=>Y.forEach((a,i)=>{m=Math.min(m,nkMes(p,a,Y[(i+1)%Y.length]))})));return m}
+function grupMes(G1,G2,dx=0,dy=0){let m=Infinity;G1.poli.forEach(A=>{const A2=A.map(q=>[q[0]+dx,q[1]+dy]);G2.poli.forEach(B=>{m=Math.min(m,poliMes(A2,B))})});return m}
+function alanDisi(G,en,boy,dx=0,dy=0){return G.poli.some(P=>P.some(q=>q[0]+dx<-0.01||q[1]+dy<-0.01||q[0]+dx>en+0.01||q[1]+dy>boy+0.01))}
 function hesapla(st){
  const S=st.sulama,T=st.toprak,out={gr:[],eksik:[],top:{kasa:0,kasaYeni:0,ekim:0,mixL:0,mixNet:0,drenL:0,Q:0,damla:0,latM:0,korM:0,anaM:0,ahsap:0,inisSay:0,lateralSay:0}};
  st.gruplar.forEach((g,gi)=>{
@@ -438,7 +451,11 @@ function hesapla(st){
   const k=kasaHesap(g),kod=harf(gi),L=k.Ls/100,V=k.Vs/100,ar=Math.max(0,n0(g.aralik))/100,sa=Math.max(0,n0(g.siraArasi))/100,sira=Math.max(1,Math.round(n0(g.sira,1))),sut=Math.max(1,Math.round(n0(g.sutun,1))),gx=n0(g.x),gy=n0(g.y);
   const U=sut*L+(sut-1)*ar,VV=sira*V+(sira-1)*sa;
   const T2=(u,v)=>g.yon==='dikey'?[gx+v,gy+u]:[gx+u,gy+v];
-  const a0=T2(0,0),a1=T2(U,VV),bb={x:Math.min(a0[0],a1[0]),y:Math.min(a0[1],a1[1]),w:Math.abs(a1[0]-a0[0]),h:Math.abs(a1[1]-a0[1])};
+  const a0=T2(0,0),a1=T2(U,VV),bb0={x:Math.min(a0[0],a1[0]),y:Math.min(a0[1],a1[1]),w:Math.abs(a1[0]-a0[0]),h:Math.abs(a1[1]-a0[1])};
+  const aci=((n0(g.aci)%360)+360)%360,arad=aci*Math.PI/180,ca=Math.cos(arad),sn=Math.sin(arad),pv=[bb0.x+bb0.w/2,bb0.y+bb0.h/2];
+  const rot=q=>[pv[0]+(q[0]-pv[0])*ca-(q[1]-pv[1])*sn,pv[1]+(q[0]-pv[0])*sn+(q[1]-pv[1])*ca];
+  const kc=[[bb0.x,bb0.y],[bb0.x+bb0.w,bb0.y],[bb0.x+bb0.w,bb0.y+bb0.h],[bb0.x,bb0.y+bb0.h]].map(rot),xs=kc.map(q=>q[0]),ys=kc.map(q=>q[1]);
+  const bb={x:Math.min(...xs),y:Math.min(...ys),w:Math.max(...xs)-Math.min(...xs),h:Math.max(...ys)-Math.min(...ys)};
   const area=k.icAlan/1e4;let fill=0,dren=0;
   if(g.toprak==='tam'){dren=Math.max(0,n0(T.drenaj));fill=Math.max(0,k.Hr-n0(T.bos)-dren)}else if(g.toprak==='ust'){fill=Math.max(0,n0(T.ust))}
   const mixNet=k.icAlan*fill/1000,mixL=mixNet*(1+n0(T.oturma)/100),drenL=k.icAlan*dren/1000;
@@ -448,7 +465,7 @@ function hesapla(st){
    const damla=seg.reduce((s,x)=>s+x.nk*x.n,0),Q=damla*n0(S.damlaDebi);
    if(seg.length)d={seg,nk:seg.reduce((s,x)=>s+x.nk,0),damla,Q,latM:seg.reduce((s,x)=>s+x.lat,0),mmh:area>0?Q/area:0}}
   const beds=[];
-  for(let r=0;r<sira;r++)for(let c=0;c<sut;c++){const u0=c*(L+ar),v0=r*(V+sa),p=T2(u0,v0),q=T2(u0+L,v0+V);beds.push({ad:kod+(r*sut+c+1),r,c,u0,v0,x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])})}
+  const haric=Array.isArray(g.haric)?g.haric:[];for(let r=0;r<sira;r++)for(let c=0;c<sut;c++){const no=r*sut+c;if(haric.includes(no))continue;const u0=c*(L+ar),v0=r*(V+sa),p=T2(u0,v0),q=T2(u0+L,v0+V);beds.push({ad:kod+(no+1),no,r,c,u0,v0,x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])})}
   const P=(b,u,v)=>T2(b.u0+u/100,b.v0+v/100);
   const R=(b,ua,ub,va,vb)=>{const p=P(b,ua,va),q=P(b,ub,vb);return{x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])}};
   let boru=null;
@@ -459,7 +476,7 @@ function hesapla(st){
    const fu=besle.map(x=>x.f),uf=(c,f)=>c*(L+ar)+f/100,vh=r=>r===0?-0.3:r*(V+sa)-sa/2,son=uf(sut-1,Math.max(...fu));
    const hatlar=[];for(let r=0;r<sira;r++)hatlar.push([T2(-0.3,vh(r)),T2(son,vh(r))]);
    if(sira>1)hatlar.push([T2(-0.3,vh(0)),T2(-0.3,vh(sira-1))]);
-   const ust=T2(-0.3,vh(0)),src=[n0(S.kx),n0(S.ky)],bag=[src,[ust[0],src[1]],ust];
+   const ust=rot(T2(-0.3,vh(0))),src=[n0(S.kx),n0(S.ky)],bag=[src,[ust[0],src[1]],ust];
    const digerleri=k.icler.filter(r=>!besle.some(x=>x.r===r)&&r.ub-r.ua>5&&r.vb-r.va>5);
    const yakin=um=>fu.reduce((m,f,fi)=>Math.abs(f-um)<Math.abs(fu[m]-um)?fi:m,0);
    let korEk=0;
@@ -473,8 +490,10 @@ function hesapla(st){
     dag.push(l)}));
    const headerM=sira*(son+0.3),trunkM=sira>1?vh(sira-1)-vh(0):0,bagM=Math.abs(ust[0]-src[0])+Math.abs(ust[1]-src[1]);
    boru={hatlar,bag,inis,dag,headerM,trunkM,bagM,dusus:fu.length,anaM:headerM+trunkM+bagM,korM:beds.length*(besle.reduce((a,x)=>a+(x.r.vb-x.r.va+k.Hr+40)/100,0)+korEk)+inisY,dirsekBag:(Math.abs(ust[0]-src[0])>0.01&&Math.abs(ust[1]-src[1])>0.01)?1:0}}
-  const n=beds.length,G={g,gi,kod,k,U,V:VV,bb,beds,area,fill,dren,mixL,mixNet,drenL,d,boru,n,T2,P,R,sira,sut,L,ar,sa};
+  if(!beds.length)return;
+  const n=beds.length,G={g,gi,kod,k,U,V:VV,bb,bb0,aci,pv,rot,beds,area,fill,dren,mixL,mixNet,drenL,d,boru,n,T2,P,R,sira,sut,L,ar,sa};
   G.parca=g.durum==='yeni'?parcalar(G):(k.mk!=='yok'?parcalar(G,true):[]);
+  G.poli=beds.map(b=>[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].map(rot));
   out.gr.push(G);const o=out.top;
   o.kasa+=n;if(g.durum==='yeni')o.kasaYeni+=n;o.ahsap+=(g.durum==='yeni'?ahsapHacim(k):ahsapHacim(k,true))*n;
   o.ekim+=area*n;o.mixL+=mixL*n;o.mixNet+=mixNet*n;o.drenL+=drenL*n;
@@ -491,7 +510,7 @@ function hesapla(st){
  out.sorun=denetle(st,out);return out}
 
 /* ---------- Yön ---------- */
-function yonSapma(st,g){const a=n0(st.alan.kuzey),b=g.yon==='dikey'?180-a:90-a;const m=((b%180)+180)%180;return{bearing:m,sapma:Math.min(m,180-m)}}
+function yonSapma(st,g){const a=n0(st.alan.kuzey),b=(g.yon==='dikey'?180-a:90-a)+n0(g.aci);const m=((b%180)+180)%180;return{bearing:m,sapma:Math.min(m,180-m)}}
 function yonAdi(b){const d=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];const x=((b%360)+360)%360;const i=Math.round(x/22.5)%16;const j=(i+8)%16;return d[i]+'–'+d[j]}
 
 /* ---------- Denetim ajanı ---------- */
@@ -513,7 +532,7 @@ function denetle(st,H){
    if(k.mkIcD<25)ek('uyari',`${adı}: malzeme kasası iç ölçüsü ${fmt(k.mkIcD)} cm`,'El aletleri, gübre torbası ve hortum makarası sığmaz.','İç ölçüyü en az 35–45 cm yapın.');
    if(k.mk==='ic'&&k.mkKayip>k.Lin*k.Win*0.35)ek('uyari',`${adı}: malzeme kasası tabanın %${fmt(k.mkKayip/(k.Lin*k.Win)*100,0)}’ini kaplıyor`,'Ekim alanı belirgin biçimde azalır.','Kasaya ek (dışta) malzeme kasası düşünün.');
    ek('ok',`${adı}: malzeme kasası`,`${k.mk==='ic'?'Kasa içinde':'Kasaya ek'}, ${mkYerAdi(k)}; iç hacim ≈ ${fmt(k.mkHacim,0)} L (${fmt(k.mkIcU)}×${fmt(k.mkIcV)}×${fmt(k.mkIcH)} cm).${k.mk==='ic'?` Ekim alanından kasa başı ${fmt(k.mkKayip/1e4,2)} m² ayrıldı.`:' Kasanın kapladığı yer buna göre büyüdü; yerleşim çizimde gösterildi.'}`,'Tabana tahliye deliği açın; menteşeyi ekim tarafına takın ki kapak açıkken yola sarksın.')}
-  if(b.x<-0.01||b.y<-0.01||b.x+b.w>en+0.01||b.y+b.h>boy+0.01)ek('kritik',`${adı}: alan dışına taşıyor`,`Grup ${fmt(b.x,2)}–${fmt(b.x+b.w,2)} m (x), ${fmt(b.y,2)}–${fmt(b.y+b.h,2)} m (y) aralığında; alan ${fmt(en,2)} × ${fmt(boy,2)} m.`,'Grubun x/y konumunu, sıra/sütun sayısını ya da alan ölçüsünü düzeltin.');
+  if(alanDisi(G,en,boy))ek('kritik',`${adı}: alan dışına taşıyor`,`Grup ${fmt(b.x,2)}–${fmt(b.x+b.w,2)} m (x), ${fmt(b.y,2)}–${fmt(b.y+b.h,2)} m (y) aralığında; alan ${fmt(en,2)} × ${fmt(boy,2)} m.`,'Grubun x/y konumunu, sıra/sütun sayısını ya da alan ölçüsünü düzeltin.');
   if(g.durum==='yeni'){
    if(k.W>120)ek(k.W>140?'kritik':'uyari',`${adı}: kasa eni ${fmt(k.W)} cm`,'İki taraftan çalışmada kol erişimi ~60 cm’dir; ortadaki şerit ezilir ya da bakımsız kalır.','Eni 100–120 cm’ye indirin; duvar dibindeki tek taraflı kasalarda 60–75 cm kullanın.');
    if(k.W<60)ek('uyari',`${adı}: kasa eni ${fmt(k.W)} cm`,'Dar kasalarda toprak çabuk kurur ve ısınır, ekim alanına göre malzeme gideri yüksektir.','En az 80 cm önerilir.');
@@ -536,10 +555,10 @@ function denetle(st,H){
   }
   if(g.durum==='mevcut'&&g.toprak==='tam')ek('uyari',`${adı}: mevcut kasa tam dolum`,'Mevcut kasa için tam dolum hesaplandı.','Yalnızca üst katman yenilenecekse "Toprak" alanını "Üst katman" yapın.');
  });
- // çakışma
- for(let i=0;i<H.gr.length;i++)for(let j=i+1;j<H.gr.length;j++){const a=H.gr[i].bb,b=H.gr[j].bb;const ox=Math.min(a.x+a.w,b.x+b.w)-Math.max(a.x,b.x),oy=Math.min(a.y+a.h,b.y+b.h)-Math.max(a.y,b.y);
-  if(ox>0.01&&oy>0.01)ek('kritik',`${H.gr[i].kod} ve ${H.gr[j].kod} grupları üst üste`,'İki grubun kasaları aynı yere düşüyor.','Gruplardan birinin x/y konumunu değiştirin.');
-  else{const gap=Math.max(Math.max(a.x,b.x)-Math.min(a.x+a.w,b.x+b.w),Math.max(a.y,b.y)-Math.min(a.y+a.h,b.y+b.h));if(gap<0.6)ek('uyari',`${H.gr[i].kod}–${H.gr[j].kod} arası ${fmt(gap*100,0)} cm`,'Gruplar arasındaki yol dar; ana sulama hattı da burada olabilir.','Arayı en az 60–80 cm yapın.')}}
+ // çakışma (kasa bazında, dönüş dahil)
+ for(let i=0;i<H.gr.length;i++)for(let j=i+1;j<H.gr.length;j++){const gap=grupMes(H.gr[i],H.gr[j]);
+  if(gap<0.005)ek('kritik',`${H.gr[i].kod} ve ${H.gr[j].kod} grupları üst üste`,'İki grubun kasaları aynı yere düşüyor.','Gruplardan birini taşıyın ya da çevirin.');
+  else if(gap<0.6)ek('uyari',`${H.gr[i].kod}–${H.gr[j].kod} arası ${fmt(gap*100,0)} cm`,'Gruplar arasındaki yol dar; ana sulama hattı da burada olabilir.','Arayı en az 60–80 cm yapın.')}
  // sulama
  if(o.Q>0){
   if(o.bolge>1)ek('uyari',`Sulama ${o.bolge} bölgeye ayrılmalı`,`Toplam debi ${fmt(o.Q,0)} L/saat; Ø${S.anaCap} mm ana hat ${fmt(o.boruKap,0)} L/saat taşır${n0(S.kaynakDebi)>0?`, kaynak ${fmt(S.kaynakDebi,0)} L/saat verir`:''}.`,`Grupları vanalarla ${o.bolge} bölgeye ayırıp sırayla sulayın ya da ana hattı büyütün.`);
@@ -588,7 +607,7 @@ function svgPlan(st,H,mod='plan',etk=null){
  const gs=M>60?5:1;s+=`<g stroke="#e9eee7" stroke-width="${sw*0.8}">`;for(let x=gs;x<en-1e-6;x+=gs)s+=`<line x1="${x}" y1="0" x2="${x}" y2="${boy}"/>`;for(let y=gs;y<boy-1e-6;y+=gs)s+=`<line x1="0" y1="${y}" x2="${en}" y2="${y}"/>`;s+='</g>';
  s+=`<rect x="0" y="0" width="${en}" height="${boy}" fill="#f3f6ef" fill-opacity="0.5" stroke="#2b3a2e" stroke-width="${sw*2.2}"/>`;
  const sul=mod==='sulama';
- H.gr.forEach(G=>{s+=`<g data-grup="${G.gi}">`;const g=G.g,k=G.k,mev=g.durum==='mevcut',mz=MALZ[g.malzeme]||MALZ.ahsap,dash=mev?`stroke-dasharray="${f*0.5} ${f*0.3}"`:'';
+ H.gr.forEach(G=>{let disari='';s+=`<g data-grup="${G.gi}"><g data-rot="1" data-px="${G.pv[0]}" data-py="${G.pv[1]}" transform="rotate(${G.aci} ${G.pv[0]} ${G.pv[1]})">`;const g=G.g,k=G.k,mev=g.durum==='mevcut',mz=MALZ[g.malzeme]||MALZ.ahsap,dash=mev?`stroke-dasharray="${f*0.5} ${f*0.3}"`:'';
   G.beds.forEach(b=>{const R=(a,c,va,vb)=>G.R(b,a,c,va,vb),rr=(r,fill,ex='')=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${fill}" ${ex}/>`;
    k.icler.forEach(r=>s+=rr(R(r.ua,r.ub,r.va,r.vb),mev?'#b9b1a4':'#7b5b3d',`fill-opacity="${sul?0.25:0.55}"`));
    k.duvar.forEach(w=>s+=rr(R(w.ua,w.ub,w.va,w.vb),mev?'#d6d6d6':mz.renk));
@@ -605,18 +624,20 @@ function svgPlan(st,H,mod='plan',etk=null){
    const c=R(k.etiket.ua,k.etiket.ub,k.etiket.va,k.etiket.vb);s+=`<text x="${c.x+c.w/2}" y="${c.y+c.h/2+f*0.35}" text-anchor="middle" font-weight="700" fill="#fff" stroke="#3a2a18" stroke-width="${sw*2.2}" paint-order="stroke">${b.ad}</text>`;
   });
   if(G.boru){const B=G.boru;B.hatlar.forEach(h=>s+=`<polyline points="${pl(h)}" fill="none" stroke="#123f75" stroke-width="${sw*(sul?4:3)}" stroke-linecap="round"/>`);
-   s+=`<polyline points="${pl(B.bag)}" fill="none" stroke="#123f75" stroke-width="${sw*(sul?4:3)}" stroke-linejoin="round"/>`;
+   disari+=`<polyline points="${pl(B.bag)}" fill="none" stroke="#123f75" stroke-width="${sw*(sul?4:3)}" stroke-linejoin="round"/>`;
    B.inis.forEach(h=>s+=`<polyline points="${pl(h)}" fill="none" stroke="#3b8fd9" stroke-width="${sw*2}"/>`);
    B.dag.forEach(l=>l.forEach(h=>s+=`<polyline points="${pl(h)}" fill="none" stroke="#3b8fd9" stroke-width="${sw*2}"/>`));
-   const vp=B.bag[2];s+=`<g transform="translate(${vp[0]} ${vp[1]})"><path d="M${-f*0.45} ${-f*0.3} L${f*0.45} ${f*0.3} L${f*0.45} ${-f*0.3} L${-f*0.45} ${f*0.3}Z" fill="#e07b28" stroke="#7a3d0c" stroke-width="${sw}"/></g>`;
+   const vp=B.bag[2];disari+=`<g transform="translate(${vp[0]} ${vp[1]})"><path d="M${-f*0.45} ${-f*0.3} L${f*0.45} ${f*0.3} L${f*0.45} ${-f*0.3} L${-f*0.45} ${f*0.3}Z" fill="#e07b28" stroke="#7a3d0c" stroke-width="${sw}"/></g>`;
    if(sul){const m=B.hatlar[0][1];s+=`<text x="${m[0]+f*0.3}" y="${m[1]-f*0.3}" font-size="${f*0.8}" fill="#123f75">Ø${S.anaCap} PE ana hat</text>`}}
   // ölçüler
   const segX=g.yon==='dikey'?alt(G.sira,k.Vs,n0(g.siraArasi)):alt(G.sut,k.Ls,n0(g.aralik));
   const segY=g.yon==='dikey'?alt(G.sut,k.Ls,n0(g.aralik)):alt(G.sira,k.Vs,n0(g.siraArasi));
-  if(!sul){s+=zincirH(G.bb.x,G.bb.y+G.bb.h+f*1.3,segX,f,sw);s+=zincirV(G.bb.y,G.bb.x+G.bb.w+f*1.3,segY,f,sw)}
-  s+=`<text x="${G.bb.x}" y="${G.bb.y-0.3-f*0.7}" font-weight="700" font-size="${f*0.95}" fill="${mev?'#666':'#2e6b3a'}">${G.kod} · ${esc(g.ad)}${mev?' (mevcut)':''} <tspan font-weight="400" font-size="${f*0.75}" fill="#555">x=${fmt(g.x,2)} y=${fmt(g.y,2)} m</tspan></text>`;
-  if(etk){const sec=etk.secili===G.gi;s+=`<rect class="tut" x="${G.bb.x-0.35}" y="${G.bb.y-0.35-f*1.2}" width="${G.bb.w+0.7}" height="${G.bb.h+0.7+f*1.2}" fill="${sec?'rgba(224,123,40,.08)':'transparent'}" stroke="${sec?'#e07b28':'none'}" stroke-width="${sw*2.5}" stroke-dasharray="${f*0.6} ${f*0.35}" rx="${f*0.3}"/>`}
-  s+='</g>';
+  const B0=G.bb0;if(!sul){s+=zincirH(B0.x,B0.y+B0.h+f*1.3,segX,f,sw);s+=zincirV(B0.y,B0.x+B0.w+f*1.3,segY,f,sw)}
+  s+=`<text x="${B0.x}" y="${B0.y-0.3-f*0.7}" font-weight="700" font-size="${f*0.95}" fill="${mev?'#666':'#2e6b3a'}">${G.kod} · ${esc(g.ad)}${mev?' (mevcut)':''} <tspan font-weight="400" font-size="${f*0.75}" fill="#555">x=${fmt(g.x,2)} y=${fmt(g.y,2)} m${G.aci?` · ${fmt(G.aci,0)}°`:''}</tspan></text>`;
+  if(etk){const sec=etk.secili===G.gi;s+=`<rect class="tut" x="${B0.x-0.35}" y="${B0.y-0.35-f*1.2}" width="${B0.w+0.7}" height="${B0.h+0.7+f*1.2}" fill="${sec?'rgba(224,123,40,.08)':'transparent'}" stroke="${sec?'#e07b28':'none'}" stroke-width="${sw*2.5}" stroke-dasharray="${f*0.6} ${f*0.35}" rx="${f*0.3}"/>`}
+  if(etk&&etk.kasa&&etk.kasa.gi===G.gi){const kb=G.beds.find(b=>b.no===etk.kasa.no);if(kb)s+=`<rect x="${kb.x-0.08}" y="${kb.y-0.08}" width="${kb.w+0.16}" height="${kb.h+0.16}" fill="none" stroke="#e07b28" stroke-width="${sw*3}" pointer-events="none"/>`}
+  if(etk&&etk.secili===G.gi){const hx=B0.x+B0.w/2,hy=B0.y-0.35-f*1.2-f*2.2;s+=`<line x1="${hx}" y1="${B0.y-0.35-f*1.2}" x2="${hx}" y2="${hy}" stroke="#e07b28" stroke-width="${sw*2}"/><g data-dondur="1"><circle cx="${hx}" cy="${hy}" r="${f*1.3}" fill="transparent"/><circle cx="${hx}" cy="${hy}" r="${f*0.7}" fill="#fff" stroke="#e07b28" stroke-width="${sw*3}"/><text x="${hx}" y="${hy+f*0.35}" text-anchor="middle" font-size="${f}" fill="#e07b28" font-weight="700">⟳</text></g>`}
+  s+='</g>'+disari+'</g>';
  });
  if(H.top.Q>0){s+=`<g data-kaynak="1"><g transform="translate(${n0(S.kx)} ${n0(S.ky)})">${etk?`<circle r="${f*1.6}" fill="transparent"/>`:''}<circle r="${f*0.65}" fill="#1f6fb2" stroke="#0b3d74" stroke-width="${sw*1.5}"/><text y="${f*0.33}" text-anchor="middle" fill="#fff" font-weight="700" font-size="${f*0.85}">S</text></g></g>`}
  s+=olcuH(0,en,-pad*0.42,`${fmt(en,2)} m`,f,sw*1.3,'#111');s+=olcuV(0,boy,-pad*0.42,`${fmt(boy,2)} m`,f,sw*1.3,'#111');
@@ -908,7 +929,7 @@ function renderForm(){
  renderGruplar();renderBilesen()}
 function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const p=`gruplar.${i}.`;const gal=g.malzeme==='galvaniz',bet=g.malzeme==='beton';
  return`<div class="grup ${g.durum==='mevcut'?'mevcut':''}"><div class="grup-bas"><span class="rozet">${harf(i)}</span><input data-k="${p}ad" type="text" value="${esc(g.ad)}" style="flex:1"><button class="btn kucuk" data-kopya="${i}" aria-label="Grubu kopyala">⧉</button><button class="btn kucuk kirmizi" data-sil="${i}" aria-label="Grubu sil">✕</button></div>
- ${sekilHTML(g,i)}<div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)
+ ${sekilHTML(g,i)}<div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)+fld(p+'aci','Dönüş açısı (°)',g.aci||0,{i:'saat yönünde; planda ⟳ ile de çevrilir'})
  +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi)
  +fld(p+'malzeme','Malzeme',g.malzeme,{sec:Object.entries(MALZ).map(([k,v])=>[k,v.ad])})+(gal?'':fld(p+'t',bet?'Duvar kalınlığı (cm)':'Tahta kalınlığı (cm)',g.t))+(gal?'':fld(p+'tahtaH',bet?'Sıra yüksekliği (cm)':'Tahta yüksekliği (cm)',g.tahtaH))+(bet?'':fld(p+'dikme','Dikme kesiti (cm)',g.dikme,{i:'kare'})+fld(p+'gomme','Dikme gömme (cm)',g.gomme,{i:'0 = zemine oturur'}))
   +fld(p+'mk','Malzeme kasası',g.mk,{sec:[['yok','Yok'],['ic','Kasa içinde (bölmeli)'],['dis','Kasaya ek (dışta)']]})+(g.mk&&g.mk!=='yok'?fld(p+'mkYer','Malzeme kasası yeri',g.mkYer||g.mkUc||'bas',{sec:[['bas','Ön uç (kısa kenar)'],['son','Arka uç (kısa kenar)'],['on','Ön uzun kenar'],...(g.sekil&&g.sekil!=='I'?[]:[['arka','Arka uzun kenar']]),...(g.mk==='ic'?[['orta','Arada (enine)']]:[])]})+(g.mk==='dis'?fld(p+'mkH','MK yüksekliği (cm)',g.mkH,{i:'boş = kasa ile aynı'}):''):'')
@@ -954,7 +975,7 @@ function cizimCiz(zorla){
  const gsec=()=>H.gr.find(x=>x.gi===+sel.value);if(cizimMod==='mk'&&gsec()&&gsec().k.mk==='yok'){const y=H.gr.find(x=>x.k.mk!=='yok');if(y)sel.value=y.gi}
  const G=gsec()||H.gr[0],kutu=$('#cizimKutu');let alt='',lj='';
  if(!G){kutu.innerHTML='<p class="not" style="padding:16px">Önce bir kasa grubu ekleyin.</p>';yerArac();return}
- if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod,cizimMod==='plan'?{secili:yer.secili}:null);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
+ if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod,cizimMod==='plan'?{secili:yer.tasima?yer.secili:null,kasa:yer.tasima?yer.kasa:null}:null);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
   if(cizimMod==='sulama')alt=sulamaTablo(st,H)}
  else if(cizimMod==='kesit'){kutu.innerHTML=svgKesit(G,st);alt=kasaTablo(G)}
  else if(cizimMod==='gorunus'){kutu.innerHTML=svgGorunus(G);alt=kasaTablo(G)}
@@ -972,28 +993,42 @@ function sulamaTablo(st,H){const o=H.top,S=st.sulama;if(o.Q<=0)return'<p class="
  <p class="not">Ana hat uzunluğu her grubun kaynaktan ayrı beslendiği varsayımıyla hesaplanır; ortak güzergâh kullanılırsa daha az boru gerekir.</p></div>`}
 
 /* ---------- Sürükle-bırak yerleşim ---------- */
-const yer={tasima:false,secili:null,s:null};
+const yer={tasima:false,secili:null,s:null,kasa:null,r:null};
+const aciN=a=>Math.round(((a%360)+360)%360*10)/10;
 function svgNokta(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
-function yerDurum(gi,dx=0,dy=0){const G=H.gr.find(x=>x.gi===gi);if(!G)return{metin:'',sorun:false};const b={x:G.bb.x+dx,y:G.bb.y+dy,w:G.bb.w,h:G.bb.h},en=n0(st.alan.en),boy=n0(st.alan.boy),g=G.g;let sorun=[];
- if(b.x<-0.001||b.y<-0.001||b.x+b.w>en+0.001||b.y+b.h>boy+0.001)sorun.push('alan dışında');
- H.gr.forEach(O=>{if(O.gi===gi)return;const o=O.bb,ox=Math.min(b.x+b.w,o.x+o.w)-Math.max(b.x,o.x),oy=Math.min(b.y+b.h,o.y+o.h)-Math.max(b.y,o.y);if(ox>0.01&&oy>0.01)sorun.push(`${O.kod} ile çakışıyor`);else{const ar=Math.max(Math.max(b.x,o.x)-Math.min(b.x+b.w,o.x+o.w),Math.max(b.y,o.y)-Math.min(b.y+b.h,o.y+o.h));if(ar<0.6)sorun.push(`${O.kod} ile arası ${fmt(ar*100,0)} cm`)}});
+function yerDurum(gi,dx=0,dy=0){const G=H.gr.find(x=>x.gi===gi);if(!G)return{metin:'',sorun:false};const en=n0(st.alan.en),boy=n0(st.alan.boy),g=G.g;let sorun=[];
+ if(alanDisi(G,en,boy,dx,dy))sorun.push('alan dışında');
+ H.gr.forEach(O=>{if(O.gi===gi)return;const ar=grupMes(G,O,dx,dy);if(ar<0.005)sorun.push(`${O.kod} ile çakışıyor`);else if(ar<0.6)sorun.push(`${O.kod} ile arası ${fmt(ar*100,0)} cm`)});
  return{metin:`${G.kod} · ${g.ad}: x=${fmt(n0(g.x)+dx,2)} m, y=${fmt(n0(g.y)+dy,2)} m${sorun.length?' — ⚠ '+sorun.join(', '):' ✓'}`,sorun:sorun.length>0}}
 function yerArac(){const t=$('#btnTasi');t.textContent=`✋ Taşıma modu: ${yer.tasima?'açık':'kapalı'}`;t.classList.toggle('dolu',yer.tasima);$('#cizimKutu').classList.toggle('tasima',yer.tasima&&cizimMod==='plan');
- $('#yerArac').hidden=cizimMod!=='plan';const G=H.gr.find(x=>x.gi===yer.secili);$('#yerSecili').hidden=!(yer.tasima&&G);if(G){const d=yerDurum(G.gi);$('#yerAd').textContent=d.metin;$('#yerAd').style.color=d.sorun?'var(--kr)':''}}
+ $('#yerArac').hidden=cizimMod!=='plan';const G=H.gr.find(x=>x.gi===yer.secili);$('#yerSecili').hidden=!(yer.tasima&&G);if(G){const d=yerDurum(G.gi);$('#yerAd').textContent=d.metin+(G.aci?` · açı ${fmt(G.aci,1)}°`:'');$('#yerAd').style.color=d.sorun?'var(--kr)':'';if(document.activeElement!==$('#yerAci'))$('#yerAci').value=fmt(G.aci,1).replace(',','.');
+  const kb=yer.kasa&&yer.kasa.gi===G.gi?G.beds.find(b=>b.no===yer.kasa.no):null,ay=$('#btnAyir');ay.hidden=!(kb&&G.beds.length>1);if(kb)ay.textContent=`✂ ${kb.ad} kasasını ayır`}}
 $('#btnTasi').onclick=()=>{yer.tasima=!yer.tasima;if(!yer.tasima)yer.secili=null;cizimCiz(true);if(yer.tasima)toast('Kasa grubunu ya da S’yi sürükleyin; bir gruba dokununca oklarla ince ayar yapabilirsiniz')};
-$('#cizimKutu').addEventListener('pointerdown',e=>{if(!yer.tasima||cizimMod!=='plan')return;const t=e.target.closest('[data-grup],[data-kaynak]');if(!t)return;e.preventDefault();
+$('#cizimKutu').addEventListener('pointerdown',e=>{if(!yer.tasima||cizimMod!=='plan')return;
+ const dn=e.target.closest('[data-dondur]');if(dn){e.preventDefault();const gEl=dn.closest('[data-grup]'),rEl=gEl.querySelector('[data-rot]'),svg=$('#cizimKutu svg');yer.r={gi:+gEl.dataset.grup,rEl,px:+rEl.dataset.px,py:+rEl.dataset.py,svg,id:e.pointerId,aci:null};try{svg.setPointerCapture(e.pointerId)}catch(x){}return}
+ const t=e.target.closest('[data-grup],[data-kaynak]');if(!t)return;e.preventDefault();
  const svg=$('#cizimKutu svg');yer.s={el:t,gi:t.dataset.grup!=null?+t.dataset.grup:null,p0:svgNokta(svg,e),dx:0,dy:0,svg,id:e.pointerId};try{svg.setPointerCapture(e.pointerId)}catch(x){}});
-$('#cizimKutu').addEventListener('pointermove',e=>{const d=yer.s;if(!d||e.pointerId!==d.id)return;e.preventDefault();const p=svgNokta(d.svg,e);d.dx=Math.round((p.x-d.p0.x)*10)/10;d.dy=Math.round((p.y-d.p0.y)*10)/10;
+$('#cizimKutu').addEventListener('pointermove',e=>{const r=yer.r;if(r&&e.pointerId===r.id){e.preventDefault();const p=svgNokta(r.svg,e);let a=Math.atan2(p.x-r.px,-(p.y-r.py))*180/Math.PI;a=aciN(Math.round(a));r.aci=a;r.rEl.setAttribute('transform',`rotate(${a} ${r.px} ${r.py})`);$('#yerBilgi').textContent=`Dönüş açısı: ${fmt(a,0)}° (bırakınca kaydedilir)`;$('#yerBilgi').style.color='var(--tu)';return}
+ const d=yer.s;if(!d||e.pointerId!==d.id)return;e.preventDefault();const p=svgNokta(d.svg,e);d.dx=Math.round((p.x-d.p0.x)*10)/10;d.dy=Math.round((p.y-d.p0.y)*10)/10;
  d.el.setAttribute('transform',`translate(${d.dx} ${d.dy})`);
  if(d.gi!=null){const r=yerDurum(d.gi,d.dx,d.dy);$('#yerBilgi').textContent=r.metin;$('#yerBilgi').style.color=r.sorun?'var(--kr)':'var(--y)';const tut=d.el.querySelector('.tut');if(tut){tut.setAttribute('stroke',r.sorun?'#c0392b':'#2e6b3a');tut.setAttribute('fill',r.sorun?'rgba(192,57,43,.08)':'rgba(46,107,58,.08)')}}
  else $('#yerBilgi').textContent=`Su kaynağı: x=${fmt(n0(st.sulama.kx)+d.dx,2)} m, y=${fmt(n0(st.sulama.ky)+d.dy,2)} m`});
-function yerBitir(e){const d=yer.s;if(!d||(e&&e.pointerId!==d.id))return;yer.s=null;
- if(d.gi!=null){yer.secili=d.gi;if(d.dx||d.dy){const g=st.gruplar[d.gi];g.x=r2(n0(g.x)+d.dx);g.y=r2(n0(g.y)+d.dy)}}
+function yerBitir(e){const r=yer.r;if(r&&(!e||e.pointerId===r.id)){yer.r=null;$('#yerAci').blur();if(r.aci!=null){st.gruplar[r.gi].aci=r.aci;yer.secili=r.gi}$('#yerBilgi').style.color='';degisti();renderForm();cizimCiz(true);return}
+ const d=yer.s;if(!d||(e&&e.pointerId!==d.id))return;yer.s=null;
+ if(d.gi!=null){if(yer.secili!==d.gi)yer.kasa=null;yer.secili=d.gi;if(d.dx||d.dy){const g=st.gruplar[d.gi];g.x=r2(n0(g.x)+d.dx);g.y=r2(n0(g.y)+d.dy)}
+  else{const G=H.gr.find(x=>x.gi===d.gi);if(G){const a=-G.aci*Math.PI/180,qx=d.p0.x-G.pv[0],qy=d.p0.y-G.pv[1],lx=G.pv[0]+qx*Math.cos(a)-qy*Math.sin(a),ly=G.pv[1]+qx*Math.sin(a)+qy*Math.cos(a);const kb=G.beds.find(b=>lx>=b.x&&lx<=b.x+b.w&&ly>=b.y&&ly<=b.y+b.h);yer.kasa=kb?{gi:G.gi,no:kb.no}:null}}}
  else if(d.dx||d.dy){st.sulama.kx=r2(n0(st.sulama.kx)+d.dx);st.sulama.ky=r2(n0(st.sulama.ky)+d.dy)}
  $('#yerBilgi').style.color='';$('#yerBilgi').textContent='Sürükleyerek taşıyın; bir gruba dokununca oklarla 10 cm’lik ince ayar yapabilirsiniz.';
  degisti();renderForm();cizimCiz(true)}
 $('#cizimKutu').addEventListener('pointerup',yerBitir);$('#cizimKutu').addEventListener('pointercancel',yerBitir);
-$('#yerSecili').addEventListener('click',e=>{const b=e.target.closest('[data-it]');if(!b)return;const g=st.gruplar[yer.secili];if(!g)return;const[a,c]=b.dataset.it.split(',').map(Number);g.x=r2(n0(g.x)+a);g.y=r2(n0(g.y)+c);degisti();renderForm();cizimCiz(true)});
+$('#yerSecili').addEventListener('click',e=>{const ba=e.target.closest('[data-aci]');if(ba){const g=st.gruplar[yer.secili];if(!g)return;g.aci=aciN(n0(g.aci)+(+ba.dataset.aci));degisti();renderForm();cizimCiz(true);return}
+ const b=e.target.closest('[data-it]');if(!b)return;const g=st.gruplar[yer.secili];if(!g)return;const[a,c]=b.dataset.it.split(',').map(Number);g.x=r2(n0(g.x)+a);g.y=r2(n0(g.y)+c);degisti();renderForm();cizimCiz(true)});
+$('#yerAci').addEventListener('change',e=>{const g=st.gruplar[yer.secili];const v=parseFloat(String(e.target.value).replace(',','.'));if(!g||!Number.isFinite(v))return;g.aci=aciN(v);degisti();renderForm();cizimCiz(true)});
+$('#btnAyir').onclick=()=>{const K=yer.kasa;if(!K)return;const G=H.gr.find(x=>x.gi===K.gi),b=G&&G.beds.find(x=>x.no===K.no);if(!b||G.beds.length<2)return;const g=st.gruplar[K.gi];
+ const yeni=JSON.parse(JSON.stringify(g));yeni.id=uid();yeni.ad=`${b.ad} (ayrı kasa)`;yeni.sira=1;yeni.sutun=1;yeni.haric=[];
+ const mrk=G.rot([b.x+b.w/2,b.y+b.h/2]);yeni.x=r2(mrk[0]-b.w/2);yeni.y=r2(mrk[1]-b.h/2);
+ g.haric=(Array.isArray(g.haric)?g.haric:[]).concat(b.no);st.gruplar.push(yeni);yer.secili=st.gruplar.length-1;yer.kasa=null;
+ degisti();renderForm();cizimCiz(true);toast(`${b.ad} ayrı kasa oldu (${harf(yer.secili)} grubu); artık tek başına çevirebilirsiniz`)};
 $('#btnDondur').onclick=()=>{const g=st.gruplar[yer.secili];if(!g)return;g.yon=g.yon==='dikey'?'yatay':'dikey';degisti();renderForm();cizimCiz(true);toast(`${harf(yer.secili)} grubu ${g.yon==='dikey'?'dikey':'yatay'} yerleştirildi`)};
 
 /* ---------- Denetim sekmesi ---------- */
@@ -1061,13 +1096,14 @@ function sahne3D(){const{THREE,root,kutuG,silG,M,pivot}=U3;
  root.traverse(o=>{if(o.isSprite){o.material.map.dispose();o.material.dispose()}});root.clear();
  const A=st.alan,en=Math.max(1,n0(A.en,1)),boy=Math.max(1,n0(A.boy,1)),Mx=Math.max(en,boy),T=st.toprak;
  root.position.set(-en/2,0,-boy/2);
- const kutu=(w,h,d,m,x,y,z,golge=true)=>{const o=new THREE.Mesh(kutuG,m);o.scale.set(Math.max(w,0.001),Math.max(h,0.001),Math.max(d,0.001));o.position.set(x,y,z);o.castShadow=golge;o.receiveShadow=true;root.add(o);return o};
- const boru=(a,b,r,m)=>{const A3=new THREE.Vector3(...a),B3=new THREE.Vector3(...b),d=B3.clone().sub(A3),L=d.length();if(L<1e-4)return;const o=new THREE.Mesh(silG,m);o.scale.set(r,L,r);o.position.copy(A3).add(B3).multiplyScalar(0.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());root.add(o)};
+ let hedef=root;
+ const kutu=(w,h,d,m,x,y,z,golge=true)=>{const o=new THREE.Mesh(kutuG,m);o.scale.set(Math.max(w,0.001),Math.max(h,0.001),Math.max(d,0.001));o.position.set(x,y,z);o.castShadow=golge;o.receiveShadow=true;hedef.add(o);return o};
+ const boru=(a,b,r,m)=>{const A3=new THREE.Vector3(...a),B3=new THREE.Vector3(...b),d=B3.clone().sub(A3),L=d.length();if(L<1e-4)return;const o=new THREE.Mesh(silG,m);o.scale.set(r,L,r);o.position.copy(A3).add(B3).multiplyScalar(0.5);o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());hedef.add(o)};
  const fotoVar=!!foto;
  if(!fotoVar){kutu(en+4,0.02,boy+4,M.zemin,en/2,-0.011,boy/2,false);kutu(en,0.004,boy,M.cakil,en/2,0.002,boy/2,false)}
  else{const g=new THREE.Mesh(new THREE.PlaneGeometry(en+6,boy+6),M.golge);g.rotation.x=-Math.PI/2;g.position.set(en/2,0.001,boy/2);g.receiveShadow=true;root.add(g)}
  const etiket=$('#selEtiket').value==='1';
- H.gr.forEach(G=>{const g=G.g,k=G.k,mev=g.durum==='mevcut',tt=Math.max(k.t,m3(k.m))/100,Hr=k.Hr/100,mats=mev?M.mevcut:(M[k.m]||M.ahsap),bos=n0(T.bos)/100,soilH=Math.max(0.02,Hr-bos);
+ H.gr.forEach(G=>{const gd=new THREE.Group(),gi2=new THREE.Group();gd.position.set(G.pv[0],0,G.pv[1]);gd.rotation.y=-G.aci*Math.PI/180;gi2.position.set(-G.pv[0],0,-G.pv[1]);gd.add(gi2);root.add(gd);hedef=gi2;const g=G.g,k=G.k,mev=g.durum==='mevcut',tt=Math.max(k.t,m3(k.m))/100,Hr=k.Hr/100,mats=mev?M.mevcut:(M[k.m]||M.ahsap),bos=n0(T.bos)/100,soilH=Math.max(0.02,Hr-bos);
   G.beds.forEach((b,bi)=>{
    const R=(ua,ub,va,vb)=>G.R(b,ua,ub,va,vb),kR=(r,y,h,m,gl=true)=>kutu(r.w,h,r.h,m,r.x+r.w/2,y+h/2,r.y+r.h/2,gl);
    const duv=(w,Htop,kn,ms,ofs=0)=>{const n=Math.max(1,kn),th=Htop/n,r=R(w.ua,w.ub,w.va,w.vb);for(let i=0;i<n;i++)kR(r,i*th,th-(n>1?0.004:0),ms[(i+bi+ofs)%ms.length])};
@@ -1078,10 +1114,10 @@ function sahne3D(){const{THREE,root,kutuG,silG,M,pivot}=U3;
    if(k.mk!=='yok'){const ms=M[k.m]||M.ahsap,Hb=k.mk==='dis'?k.Hb/100:Hr,knB=k.m==='galvaniz'?1:Math.max(1,k.mk==='dis'?k.kursB:k.kurs);
     mkDuvar(k).forEach((w,wi)=>duv(w,Hb,knB,ms,wi));kR(R(k.mkIc.ua,k.mkIc.ub,k.mkIc.va,k.mkIc.vb),0.05,0.018,M.kontra);kR(R(k.kutu.ua,k.kutu.ub,k.kutu.va,k.kutu.vb),Hb,0.018,M.kontra)}
    if(G.d){G.d.seg.forEach(sg=>{for(let i=0;i<sg.nk;i++){let p,q;if(sg.yon==='u'){const v=sg.va+(sg.vb-sg.va)*(i+0.5)/sg.nk;p=G.P(b,sg.ua+5,v);q=G.P(b,sg.ub-5,v)}else{const u=sg.ua+(sg.ub-sg.ua)*(i+0.5)/sg.nk;p=G.P(b,u,sg.va+5);q=G.P(b,u,sg.vb-5)}boru([p[0],soilH+0.009,p[1]],[q[0],soilH+0.009,q[1]],0.008,M.boru)}})}
-   if(etiket){const c=R(k.etiket.ua,k.etiket.ub,k.etiket.va,k.etiket.vb),sp=yazi3D(b.ad,mev);sp.position.set(c.x+c.w/2,Hr+0.25,c.y+c.h/2);const s=Math.min(0.9,Math.max(0.35,Mx*0.03));sp.scale.set(s*1.6,s*0.8,1);root.add(sp)}});
-  if(G.boru){const B=G.boru,y0=0.015,R=0.014;const seg=pts=>{for(let i=0;i<pts.length-1;i++)boru([pts[i][0],y0,pts[i][1]],[pts[i+1][0],y0,pts[i+1][1]],R,M.ana)};B.hatlar.forEach(seg);seg(B.bag);
+   if(etiket){const c=R(k.etiket.ua,k.etiket.ub,k.etiket.va,k.etiket.vb),sp=yazi3D(b.ad,mev);sp.position.set(c.x+c.w/2,Hr+0.25,c.y+c.h/2);const s=Math.min(0.9,Math.max(0.35,Mx*0.03));sp.scale.set(s*1.6,s*0.8,1);hedef.add(sp)}});
+  if(G.boru){const B=G.boru,y0=0.015,R=0.014;const seg=pts=>{for(let i=0;i<pts.length-1;i++)boru([pts[i][0],y0,pts[i][1]],[pts[i+1][0],y0,pts[i+1][1]],R,M.ana)};B.hatlar.forEach(seg);hedef=root;seg(B.bag);hedef=gi2;
    B.inis.forEach((h,i)=>{const a=h[0],w=h[1],L1=B.dag[i],d=L1[0];L1.slice(1).forEach(q=>{for(let j=0;j<q.length-1;j++)boru([q[j][0],soilH+0.012,q[j][1]],[q[j+1][0],soilH+0.012,q[j+1][1]],0.009,M.boru)});boru([a[0],y0,a[1]],[w[0],y0,w[1]],0.009,M.boru);boru([w[0],y0,w[1]],[w[0],Hr+0.02,w[1]],0.009,M.boru);boru([w[0],Hr+0.02,w[1]],[d[0][0],soilH+0.012,d[0][1]],0.009,M.boru);boru([d[0][0],soilH+0.012,d[0][1]],[d[1][0],soilH+0.012,d[1][1]],0.009,M.boru)});
-   const v=B.bag[2];kutu(0.12,0.12,0.12,M.vana,v[0],0.06,v[1])}});
+   const v=B.bag[2];hedef=root;kutu(0.12,0.12,0.12,M.vana,v[0],0.06,v[1])}hedef=root});
  if(H.top.Q>0){const S=st.sulama;kutu(0.12,0.9,0.12,M.kaynak,n0(S.kx),0.45,n0(S.ky))}
  // kuzey oku
  const a=n0(A.kuzey)*Math.PI/180,N=[Math.sin(a),-Math.cos(a)],c=[en/2,boy/2],r=Mx*0.62;
