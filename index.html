@@ -88,6 +88,10 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .malzLink{text-decoration:underline dotted #7a9a80;text-underline-offset:3px;cursor:pointer}.malzLink::after{content:" 🖼";font-size:.8em}
 .pdfKap{position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1}.pdfKap .sayfa{width:794px;max-width:none!important;margin:0!important;box-shadow:none!important;border-radius:0!important;padding:40px 36px!important;overflow:visible!important}.pdfKap .iki{grid-template-columns:1fr 1fr!important}.pdfKap .kutu4{grid-template-columns:repeat(4,1fr)!important}.pdfKap .cizim>svg{max-height:880px}.pdfKap .malzLink{text-decoration:none}.pdfKap .malzLink::after{content:""}
 #piyasaListe td{vertical-align:top;overflow-wrap:anywhere}#piyasaListe table{table-layout:fixed;width:100%}#piyasaListe th:first-child{width:42px}#piyasaListe th:last-child{width:38%}#piyasaListe td.s,#piyasaListe th.s{white-space:normal}.piyAra{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.piyKay{padding-left:20px;font-size:13px}.piyKay li{margin-bottom:4px}.piyAra a{font-size:11.5px;padding:2px 7px;border:1px solid var(--cz);border-radius:10px;text-decoration:none;color:var(--y)}
+#dlgIhaleOn{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;background:#eef1ec;display:none;flex-direction:column}#dlgIhaleOn[open]{display:flex}
+.onUst{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--y);color:#fff}.onUst .btn{background:#fff}
+.onSekmeler{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:1px solid var(--cz);flex:0 0 auto}.onSekmeler button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:16px;padding:7px 12px;font-size:13px;min-height:36px;color:var(--sl)}.onSekmeler button.on{background:var(--y);color:#fff;border-color:var(--y);font-weight:700}
+#onIcerik{flex:1;overflow:auto;padding:10px}.onDoc .onLi{margin:2px 0 2px 14px;text-indent:-14px}.onSheet table{font-size:10.5px;min-width:720px}.onSheet .tablo{overflow-x:auto}.onSheet td,.onSheet th{padding:3px 4px}
 #ihaleFiyat td,#ihaleFiyat th{vertical-align:middle;padding:6px 4px}#ihaleFiyat td:first-child{font-size:11px;white-space:nowrap}
 @media print{.malzLink{text-decoration:none}.malzLink::after{content:""}}
 .gizleKut{flex-direction:row;align-items:center;gap:8px;margin-top:8px;font-size:13.5px;color:var(--sl);min-height:36px;cursor:pointer}
@@ -251,7 +255,7 @@ dialog .ic{padding:16px}
  <details class="kart"><summary style="padding:14px;font-weight:700;cursor:pointer">Birim fiyatlar (isteğe bağlı)</summary><div style="padding:0 14px 14px"><p class="not" style="margin-top:0">Piyasa araştırmasından elde ettiğiniz birim fiyatları (KDV hariç) girerseniz yaklaşık maliyet tutarı dosyaya hazır yazılır.</p><div id="ihaleFiyat"></div></div></details>
  <details class="kart" open id="piyasaKart"><summary style="padding:14px;font-weight:700;cursor:pointer">🔎 Piyasa fiyatları (ajan araştırması)</summary><div style="padding:0 14px 14px" id="piyasaListe"></div></details>
  <div class="kart"><h3 style="margin-top:0">Klasör içeriği</h3><div id="ihaleListe"></div>
-  <div class="satir"><button class="btn dolu" id="btnIhale">📦 İhale dosyasını hazırla</button><button class="btn" id="btnIhaleTaslak" hidden>Yine de taslak hazırla</button></div>
+  <div class="satir"><button class="btn" id="btnIhaleOn">👁 Sayfada önizle</button><button class="btn dolu" id="btnIhale">📦 İhale dosyasını hazırla</button><button class="btn" id="btnIhaleTaslak" hidden>Yine de taslak hazırla</button></div>
   <p class="not" id="ihaleDurum" aria-live="polite"></p>
   <div class="satir" id="ihaleCikti" hidden><button class="btn dolu" id="ihIndir">⬇ ZIP klasörü indir</button><button class="btn" id="ihPaylas">↗ Paylaş (Drive, e-posta…)</button></div>
  </div>
@@ -287,11 +291,12 @@ dialog .ic{padding:16px}
  <p class="not" id="malzFotoNot"></p>
  <div class="satir"><label class="btn" style="flex-direction:row">📷 Kendi fotoğrafımı ekle<input type="file" id="malzFoto" accept="image/*" hidden></label><button class="btn kirmizi" id="malzFotoSil" hidden>Fotoğrafı kaldır</button><button class="btn dolu" id="malzKapat" style="margin-left:auto">Kapat</button></div>
 </div></dialog>
+<dialog id="dlgIhaleOn"><div class="onUst"><b>İhale dosyası önizleme</b><button class="btn kucuk" id="onKapat">Kapat ✕</button></div><div class="onSekmeler" id="onSekmeler"></div><div id="onIcerik"></div></dialog>
 <div id="toast"></div>
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-15';
+const APP_VERSION = '2026.11.22-16';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1105,7 +1110,7 @@ function rozetCiz(){const kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sor
 /* ---------- Sekmeler ---------- */
 $$('#altNav button').forEach(b=>b.onclick=()=>sekme(b.dataset.t));
 function sekme(t){aktifTab=t;$$('#altNav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.tab').forEach(s=>s.classList.toggle('aktif',s.id==='t-'+t));window.scrollTo(0,0);
- if(t==='cizim')cizimCiz();if(t==='denetim')denetimCiz();if(t==='rapor')raporCiz();if(t==='3d')uc3D();if(t==='ihale'){ihaleSon=null;$('#ihaleCikti').hidden=true;$('#ihaleKontrol').hidden=true;$('#ihaleDurum').textContent='';$('#btnIhaleTaslak').hidden=true;ihaleCiz()}}
+ if(t==='cizim')cizimCiz();if(t==='denetim')denetimCiz();if(t==='rapor')raporCiz();if(t==='3d')uc3D();if(t==='ihale'){ihaleSon=null;ihaleTurSon=null;$('#ihaleCikti').hidden=true;$('#ihaleKontrol').hidden=true;$('#ihaleDurum').textContent='';$('#btnIhaleTaslak').hidden=true;ihaleCiz()}}
 
 /* ---------- Çizim sekmesi ---------- */
 let cizimMod='plan',zoom=1;
@@ -1474,13 +1479,14 @@ function xlsxYap(zipCtor,sayfalar){const z=new zipCtor();
 function ihaleSayfalari(K,I){const B=(v,s=1)=>({v,s}),bas=4;const toplamSatir=bas+K.length+1,kdv=n0(I.kdv,20);
  const ust=(baslik)=>[[{v:baslik,s:5}],[`İş: ${isAdi(I)}`],[`İdare: ${I.idare||'—'} · Yer: ${isYeri(I)} · Tarih: ${st.meta.tarih||''}`]];
  const metraj={ad:'Metraj',gen:[6,9,20,46,22,8,11,34],yatay:true,birlesik:['A1:H1','A2:H2','A3:H3'],satirlar:[...ust('METRAJ CETVELİ'),['Sıra','Poz No','Bölüm','İş kalemi','Ölçü / özellik','Birim','Miktar','Açıklama'].map(x=>B(x)),...K.map(k=>[k.no,k.poz,k.bolum,k.kalem,k.olcu,k.birim,k.miktar,k.not])]};
+ const ymTop=Math.round(K.reduce((t,k)=>{const f=ihFiyat(I,k);return t+(f==null?0:Math.round(f*k.miktar*100)/100)},0)*100)/100;
  const ym={ad:'Yaklaşık Maliyet',gen:[6,9,48,8,11,15,17],yatay:true,birlesik:['A1:G1','A2:G2','A3:G3'],satirlar:[...ust('YAKLAŞIK MALİYET HESAP CETVELİ'),['Sıra','Poz No','İş kalemi','Birim','Miktar','Birim fiyat (TL, KDV hariç)','Tutar (TL)'].map(x=>B(x)),
   ...K.map((k,i)=>{const r=bas+1+i,f=ihFiyat(I,k);return[k.no,k.poz,k.kalem,k.birim,{f:`Metraj!G${r}`,v:k.miktar},f==null?{v:'',s:3}:{v:f,s:3},{f:`E${r}*F${r}`,v:f==null?0:Math.round(f*k.miktar*100)/100}]}),
-  ['','','Toplam (KDV hariç)','','','',{f:`SUM(G${bas+1}:G${bas+K.length})`,s:4}],['','',`KDV (%${fmt(kdv)})`,'','','',{f:`G${toplamSatir}*${kdv/100}`,s:4}],['','','Genel toplam (KDV dahil)','','','',{f:`G${toplamSatir}+G${toplamSatir+1}`,s:4}],[],
+  ['','','Toplam (KDV hariç)','','','',{f:`SUM(G${bas+1}:G${bas+K.length})`,v:ymTop,s:4}],['','',`KDV (%${fmt(kdv)})`,'','','',{f:`G${toplamSatir}*${kdv/100}`,v:Math.round(ymTop*kdv)/100,s:4}],['','','Genel toplam (KDV dahil)','','','',{f:`G${toplamSatir}+G${toplamSatir+1}`,v:Math.round(ymTop*(100+kdv))/100,s:4}],[],
   ['','','Birim fiyatlar piyasa fiyat araştırmasıyla (en az 3 teklif) ya da güncel birim fiyat pozlarıyla belirlenir. ÖZ- ile başlayan pozlar bu projeye özel tanımlıdır.'],[],['','','Hazırlayan','','','Onaylayan'],['','',st.meta.hazirlayan||'','','','']]};
  const tk={ad:'Teklif Cetveli',gen:[6,50,8,11,16,17],yatay:true,birlesik:['A1:F1','A2:F2','A3:F3'],satirlar:[...ust(I.teklif==='goturu'?'GÖTÜRÜ BEDEL TEKLİF CETVELİ (EK: İŞ KALEMLERİ)':'BİRİM FİYAT TEKLİF CETVELİ'),['Sıra','İş kalemi','Birim','Miktar','Teklif edilen birim fiyat (TL)','Tutarı (TL)'].map(x=>B(x)),
   ...K.map((k,i)=>{const r=bas+1+i;return[k.no,k.kalem+(k.olcu?` (${k.olcu})`:''),k.birim,{f:`Metraj!G${r}`,v:k.miktar},{v:'',s:3},{f:`D${r}*E${r}`,v:0}]}),
-  ['','Toplam tutar (KDV hariç)','','','',{f:`SUM(F${bas+1}:F${bas+K.length})`,s:4}],[],['','Teklif verenin adı soyadı / ticaret unvanı:'],['','Tarih:'],['','İmza / kaşe:']]};
+  ['','Toplam tutar (KDV hariç)','','','',{f:`SUM(F${bas+1}:F${bas+K.length})`,v:0,s:4}],[],['','Teklif verenin adı soyadı / ticaret unvanı:'],['','Tarih:'],['','İmza / kaşe:']]};
  const pa={ad:'Piyasa Araştırması',gen:[6,46,8,11,14,14,14,15,15,40],yatay:true,birlesik:['A1:J1','A2:J2','A3:J3'],satirlar:[...ust('PİYASA FİYAT ARAŞTIRMASI TUTANAĞI'),['Sıra','İş kalemi','Birim','Miktar','1. firma BF (TL)','2. firma BF (TL)','3. firma BF (TL)','Firma ortalaması BF (TL)',`İnternet referansı BF (TL, KDV hariç, ${PIYASA_TARIH})`,'Referans kaynağı'].map(x=>B(x)),
   ...K.map((k,i)=>{const r=bas+1+i,p=piyasaFiyat(k);return[k.no,k.kalem,k.birim,{f:`Metraj!G${r}`,v:k.miktar},{v:'',s:3},{v:'',s:3},{v:'',s:3},{f:`IFERROR(AVERAGE(E${r}:G${r}),"")`},p?{v:Math.round(p.haric*100)/100,s:3}:{v:'',s:3},p?`${p.ref.kaynak}: ${p.ref.ad} (${p.hesap}) ${p.ref.url}`:'bulunamadı']}),[],
   ['','Firma unvanları: 1) ……………… 2) ……………… 3) ………………'],[],['','Araştırmayı yapan(lar) adı soyadı, unvanı, imza:']]};
@@ -1587,8 +1593,7 @@ async function ihaleUret(zorla){const I=ihaleAyar(),durum=$('#ihaleDurum'),btn=$
   const uret=async(tur)=>{yaz(`Dosyalar hazırlanıyor (${tur})…`);
    dosyalar['01_Teknik_Sartname.docx']=await docxYap(JZ,sartnameBloklari(K,I,taslak));
    dosyalar['02_Metraj_ve_Yaklasik_Maliyet.xlsx']=await xlsxYap(JZ,ihaleSayfalari(K,I));
-   dosyalar['03_Cizimler/01_Vaziyet_plani.svg']=svgPlan(st,H,'plan');if(H.top.Q>0)dosyalar['03_Cizimler/02_Sulama_semasi.svg']=svgPlan(st,H,'sulama');
-   H.gr.forEach(G=>{const b=`03_Cizimler/${G.kod}_`;if(G.g.durum==='yeni'){dosyalar[b+'kesit.svg']=svgKesit(G,st);dosyalar[b+'kose_detayi.svg']=svgKose(G)}if(G.parca.length)dosyalar[b+'yan_gorunus.svg']=svgGorunus(G);if(G.k.mk!=='yok')dosyalar[b+'malzeme_kasasi.svg']=svgMK(G)});
+   ihaleCizimleri().forEach(([f,,svg])=>dosyalar['03_Cizimler/'+f]=svg);
    Object.keys(dosyalar).filter(y=>y.endsWith('.svg')).forEach(y=>{let s=String(dosyalar[y]).trim();if(!/^<svg[^>]*xmlns=/.test(s))s=s.replace(/^<svg/,'<svg xmlns="http://www.w3.org/2000/svg"');dosyalar[y]='<?xml version="1.0" encoding="UTF-8"?>\n'+s});
    if(I.ekPdf!=='hayir'){const r=await raporPDF((i,n)=>yaz(`Kurulum raporu PDF’e çevriliyor… ${i}/${n}`));dosyalar[`04_Kurulum_Raporu_${ad}.pdf`]=r.blob}
    dosyalar[`05_Proje_Verisi_${ad}.json`]=JSON.stringify(st,null,1)};
@@ -1599,7 +1604,7 @@ async function ihaleUret(zorla){const I=ihaleAyar(),durum=$('#ihaleDurum'),btn=$
   const ic=ihaleIcindekiler(K,I,tur,taslak);zb=await paketle({'00_Icindekiler_ve_Kontrol_Raporu.txt':ic});
   const son=await window.JSZip.loadAsync(zb),sayi=Object.values(son.files).filter(f=>!f.dir).length,bekS=Object.keys(dosyalar).length+1;
   tur.push({ad:'Son kontrol — teslim paketi',R:[sayi===bekS?{d:'ok',x:`ZIP klasörü açıldı: ${sayi} dosyanın tamamı yerinde (${fmt(zb.size/1048576,2)} MB).`}:{d:'kritik',x:`ZIP’te ${sayi} dosya var, ${bekS} bekleniyordu.`}]});
-  kontrolGoster(tur);const sonKr=tur.slice(1).some(t=>t.R.some(r=>r.d==='kritik'));
+  kontrolGoster(tur);ihaleTurSon=tur;const sonKr=tur.slice(1).some(t=>t.R.some(r=>r.d==='kritik'));
   ihaleSon={blob:zb,ad:kok.slice(0,-1)+'.zip'};$('#ihaleCikti').hidden=false;
   yaz(sonKr?'Paket hazırlandı ancak dosya kontrolünde sorun kaldı; aşağıdaki listeye bakın.':`Hazır: ${ihaleSon.ad} · ${sayi} dosya. Ajan dosyaları ${tur.length} kez kontrol etti.`)}
  catch(e){console.error(e);yaz('Hazırlanamadı: '+(e.message||e))}finally{btn.disabled=false}}
@@ -1672,6 +1677,32 @@ function piyasaCiz(){const K=metrajKalemleri(),I=ihaleAyar(),kdv=n0(I.kdv,20);le
   <p class="not">İşçilik için resmî referans: ${PIYASA_ISCILIK.kaynak} — usta ${fmt(PIYASA_ISCILIK.usta,2)} TL/sa, usta yardımcısı ${fmt(PIYASA_ISCILIK.yrd,2)} TL/sa (<a href="${PIYASA_ISCILIK.url}" target="_blank" rel="noopener">PDF</a>). Bu fiyatlar perakende referanstır; yaklaşık maliyette mevzuat gereği firmalardan alınan teklifler esas alınır.</p>`:'<p class="not">Önce kasa grubu ekleyin.</p>'}
 function piyasaAktar(ustune){const K=metrajKalemleri(),I=ihaleAyar();let n=0;K.forEach(k=>{const p=piyasaFiyat(k);if(!p)return;if(!ustune&&I.fiyat[k.anahtar]!=null&&I.fiyat[k.anahtar]!=='')return;I.fiyat[k.anahtar]=String(Math.round(p.haric*100)/100);n++});kaydet();ihaleCiz();piyasaCiz();toast(n?`${n} kalemin birim fiyatı referanstan dolduruldu`:'Aktarılacak boş kalem yok')}
 $('#t-ihale').addEventListener('click',e=>{if(e.target.id==='btnPiyAktar')piyasaAktar(false);if(e.target.id==='btnPiyUstune')piyasaAktar(true)});
+/* ---------- İhale dosyası sayfa içi önizleme ---------- */
+function ihaleCizimleri(){const L=[];L.push(['01_Vaziyet_plani.svg','Vaziyet planı',svgPlan(st,H,'plan')]);if(H.top.Q>0)L.push(['02_Sulama_semasi.svg','Sulama şeması',svgPlan(st,H,'sulama')]);
+ H.gr.forEach(G=>{const b=G.kod+'_',a=`${G.kod} · ${duzMetin(G.g.ad)}`;if(G.g.durum==='yeni'){L.push([b+'kesit.svg',a+' — kesit',svgKesit(G,st)]);L.push([b+'kose_detayi.svg',a+' — köşe detayı',svgKose(G)])}if(G.parca.length)L.push([b+'yan_gorunus.svg',a+' — yan görünüş',svgGorunus(G)]);if(G.k.mk!=='yok')L.push([b+'malzeme_kasasi.svg',a+' — malzeme kasası',svgMK(G)])});
+ return L}
+let onSekme='sartname',ihaleTurSon=null;
+function onSartname(B){return`<div class="sayfa onDoc">${B.map(b=>{
+ if(b.t==='baslik')return`<h1 style="text-align:center">${esc(b.x)}</h1>`;if(b.t==='orta')return`<p style="text-align:center">${b.b?'<b>':''}${esc(b.x)}${b.b?'</b>':''}</p>`;
+ if(b.t==='h1')return`<h2>${esc(b.x)}</h2>`;if(b.t==='h2')return`<h3>${esc(b.x)}</h3>`;if(b.t==='li')return`<p class="onLi">${b.n?b.n+'.':'•'} ${esc(b.x)}</p>`;
+ if(b.t==='tablo')return`<table>${b.satir.map((r,i)=>`<tr>${r.map(h=>i?`<td>${esc(h)}</td>`:`<th>${esc(h)}</th>`).join('')}</tr>`).join('')}</table>`;
+ if(b.t==='imza')return`<div class="imza"><div>Hazırlayan<br>${esc(b.x||'')}</div><div>Onaylayan</div></div>`;
+ return`<p>${b.b?'<b>':''}${esc(b.x)}${b.b?'</b>':''}</p>`}).join('')}</div>`}
+function onSayfa(S){const hv=h=>{if(h==null||h==='')return'';const o=typeof h==='object'?h:{v:h};if(typeof o.v==='number'&&Number.isFinite(o.v))return Number.isInteger(o.v)&&!(o.s===3||o.s===4)?fmt(o.v,0):fmt(o.v,2);if(o.f!=null)return o.v!=null&&o.v!==''?esc(String(o.v)):'<i class="not">formül</i>';return esc(String(o.v??''))};
+ const R=S.satirlar,bas=R.slice(0,3).map(r=>r[0]?(typeof r[0]==='object'?r[0].v:r[0]):'').filter(Boolean),gov=R.slice(3),n=Math.max(...gov.map(r=>r.length));
+ return`<div class="sayfa onSheet"><h2 style="margin-top:0">${esc(bas[0]||S.ad)}</h2>${bas.slice(1).map(x=>`<p style="margin:2px 0;font-size:11.5px">${esc(x)}</p>`).join('')}<div class="tablo" style="margin-top:8px"><table>${gov.map((r,i)=>r.length?`<tr>${Array.from({length:n},(_,c)=>{const h=r[c],o=h&&typeof h==='object'?h:null,num=o&&(o.f!=null||typeof o.v==='number')||typeof h==='number';return i===0?`<th>${hv(h)}</th>`:`<td class="${num?'s':''}"${o&&o.s===4?' style="font-weight:700;background:#e3eedf"':''}>${hv(h)}</td>`}).join('')}</tr>`:'<tr><td colspan="'+n+'" style="border:0;height:8px"></td></tr>').join('')}</table></div><p class="not" style="font-size:10.5px">Önizleme formüllerin bu andaki değerlerini gösterir; Excel’de fiyat girilince tutarlar yeniden hesaplanır.</p></div>`}
+function onizleCiz(){const I=ihaleAyar(),K=metrajKalemleri(),kr=ihaleKontrol1(K,I).filter(r=>r.d==='kritik').length,S=ihaleSayfalari(K,I),C=ihaleCizimleri();
+ const sek=[['sartname','01 Şartname'],['m0','02 Metraj'],['m1','Yaklaşık maliyet'],['m2','Teklif cetveli'],['m3','Piyasa araştırması'],['cizim',`03 Çizimler (${C.length})`],['rapor','04 Kurulum raporu'],['ic','00 İçindekiler']];
+ $('#onSekmeler').innerHTML=sek.map(([k,a])=>`<button data-on="${k}" class="${k===onSekme?'on':''}">${a}</button>`).join('');
+ let h='';if(onSekme==='sartname')h=onSartname(sartnameBloklari(K,I,kr>0));
+ else if(/^m\d$/.test(onSekme))h=onSayfa(S[+onSekme[1]]);
+ else if(onSekme==='cizim')h=C.map(([f,a,s])=>`<div class="sayfa" style="padding:12px"><h3 style="margin:0 0 6px">${esc(a)}</h3><div class="cizim">${s}</div><p class="not" style="margin:4px 0 0;font-size:11px">03_Cizimler/${f}</p></div>`).join('');
+ else if(onSekme==='rapor'){raporCiz();h=`<p class="not" style="padding:0 4px">Klasördeki PDF bu raporun sayfalarından oluşturulur.</p>`+$('#rapor').innerHTML}
+ else h=`<div class="sayfa"><pre style="white-space:pre-wrap;font:12px/1.5 ui-monospace,Menlo,monospace;margin:0">${esc(ihaleIcindekiler(K,I,ihaleTurSon||[{ad:'1. kontrol — kaynak veri (önizleme anında)',R:ihaleKontrol1(K,I)}],kr>0))}</pre>${ihaleTurSon?'':'<p class="not">Dosya kontrolleri (2. tur) “İhale dosyasını hazırla” ile paket üretilince eklenir.</p>'}</div>`;
+ $('#onIcerik').innerHTML=h;$('#onIcerik').scrollTop=0}
+$('#btnIhaleOn').onclick=()=>{H=hesapla(st);onSekme='sartname';onizleCiz();$('#dlgIhaleOn').showModal()};
+$('#onSekmeler').addEventListener('click',e=>{const b=e.target.closest('[data-on]');if(!b)return;onSekme=b.dataset.on;onizleCiz()});
+$('#onKapat').onclick=()=>$('#dlgIhaleOn').close();
 /* ---------- Projeler ---------- */
 function plistCiz(){$('#plist').innerHTML=Object.entries(DB.projeler).map(([id,p])=>`<button class="p ${id===DB.aktif?'on':''}" data-pid="${id}"><b>${esc(p.meta.ad)}</b><small>${esc(p.meta.bostan||'')} · ${p.gruplar.length} grup · ${esc(p.meta.tarih||'')}</small></button>`).join('')}
 $('#btnProje').onclick=()=>{plistCiz();$('#dlgProje').showModal()};
