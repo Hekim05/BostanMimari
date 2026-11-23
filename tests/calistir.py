@@ -161,6 +161,14 @@ async def sulama_hatlari(pg):
     assert r['kesen'] == 0 and r['disarda'] == 0 and r['anaM'] > 0, r
 
 @test
+async def gergi_secenegi(pg):
+    r = await pg.evaluate("""()=>{const o=[];['oto','seyrek','yok'].forEach(sec=>{const p=bosProje();p.gruplar=[yeniGrup(0,{L:400,W:120,H:60,gomme:20,sutun:1,gergiSec:sec})];projeEkle(p);const G=H.gr[0];
+      o.push({g:G.k.gergi,eta:G.day.eta,parca:G.parca.filter(x=>/Gergi/.test(x.kalem)).reduce((a,x)=>a+x.adet,0)})});return o}""")
+    assert r[0]['g'] == 3 and r[1]['g'] == 2 and r[2]['g'] == 0, r
+    assert r[0]['parca'] == 3 and r[2]['parca'] == 0, r
+    assert r[0]['eta'] <= 1 and r[2]['eta'] > 1, r   # gergisiz 20 cm gömme yetmez: program uyarmalı
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -215,7 +223,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
