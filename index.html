@@ -6,17 +6,18 @@
 <title>Bostan Mimarı — Kasa, Sulama ve Toprak Planlayıcı</title>
 <meta name="description" content="Kent bostanı kasa yerleşimi, damla sulama, montaj, toprak karışımı ve 3D görünüm planlayıcı">
 <meta name="theme-color" content="#2e6b3a">
+<meta name="color-scheme" content="only light">
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <style>
 :root{--y:#2e6b3a;--y2:#4f8f5b;--ac:#e9f3ea;--tu:#e07b28;--bg:#cfdac9;--kart:#fff;--cz:#dfe3dc;--yz:#1f2a21;--sl:#5d6b60;--mv:#1f6fb2;--uy:#b97f00;--kr:#c0392b}
-*{box-sizing:border-box}
+*{box-sizing:border-box}:root{color-scheme:only light}
 [hidden]{display:none!important}
 html,body{margin:0;background:var(--bg);color:var(--yz);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"DejaVu Sans",sans-serif;font-size:16px;-webkit-text-size-adjust:100%;line-height:1.4}
 body{padding-bottom:calc(76px + env(safe-area-inset-bottom));overflow-x:hidden}
-button{font:inherit;cursor:pointer}
+button{font:inherit;cursor:pointer;color:var(--yz)}
 .ust{position:sticky;top:0;z-index:30;background:linear-gradient(180deg,#24572f,#2e6b3a);color:#fff;display:flex;align-items:center;gap:12px;padding:18px 16px 16px;padding-top:calc(18px + env(safe-area-inset-top));min-height:92px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .ust .marka{display:flex;align-items:center;gap:10px;flex:1;min-width:0}.ust .marka>div{min-width:0;flex:1}
 .ust b{display:block;font-size:20px;letter-spacing:.2px}.ust .marka svg{width:46px;height:46px;flex:0 0 46px}
@@ -100,9 +101,9 @@ body.ev .alt{display:none}body.ev{padding-bottom:24px}
 .rozet{display:inline-block;border-radius:10px;padding:3px 8px;font-size:12.5px;font-weight:600;margin-top:8px}.rozet.kr{background:#fbe3e0;color:var(--kr)}.rozet.uy{background:#fff1d0;color:#8a5d00}.rozet.ok{background:#dcefdc;color:var(--y)}
 .evIs{display:flex;border-top:1px solid #e3e8df}.evIs button{flex:1;border:0;background:none;min-height:44px;font-size:14px;color:var(--sl)}.evIs button+button{border-left:1px solid #e3e8df}.evIs .sil{color:var(--kr)}
 .adimlar{background:#fff;border:1px solid #c3cfbd;border-radius:14px;padding:10px 12px;margin-bottom:12px;box-shadow:0 1px 3px rgba(30,50,30,.12)}
-.adimlar .sira{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.adimlar button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:18px;padding:6px 10px;font-size:13px;min-height:38px;display:flex;align-items:center;gap:5px}
+.adimlar .sira{display:flex;gap:6px;flex-wrap:wrap}.adimlar button{color:#1f2a21;-webkit-text-fill-color:#1f2a21;font-weight:600;flex:1 1 30%;justify-content:center;border:1px solid var(--cz);background:#fff;border-radius:18px;padding:6px 10px;font-size:13px;min-height:38px;display:flex;align-items:center;gap:5px}
 .adimlar button.ok{border-color:#9cc8a2;background:#eef7ee}.adimlar button.kr{border-color:#e8a59d;background:#fdeeec}.adimlar button.uy{border-color:#e6c77d;background:#fff6e0}.adimlar button.sonra{border-color:var(--y);box-shadow:0 0 0 2px rgba(46,107,58,.35)}
-.adimlar p{margin:8px 2px 0;font-size:13.5px}
+.adimlar p{margin:8px 2px 0;font-size:13.5px;color:#1f2a21}
 #dlgIhaleOn{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;background:#eef1ec;display:none;flex-direction:column}#dlgIhaleOn[open]{display:flex}
 .onUst{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--y);color:#fff}.onUst .btn{background:#fff}
 .onSekmeler{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:1px solid var(--cz);flex:0 0 auto}.onSekmeler button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:16px;padding:7px 12px;font-size:13px;min-height:36px;color:var(--sl)}.onSekmeler button.on{background:var(--y);color:#fff;border-color:var(--y);font-weight:700}
@@ -321,7 +322,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-1';
+const APP_VERSION = '2026.11.23-2';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
