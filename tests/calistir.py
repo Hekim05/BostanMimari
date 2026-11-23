@@ -198,6 +198,18 @@ async def grup_belirleme(pg):
     assert r['kesen'] == 0, r
 
 @test
+async def hizalama(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:40,boy:30};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3}),yeniGrup(1,{x:3.37,y:7.9,sutun:2}),yeniGrup(2,{x:21.4,y:3.13,sutun:1})];projeEkle(p);
+      sekme('cizim');const cy=(gi,no)=>{const G=H.gr[gi],k=kasaKutu(G,G.beds.find(b=>b.no===no));return[(k.x0+k.x1)/2,(k.y0+k.y1)/2,k.x0,k.y0]};
+      // grup kapsamında: C grubunu A'nın sırasına (aynı y) getir
+      yer.kasalar=[{gi:0,no:0},{gi:2,no:0}];$('#hizaKapsam').value='grup';hizala('y');const g1=[cy(0,0)[1],cy(2,0)[1],H.gr[2].serbest];
+      // kasa kapsamında: B1'in sol kenarını A1'e hizala
+      yer.kasalar=[{gi:0,no:0},{gi:1,no:0}];$('#hizaKapsam').value='kasa';hizala('sol');const g2=[cy(0,0)[2],cy(1,0)[2]];
+      return{g1,g2}}""")
+    assert abs(r['g1'][0] - r['g1'][1]) < 0.011 and not r['g1'][2], r
+    assert abs(r['g2'][0] - r['g2'][1]) < 0.011, r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -252,7 +264,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
