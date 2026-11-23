@@ -322,7 +322,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-2';
+const APP_VERSION = '2026.11.23-3';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -341,7 +341,7 @@ const MALZ={
 };
 const TURLER=[['toprak','Bahçe toprağı'],['kompost','Kompost'],['torf','Torf'],['gubre','Hayvan gübresi'],['solucan','Solucan gübresi'],['perlit','Perlit'],['pomza','Pomza'],['kum','Dere kumu'],['diger','Diğer']];
 const BORU_IC={16:13.6,20:16.6,25:21,32:27.2,40:34};
-function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:'',aci:0,haric:[],kasaAci:{},hatSayisi:'',vanaD:20,girisUc:'bas',takviye:'oneri'},o)}
+function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:'',aci:0,haric:[],kasaAci:{},hatSayisi:'',vanaD:20,girisUc:'bas',takviye:'oneri',disL:'evet'},o)}
 function varsayilanBilesen(){return[
  {ad:'Bahçe toprağı (elenmiş)',tur:'toprak',oran:40,paket:1000,pAd:'m³',yog:1.25},
  {ad:'Olgun kompost',tur:'kompost',oran:25,paket:50,pAd:'çuval',yog:0.55},
@@ -476,6 +476,7 @@ function takviyeOner(k,g){if(k.m!=='ahsap'&&k.m!=='kompozit')return{sev:'yok',ne
  let sev=k.Hr>=60||(k.L>=360&&k.Hr>=45)||ek?'guclu':(k.Hr>=30||k.L>=200||k.sekil!=='I'?'standart':'hafif');
  const sec=['hafif','standart','guclu','yok'].includes(g.takviye)?g.takviye:sev;
  return{sev:sec,oneri:sev,neden:gerek.length?gerek.join(', '):`düşük yük (${fmt(k.Hr)} cm yükseklik, ${fmt(k.L)} cm boy)`}}
+function disLVar(k,g){return(k.m==='ahsap'||k.m==='kompozit')&&(g.disL||'evet')!=='hayir'}
 function takviyeParca(k,g,ad){const T=takviyeOner(k,g);if(T.sev==='yok')return T;const kn=k.kurs,dis=k.nV-k.icKose,ara=k.araTop;
  const kb=T.sev==='guclu'?2*k.nV*kn:T.sev==='standart'?k.nV*kn:k.nV*Math.min(kn,2);
  const not=g.takviye&&g.takviye!=='oneri'?'':` (ajan önerisi: ${TAKVIYE_AD[T.oneri]})`;
@@ -498,6 +499,7 @@ function parcalar(G,sadeceMK){
    k.gergiL.forEach(x=>ad(k.m==='ahsap'?'Gergi çıtası':'Gergi çubuğu Ø8 galvaniz',k.m==='ahsap'?`5×5 cm · ${fmt(x.uz)} cm`:`${fmt(x.uz+4)} cm, iki ucu dişli`,x.n,'adet','Karşılıklı dikmeleri bağlar'));
    ad(k.m==='ahsap'?'Galvaniz/paslanmaz vida':'Paslanmaz vida',k.m==='ahsap'?`5×${Math.round(k.t+4)*10} mm`:'4,5×50 mm',Math.ceil(k.kurs*(4*k.nV+2*k.araTop)*1.1),'adet','%10 fire dahil');
    takviyeParca(k,g,ad);
+   if(disLVar(k,g)){const nL=k.nV,boy=Math.max(10,k.Hr-2);ad('Galvaniz dış köşe L profili (geniş) 100×100×3 mm',`${fmt(boy)} cm boy, köşenin dış yüzüne`,nL,'adet',`Sıcak daldırma galvaniz; ${k.icKose?`${k.nV-k.icKose} dış + ${k.icKose} iç (kollar arası) köşe; `:''}her tahta sırasına kanat başına 2 vida. Ahşapla arasına EPDM bant`);ad('Galvaniz L profil vidası 5×50 mm','yassı başlı, pullu',Math.ceil(nL*k.kurs*4*1.1),'adet','%10 fire dahil');ad('EPDM ayırıcı bant 100 mm',`${fmt(boy)} cm × 2 kanat`,Math.ceil(nL*2*boy/100*10)/10,'m','Bakırlı emprenye ile galvanizin temasını keser')}
   }else if(k.m==='galvaniz'){
    const gr=new Map();k.kenar.forEach(e=>{const key=Math.round(e.uz*10)/10;gr.set(key,(gr.get(key)||0)+1)});
    [...gr.entries()].sort((a,b)=>b[0]-a[0]).forEach(([uz,n])=>ad('Yan panel (oluklu sac)',`${fmt(uz)} × ${fmt(k.Hr)} cm`,n));
@@ -672,7 +674,7 @@ function dayanim(G,st,H){if(G.g.durum!=='yeni')return null;const k=G.k,Z=zeminPa
   const sS=Math.sqrt(8*P.fmd*1000*S/wd),sD=Math.cbrt(384*P.E*I/(150*5*wk))/1000;R.sIz=Math.min(sS,sD);
   if(sig>P.fmd||dl>dlim){const ac=Math.floor(R.sIz*100/5)*5,n=Math.max(0,Math.ceil(Lmax/R.sIz-1e-9)-1),treq=Math.sqrt(6*Md/(P.fmd*1000*th))*100;
    O.push(`Dikme aralığını en fazla ${fmt(ac,0)} cm yapın (en uzun kenara ${n} ara dikme)${postEtkin?'':' ve dikmeleri gömün / gergi ekleyin'}; ya da tahta kalınlığını en az ${fmt(Math.ceil(treq*2)/2,1)} cm yapın.`)}
-  const Rk=wd*s/2,nv=Math.max(2,Math.ceil(Rk/0.6-1e-9));ek('Tahta ucu bağlantısı (alt sıra)',`${fmt(Rk,2)} kN`,`${nv} × Ø5 vida = ${fmt(nv*0.6,1)} kN`,Rk/(nv*0.6),`Alt sırada her tahta ucuna en az ${nv} vida (köşebent ya da dikme üzerinden)`);
+  const Rk=wd*s/2,dL=disLVar(k,G.g),nv=2+(dL?2:0),gerek=Math.ceil(Rk/0.6-1e-9);ek(`Tahta ucu bağlantısı (alt sıra${dL?', dış L profil dahil':''})`,`${fmt(Rk,2)} kN`,`${nv} × Ø5 vida = ${fmt(nv*0.6,1)} kN`,Rk/(nv*0.6),dL?'Dikmeye 2 vida + dış L profile 2 vida':'Dikmeye 2 vida; dış L profil yok');if(gerek>nv)O.push(`Alt sıra tahta uçlarında ${gerek} vida gerekiyor; ${dL?'L profil vidalarını kanat başına 3’e çıkarın':'dış köşelere galvaniz L profil ekleyin'}.`);
   if(postEtkin&&k.dikme>0){const d=k.d/100,sp=araVar?Math.max(...ke.filter(e=>e.ara>0).map(e=>e.s)):s,w0=1.35*Z.K0*Z.g*Hs*sp,wq=1.5*Z.K0*Z.q*sp,gg=k.gergi>0;
    const M=gg?w0*Hs*Hs/(9*Math.sqrt(3))+wq*Hs*Hs/8:w0*Hs*Hs/6+wq*Hs*Hs/2,sg=M/(d*d*d/6)/1000;
    ek(`Dikme ${fmt(k.d)}×${fmt(k.d)} cm — eğilme`,`${fmt(sg,1)} MPa`,'9,2 MPa',sg/9.2,gg?'Üstten gergiyle tutulan dikme':'Toprağa gömülü, gergisiz (konsol) dikme');
@@ -698,6 +700,7 @@ function omur(G,st){const g=G.g,k=G.k,em=st.toprak.emp||'UC4',L=[],ek=(p,a,n)=>L
  ek(`Duvar (${MALZ[k.m].ad})`,b,k.m==='ahsap'?`${EMP_AD[em]} emprenye${g.icKaplama==='evet'?'; iç yüz kaplaması +1–3 yıl':'; iç yüze jeotekstil/naylon kaplama ömrü uzatır'}`:k.m==='galvaniz'?'Asidik toprak ve gübre tuzları çinko kaplamayı hızlandırarak aşındırır; iç kaplama önerilir':k.m==='kompozit'?'Çürümez; güneşte solma ve uzun sürede esneme (sünme) görülür':'Derzlerde donma–çözülme bakımı');
  if(k.m==='ahsap'&&k.gm>0)ek('Dikmelerin gömülü kısmı',[Math.max(2,b[0]-3),Math.max(4,b[1]-4)],'İlk çürüyen yer; bitüm kaplama ve çakıl yatak ömrü uzatır');
  if(k.m==='ahsap'||k.m==='kompozit')ek('Köşebent ve vidalar (sıcak daldırma galvaniz)',k.m==='ahsap'&&em!=='yok'?[8,15]:[10,20],k.m==='ahsap'&&em!=='yok'?'Bakırlı emprenye galvanizi aşındırır; vidalarda paslanmaz (A2) kullanılırsa 25+ yıl':'Elektro galvaniz (ince kaplama) 2–5 yılda paslanır');
+ if(disLVar(k,g))ek('Dış köşe L profili (sıcak daldırma galvaniz)',k.m==='ahsap'&&em!=='yok'?[12,20]:[15,25],'EPDM bant ile ahşaptan ayrılırsa bakırlı emprenyeden etkilenmez');
  if(k.gergi>0)ek('Gergiler (galvaniz)',[10,20],'');
  if(g.dip==='tel')ek('Taban kemirgen teli (galvaniz)',[8,15],'Toprak içinde, nemli ortam');
  if(g.icKaplama==='evet')ek('İç jeotekstil',[10,15],'Güneş görmediği sürece');
@@ -1016,6 +1019,7 @@ function svgKose(G){
   [[t+d*0.3,-f*0.8,t+d*0.3,t+d*0.6],[t+d*0.7,-f*0.8,t+d*0.7,t+d*0.6],[-f*0.8,t+d*0.3,t+d*0.6,t+d*0.3],[-f*0.8,t+d*0.7,t+d*0.6,t+d*0.7]].forEach(v=>s+=`<line x1="${v[0]}" y1="${v[1]}" x2="${v[2]}" y2="${v[3]}" stroke="#b02a1a" stroke-width="${sw*3}"/>`);
   s+=`<path d="M${t+d} ${t+d+2} h${f*1.6} M${t+d+2} ${t+d} v${f*1.6}" stroke="#555" stroke-width="${sw*4}" fill="none"/>`;
   et.push([Z*0.75,t/2,'Uzun yan tahta (tam boy)'],[t/2,Z*0.75,'Kısa yan tahta (iç ölçü)'],[t+d/2,t+d/2,`Dikme ${fmt(k.d)}×${fmt(k.d)} cm`],[t+d*0.7,t*0.5,'Her tahta ucuna 2 vida'],[t+d+f,t+d+f,'İç köşebent']);
+  if(disLVar(k,G.g)){const a=10,lt=Math.max(0.6,f*0.22);s+=`<path d="M${-lt} ${a} V${-lt} H${a}" fill="none" stroke="#6d767d" stroke-width="${lt*1.6}" stroke-linejoin="miter"/>`;[[a*0.6,-lt*2.6,a*0.6,t*0.8],[-lt*2.6,a*0.6,t*0.8,a*0.6]].forEach(v=>s+=`<line x1="${v[0]}" y1="${v[1]}" x2="${v[2]}" y2="${v[3]}" stroke="#1f6fb2" stroke-width="${sw*3}"/>`);et.push([a*0.85,-lt,'Dış L profil 100×100×3'],[a*0.6,-lt,'Profile 2 vida / sıra'])}
  }else if(m==='galvaniz'){
   s+=`<rect x="${t}" y="${t}" width="${Z-t}" height="${Z-t}" fill="#8d6a48" fill-opacity="0.35"/><path d="M${Z} 0 H0 V${Z}" fill="none" stroke="${mz.koyu}" stroke-width="${f*0.35}"/>`;
   s+=`<path d="M${f*0.3} ${f*5} V${f*0.3} H${f*5}" fill="none" stroke="#333" stroke-width="${f*0.6}"/>`;
@@ -1044,6 +1048,7 @@ function montaj(G,st){const k=G.k,g=G.g,A=[],T=st.toprak,yeni=g.durum==='yeni',u
   if(k.araTop>0)A.push(`Kenarlara en fazla ${fmt(k.span,0)} cm’de bir ara dikme koyun (kasa başı ${k.araTop} adet).`);
   if(k.gergi>0)A.push(`Kasanın yarı yüksekliğinde (${fmt(k.Hr/2,0)} cm) karşılıklı ara dikmeleri ${k.gergi} gergi ile bağlayın${k.sekil!=='I'?' (taban ve kollarda ayrı ayrı)':''}.`);
   A.push('Köşelere iç köşebent takın.');
+  if(disLVar(k,g))A.push(`Her köşenin dış yüzüne <b>100×100×3 mm galvaniz L profil</b> (${fmt(Math.max(10,k.Hr-2))} cm boy) yerleştirin; altına EPDM bant koyun, her tahta sırasına her kanattan 2 adet 5×50 vida atın${k.icKose?'. Kollar arasındaki iç köşelerde profil köşenin içine oturur':''}. Saha deneyimi: dış levha olmadan tahta uçları zamanla açılıyor.`);
  }else if(k.m==='galvaniz'){
   A.push('Panelleri ve köşe profillerini yere serin; koruyucu filmi sökün.');
   A.push(`Köşe profillerine (kasa başı ${k.nV}) panelleri M6 cıvatalarla bağlayın (her birleşimde ${Math.ceil(k.Hr/15)+1} cıvata; somun içeride)${k.icKose?`. İç köşelerde profil kasanın içine gelir`:''}.`);
@@ -1208,12 +1213,12 @@ function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const 
  return`<div class="grup ${g.durum==='mevcut'?'mevcut':''}"><div class="grup-bas"><span class="rozet">${harf(i)}</span><input data-k="${p}ad" type="text" value="${esc(g.ad)}" style="flex:1"><button class="btn kucuk" data-kopya="${i}" aria-label="Grubu kopyala">⧉</button><button class="btn kucuk kirmizi" data-sil="${i}" aria-label="Grubu sil">✕</button></div>
  ${sekilHTML(g,i)}<div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)+fld(p+'aci','Dönüş açısı (°)',g.aci||0,{i:'saat yönünde; planda ⟳ ile de çevrilir'})
  +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi)
- +fld(p+'malzeme','Malzeme',g.malzeme,{sec:Object.entries(MALZ).map(([k,v])=>[k,v.ad])})+(gal?'':fld(p+'t',bet?'Duvar kalınlığı (cm)':'Tahta kalınlığı (cm)',g.t))+(gal?'':fld(p+'tahtaH',bet?'Sıra yüksekliği (cm)':'Tahta yüksekliği (cm)',g.tahtaH))+(g.malzeme==='ahsap'||g.malzeme==='kompozit'?fld(p+'takviye','Galvaniz bağlantı takviyesi',g.takviye||'oneri',{sec:[['oneri','Ajan önersin'],['hafif','Hafif'],['standart','Standart'],['guclu','Güçlü'],['yok','Yok']]}):'')+(bet?'':fld(p+'dikme','Dikme kesiti (cm)',g.dikme,{i:'kare'})+fld(p+'gomme','Dikme gömme (cm)',g.gomme,{i:'0 = zemine oturur'}))
+ +fld(p+'malzeme','Malzeme',g.malzeme,{sec:Object.entries(MALZ).map(([k,v])=>[k,v.ad])})+(gal?'':fld(p+'t',bet?'Duvar kalınlığı (cm)':'Tahta kalınlığı (cm)',g.t))+(gal?'':fld(p+'tahtaH',bet?'Sıra yüksekliği (cm)':'Tahta yüksekliği (cm)',g.tahtaH))+(g.malzeme==='ahsap'||g.malzeme==='kompozit'?fld(p+'takviye','Galvaniz bağlantı takviyesi',g.takviye||'oneri',{sec:[['oneri','Ajan önersin'],['hafif','Hafif'],['standart','Standart'],['guclu','Güçlü'],['yok','Yok']]})+fld(p+'disL','Dış köşe L levhası',g.disL||'evet',{sec:[['evet','Var — 100×100×3 mm galvaniz'],['hayir','Yok']]}):'')+(bet?'':fld(p+'dikme','Dikme kesiti (cm)',g.dikme,{i:'kare'})+fld(p+'gomme','Dikme gömme (cm)',g.gomme,{i:'0 = zemine oturur'}))
   +fld(p+'mk','Malzeme kasası',g.mk,{sec:[['yok','Yok'],['ic','Kasa içinde (bölmeli)'],['dis','Kasaya ek (dışta)']]})+(g.mk&&g.mk!=='yok'?fld(p+'mkYer','Malzeme kasası yeri',g.mkYer||g.mkUc||'bas',{sec:[...(g.sekil==='U'||(g.sekil==='L'&&g.kolUc!=='son')?[['kolBas','Ön uç tarafındaki kolun ucu']]:[]),...(g.sekil==='U'||(g.sekil==='L'&&g.kolUc==='son')?[['kolSon','Arka uç tarafındaki kolun ucu']]:[]),['bas','Ön uç (kısa kenar)'],['son','Arka uç (kısa kenar)'],['on','Ön uzun kenar'],...(g.sekil&&g.sekil!=='I'?[]:[['arka','Arka uzun kenar']]),...(g.mk==='ic'?[['orta','Arada (enine)']]:[])]})+(g.mk==='dis'?fld(p+'mkH','MK yüksekliği (cm)',g.mkH,{i:'boş = kasa ile aynı'}):''):'')
  +fld(p+'dip','Taban',g.dip,{sec:[['tel','Kemirgen teli'],['jeotekstil','Jeotekstil'],['yok','Yok']]})+(bet?'':fld(p+'icKaplama','İç jeotekstil',g.icKaplama,{sec:EH}))+fld(p+'sulama','Damla sulama',g.sulama,{sec:EH})+(g.sulama==='evet'?fld(p+'hatSayisi','Damla hattı sayısı',g.hatSayisi,{i:g.sekil==='U'?'her kol başına, en az 2; boş = otomatik':'giriş başına; boş = otomatik'})+fld(p+'vanaD','Vana bölmesi derinliği (cm)',g.vanaD,{i:'malzeme kasası yoksa'})+((!g.sekil||g.sekil==='I')?fld(p+'girisUc','Sulama girişi',g.girisUc||'bas',{sec:[['bas','Ön uç'],['son','Arka uç']]}):''):'')+fld(p+'toprak','Toprak',g.toprak,{sec:[['tam','Tam dolum'],['ust','Üst katman yenileme'],['yok','Hesaplama']]})}</div></div>`}).join('');sekilleriCiz()}
 function renderBilesen(){const b=st.toprak.bil;$('#f-bilesen').innerHTML=b.map((x,i)=>{const p=`toprak.bil.${i}.`;return`<div class="grup" style="border-left-color:#8d6a48"><div class="grup-bas"><input data-k="${p}ad" type="text" value="${esc(x.ad)}" style="flex:1"><button class="btn kucuk kirmizi" data-bsil="${i}" aria-label="Bileşeni sil">✕</button></div><div class="alanlar">${fld(p+'tur','Tür',x.tur,{sec:TURLER})+fld(p+'oran','Oran (%)',x.oran)+fld(p+'paket','Paket hacmi (L)',x.paket)+fld(p+'pAd','Paket adı',x.pAd,{tip:'text'})+fld(p+'yog','Yoğunluk (kg/L)',x.yog,{i:'kuru, gevşek'})}</div></div>`}).join('')}
 function setPath(o,p,v){const a=p.split('.');let x=o;for(let i=0;i<a.length-1;i++)x=x[a[i]];x[a[a.length-1]]=v}
-const SAYI_DEGIL=/\.(damlaTip|reg|emp|ad|tur|pAd|durum|yon|malzeme|dip|icKaplama|sulama|toprak|sekil|kolUc|mk|mkUc|mkYer|takviye|girisUc)$|^meta\./;
+const SAYI_DEGIL=/\.(disL|damlaTip|reg|emp|ad|tur|pAd|durum|yon|malzeme|dip|icKaplama|sulama|toprak|sekil|kolUc|mk|mkUc|mkYer|takviye|girisUc)$|^meta\./;
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.k;if(!k)return;let v=el.value;
  if((!SAYI_DEGIL.test(k)||k==='sulama.anaCap')&&!(v===''&&/^gruplar\.|^toprak\.gamma$|^sulama\.basincMin$/.test(k))){v=parseFloat(String(v).replace(',','.'));if(!Number.isFinite(v))return}
  setPath(st,k,v);
@@ -1418,6 +1423,7 @@ function sahne3D(){const{THREE,root,kutuG,silG,M,pivot}=U3;
    const kn=k.m==='galvaniz'?1:Math.max(1,k.kurs);
    k.duvar.forEach((w,wi)=>duv(w,Hr,kn,mats,wi));
    if(k.m!=='beton'&&!mev){const d=Math.max(2,k.d);k.dikmeYer.forEach(p=>kR(R(p[0]-d/2,p[0]+d/2,p[1]-d/2,p[1]+d/2),0,Hr,M.dikme))}
+   if(!mev&&disLVar(k,g)){const a=10,th=0.6,n=k.P.length;k.P.forEach((p,i)=>{[[k.kenar[i],1],[k.kenar[(i-1+n)%n],-1]].forEach(([e,yon])=>{const ux=e.ny*yon,uy=-e.nx*yon,ox=-e.nx*th,oy=-e.ny*th,xs=[p[0],p[0]+ux*a,p[0]+ox,p[0]+ux*a+ox],ys=[p[1],p[1]+uy*a,p[1]+oy,p[1]+uy*a+oy];kR(R(Math.min(...xs),Math.max(...xs),Math.min(...ys),Math.max(...ys)),0.01,Hr-0.02,M.galvaniz[0])})})}
    k.icler.forEach(r=>kR(R(r.ua,r.ub,r.va,r.vb),0,soilH,M.toprak,false));
    if(k.mk!=='yok'){const ms=M[k.m]||M.ahsap,Hb=k.mk==='dis'?k.Hb/100:Hr,knB=k.m==='galvaniz'?1:Math.max(1,k.mk==='dis'?k.kursB:k.kurs);
     mkDuvar(k).forEach((w,wi)=>duv(w,Hb,knB,ms,wi));kR(R(k.mkIc.ua,k.mkIc.ub,k.mkIc.va,k.mkIc.vb),0.05,0.018,M.kontra);kR(R(k.kutu.ua,k.kutu.ub,k.kutu.va,k.kutu.vb),Hb,0.018,M.kontra)}
@@ -1461,6 +1467,7 @@ $('#btnYakala').onclick=()=>{if(!U3)return;const{renderer,scene,camera}=U3;rende
 /* ---------- Malzeme görselleri ---------- */
 const GZ='fill="#c3ccd2" stroke="#5f6870" stroke-width="2" stroke-linejoin="round"',AH='fill="#d8ad72" stroke="#7a5326" stroke-width="2" stroke-linejoin="round"',SY='fill="#2a2a2a" stroke="#111" stroke-width="2"',DL=(x,y,r=4)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="#5f6870" stroke-width="1.5"/>`;
 const MALZ_GOR={
+ lprofil:{ad:'Galvaniz dış köşe L profili (geniş)',s:`<path d="M60 18 L60 122 L100 108 L100 4Z" ${GZ}/><path d="M100 4 L100 108 L170 122 L170 18Z" fill="#d5dce1" stroke="#5f6870" stroke-width="2" stroke-linejoin="round"/>${[30,60,90].map(y=>DL(80,y)+DL(135,y+8)).join('')}<path d="M100 4 L100 108" stroke="#5f6870" stroke-width="3"/>`,a:'Kasa köşesinin dış yüzüne, tam boy konan geniş (100×100 mm, 3 mm) sıcak daldırma galvaniz köşe profili. Tahta uçlarının zamanla açılmasını ve köşenin ayrılmasını önler.',i:'Ahşapla arasına EPDM bant koyun; her tahta sırasına her kanattan 2 vida atın. Kesik uçlara soğuk galvaniz sprey sürün.'},
  kosebent:{ad:'Galvaniz L köşebent',s:`<path d="M55 28 L120 48 L120 112 L55 92Z" ${GZ}/><path d="M55 92 L120 112 L172 92 L107 72Z" fill="#d5dce1" stroke="#5f6870" stroke-width="2" stroke-linejoin="round"/>${DL(75,50)}${DL(100,58)}${DL(75,75)}${DL(100,83)}${DL(115,85)}${DL(140,93)}${DL(130,80)}<path d="M120 112 L120 48" stroke="#5f6870" stroke-width="3"/>`,a:'İki tahtanın köşede birleştiği yeri içten sabitler. Galvaniz kaplama paslanmayı geciktirir.',i:'Her kola en az 2 vida. Toprağa değecek yüzleri bitümlü boyayla ek koruma alabilir.'},
  ekplaka:{ad:'Galvaniz düz ek plakası',s:`<path d="M30 60 L170 40 L175 78 L35 98Z" ${GZ}/>${[0,1,2].map(i=>DL(55+i*20,73-i*3)+DL(115+i*20,64-i*3)).join('')}<path d="M100 52 L103 88" stroke="#5f6870" stroke-dasharray="4 3"/>`,a:'Boyu 400 cm’yi aşan tahtaların ek yerini iki yüzden bağlar.',i:'Ek yeri bir ara dikmenin üstüne gelmeli; plakanın iki yanına eşit vida.'},
  kosekapak:{ad:'Galvaniz dış köşe kapağı',s:`<path d="M100 20 L160 45 L100 70 L40 45Z" fill="#dfe5e9" stroke="#5f6870" stroke-width="2"/><path d="M40 45 L100 70 L100 125 L40 100Z" ${GZ}/><path d="M100 70 L160 45 L160 100 L100 125Z" fill="#aeb8bf" stroke="#5f6870" stroke-width="2"/>${DL(70,80,3.5)}${DL(130,80,3.5)}${DL(100,45,3.5)}`,a:'Kasanın üst dış köşesine geçer; tahta uçlarının açılmasını ve kırılmasını önler.',i:'Üst sıranın köşesine oturtup 3 yüzden vidalanır.'},
@@ -1507,7 +1514,7 @@ const MALZ_GOR={
  profil:{ad:'Galvaniz köşe / ara profili',s:`<path d="M70 10 L100 20 L100 130 L70 120Z" ${GZ}/><path d="M100 20 L130 10 L130 120 L100 130Z" fill="#aeb8bf" stroke="#5f6870" stroke-width="2"/>${[0,1,2,3,4,5].map(i=>DL(85,30+i*16,3)+DL(115,30+i*16,3)).join('')}`,a:'Sac panellerin köşede ve arada birleştiği galvaniz L profil.',i:'Toprağa giren kısmı ayrıca boyanabilir.'},
  genel:{ad:'Malzeme',s:`<path d="M50 50 L100 30 L150 50 L100 70Z" fill="#e6dcc8" stroke="#8a7a5a" stroke-width="2"/><path d="M50 50 L100 70 L100 120 L50 100Z" fill="#d4c6aa" stroke="#8a7a5a" stroke-width="2"/><path d="M100 70 L150 50 L150 100 L100 120Z" fill="#c2b38f" stroke="#8a7a5a" stroke-width="2"/>`,a:'',i:''}
 };
-const MALZ_KURAL=[[/işçili|kurulumu|hazırlanması, taşınması/i,'genel'],[/vida/i,'vida'],[/köşeben/i,'kosebent'],[/ek plaka/i,'ekplaka'],[/köşe kapağı/i,'kosekapak'],[/T plaka/i,'tplaka'],[/(^|[\s·])lama\b/i,'lama'],[/cıvata/i,'civata'],[/vida/i,'vida'],[/menteşe/i,'mentese'],[/tutamağı|tutamak/i,'tutamak'],[/zincir/i,'zincir'],[/kilit/i,'kilit'],[/takoz/i,'takoz'],[/gergi/i,'gergi'],[/çıta/i,'takoz'],[/kapak|kontrplak/i,'kontrplak'],[/kenar koruma/i,'kenarprofil'],[/kemirgen/i,'tel'],[/jeotekstil/i,'jeotekstil'],[/briket/i,'briket'],[/harç|beton/i,'harc'],[/oluklu sac|sac panel|panel \(oluklu|yan panel|ön panel|bölme paneli|duvar paneli/i,'sac'],[/profil/i,'profil'],[/dikme/i,'dikme'],[/tahta/i,'tahta'],
+const MALZ_KURAL=[[/işçili|kurulumu|hazırlanması, taşınması/i,'genel'],[/vida/i,'vida'],[/L profil/i,'lprofil'],[/EPDM/i,'genel'],[/köşeben/i,'kosebent'],[/ek plaka/i,'ekplaka'],[/köşe kapağı/i,'kosekapak'],[/T plaka/i,'tplaka'],[/(^|[\s·])lama\b/i,'lama'],[/cıvata/i,'civata'],[/vida/i,'vida'],[/menteşe/i,'mentese'],[/tutamağı|tutamak/i,'tutamak'],[/zincir/i,'zincir'],[/kilit/i,'kilit'],[/takoz/i,'takoz'],[/gergi/i,'gergi'],[/çıta/i,'takoz'],[/kapak|kontrplak/i,'kontrplak'],[/kenar koruma/i,'kenarprofil'],[/kemirgen/i,'tel'],[/jeotekstil/i,'jeotekstil'],[/briket/i,'briket'],[/harç|beton/i,'harc'],[/oluklu sac|sac panel|panel \(oluklu|yan panel|ön panel|bölme paneli|duvar paneli/i,'sac'],[/profil/i,'profil'],[/dikme/i,'dikme'],[/tahta/i,'tahta'],
  [/PE ana boru/i,'peboru'],[/damlalı boru/i,'damlali'],[/kör boru/i,'korboru'],[/başlangıç conta/i,'conta'],[/mini vana/i,'minivana'],[/küresel vana/i,'kuresel'],[/ T$|Ø\d+ T\b/i,'tee'],[/dirsek/i,'dirsek'],[/tapa/i,'tapa'],[/filtre/i,'filtre'],[/basınç düşürücü/i,'regulator'],[/adaptör/i,'adaptor'],[/kazığı|kazık/i,'kazik'],
  [/solucan/i,'solucan'],[/torf/i,'torf'],[/kompost/i,'kompost'],[/perlit/i,'perlit'],[/pomza/i,'pomza'],[/gübre/i,'gubre'],[/kum/i,'kum'],[/toprak|toprağ/i,'toprak']];
 function malzAnahtar(ad){for(const[r,k]of MALZ_KURAL)if(r.test(ad))return k;return'genel'}

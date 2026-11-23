@@ -80,6 +80,12 @@ async def hesap_tutarliligi(pg):
     assert not r, '; '.join(r)
 
 @test
+async def dis_kose_l_profil(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.gruplar=[yeniGrup(0,{L:600,W:200,H:60,sekil:'U',kolEn:150,kolBoy:500}),yeniGrup(1,{L:300,W:120,H:45,disL:'hayir',x:9}),yeniGrup(2,{L:300,W:120,H:45,malzeme:'galvaniz',t:0.08,tahtaH:0,dikme:4,x:14})];
+      const H=hesapla(p),n=G=>G.parca.filter(x=>/L profili/.test(x.kalem)).reduce((s,x)=>s+x.adet,0);return[n(H.gr[0]),n(H.gr[1]),n(H.gr[2]),H.gr[0].k.nV,malzAnahtar('Galvaniz dış köşe L profili (geniş) 100×100×3 mm')]}""")
+    assert r[0] == r[3] == 8 and r[1] == 0 and r[2] == 0 and r[4] == 'lprofil', r
+
+@test
 async def kasa_dayanimi(pg):
     r = await pg.evaluate("""()=>{const d=o=>{const p=bosProje();p.gruplar=[yeniGrup(0,o)];const H=hesapla(p);return H.gr[0].day};
       return{ahsap:d({L:300,W:120,H:45}).durum,beton60:d({L:300,W:120,H:60,malzeme:'beton',t:19,tahtaH:20,dikme:0,gomme:0}).durum,
@@ -154,7 +160,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
