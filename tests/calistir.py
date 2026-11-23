@@ -128,6 +128,16 @@ async def hazirlik_klasoru(pg):
         await pg.click(f'[data-on="{k}"]'); await pg.wait_for_timeout(150)
 
 @test
+async def sulama_detayi(pg):
+    await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
+    r = await pg.evaluate("""()=>{const G=H.gr.find(x=>x.d);const s=svgSulamaDetay(G,st);const d=new DOMParser().parseFromString(s,'image/svg+xml');
+      const L=sulamaListe(st,H).map(x=>x[0]||x.ad||'').join('|');return{hata:!!d.querySelector('parsererror'),n:(s.match(/Duvar geçişi|Bölme geçişi|mini vana|Başlangıç conta/g)||[]).length,
+      klasor:ihaleCizimleri().some(x=>/sulama_detayi/.test(x[0])),liste:/Duvar geçiş contası/.test(JSON.stringify(sulamaListe(st,H)))}}""")
+    assert not r['hata'] and r['n'] >= 4 and r['klasor'] and r['liste'], r
+    await pg.evaluate("()=>{cizimMod='suldetay';cizimCiz(true)}")
+    assert await pg.locator('#cizimKutu svg, .cizim svg').count() > 0
+
+@test
 async def esitleme(pg):
     # İki cihaz: sahte GitHub API
     GIST = {}
@@ -160,7 +170,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()

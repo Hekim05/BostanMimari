@@ -225,7 +225,7 @@ dialog .ic{padding:16px}
 <section id="t-cizim" class="tab">
  <h2>Teknik çizim</h2>
  <div class="seg" id="segCizim">
-  <button data-v="plan" class="on">Vaziyet planı</button><button data-v="kesit">Kasa kesiti</button><button data-v="gorunus">Yan görünüş</button><button data-v="kose">Köşe detayı</button><button data-v="mk">Malzeme kasası</button><button data-v="sulama">Sulama şeması</button>
+  <button data-v="plan" class="on">Vaziyet planı</button><button data-v="kesit">Kasa kesiti</button><button data-v="gorunus">Yan görünüş</button><button data-v="kose">Köşe detayı</button><button data-v="mk">Malzeme kasası</button><button data-v="sulama">Sulama şeması</button><button data-v="suldetay">Sulama detayı</button>
  </div>
  <div class="satir" style="margin-bottom:10px"><select id="selGrupCizim" style="flex:1;max-width:340px"></select>
   <button class="btn kucuk" data-zoom="-1" aria-label="Uzaklaştır">−</button><button class="btn kucuk" data-zoom="1" aria-label="Yakınlaştır">＋</button></div>
@@ -322,7 +322,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-3';
+const APP_VERSION = '2026.11.23-4';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -757,6 +757,66 @@ function muhHTML(st,H){const Z=zeminPar(st,H),hid=H.hid,S=st.sulama;let h='';con
   <table><tr><td>Debi farkı (en düşük basınçta)</td><td class="s"><b>%${fmt(t.vary*100,1)}</b> ${t.vary>0.2?durumY(2):t.vary>0.1?durumY(0.9):durumY(0.5)}</td></tr><tr><td>En yüksek hat basıncı (şebeke ${fmt(hid.Pmax0,1)} bar)</td><td class="s">${fmt(u.Pmax,2)} bar ${u.Pmax>hid.ustSinir?durumY(2):durumY(0.5)}</td></tr><tr><td>Ana hatta su hızı</td><td class="s">${fmt(t.v,2)} m/s ${t.v>1.5?durumY(0.9):durumY(0.5)}</td></tr><tr><td>Gerçek bölge debisi</td><td class="s">${fmt(t.Qgercek,0)} L/saat</td></tr></table>
   <p class="not">Hesap: Darcy–Weisbach (Blasius), çok çıkışlı hat için Christiansen katsayısı, damlatıcı başına 0,1 m eşdeğer boy. Şebeke basıncını musluğa takılan manometreyle, su açıkken ölçün; ASKİ bölgelerinde gün içinde basınç düşebildiği için yaz öğleden sonrası değerini “en düşük basınç” olarak girin.</p>`}
  return h}
+/* ---------- Sulama bağlantı detayı (kesit + vana bölmesi planı) ---------- */
+function svgSulamaDetay(G,st){const k=G.k,d=G.d,S=st.sulama;if(!d||!d.besleme.length)return'';
+ const b0=d.besleme[0],mkTip=b0.tip==='mk',n=Math.max(1,b0.vana.length),mz=MALZ[k.m],t=Math.max(k.t,k.m==='galvaniz'?0.6:k.t),Hr=k.Hr,bos=Math.max(0,n0(st.toprak.bos)),soil=Math.max(5,Hr-bos);
+ const ic=mkTip?k.mkIc:(k.vanaKutu[0]||{}).ic||k.mkIc,w1=ic?ic.ub-ic.ua:30,w2=ic?ic.vb-ic.va:60,Dc=Math.max(15,Math.min(w1,w2)),Wc=Math.max(20,Math.max(w1,w2));
+ const ana=n0(S.anaCap,20),gom=30,da=Math.max(5,n0(S.damlaAr,30)),ke=Math.max(0,n0(S.kenar,15));
+ const xW=45,xC=xW+t,xP=xC+Dc,xB=xP+t,xE=xB+80,f=Math.max(2.4,(xE+20)/52),sw=f*0.07,ym=-Math.max(14,Math.min(soil-8,Hr*0.45)),yL=-(soil-0.8),yIn=-12;
+ const y2=gom+22+f*3,yP0=y2+f*2.5,PH=Wc+2*t,top=-Hr-6-f*2.5,yLej=yP0+PH+f*3,H=yLej+16*f*1.55+f*2-top,W=xE+3+f*7;
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-f} ${top} ${W+f} ${H}" font-family="DejaVu Sans,Arial,sans-serif" font-size="${f}"><rect x="${-f}" y="${top}" width="${W+f}" height="${H}" fill="#fff"/>
+ <defs><pattern id="sdz" width="${f*1.2}" height="${f*1.2}" patternUnits="userSpaceOnUse"><path d="M0 ${f*1.2} L${f*1.2} 0" stroke="#9a8d7a" stroke-width="${sw}"/></pattern></defs>`;
+ const ws=`fill="${mz.renk}" stroke="${mz.koyu}" stroke-width="${sw*2}"`,boru=(pts,c='#222',w=1.6)=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"/>`,conta=(x,y,dik)=>`<rect x="${dik?x-1.4:x-0.9}" y="${dik?y-0.9:y-1.4}" width="${dik?2.8:1.8}" height="${dik?1.8:2.8}" fill="#111"/>`,vana=(x,y)=>`<rect x="${x-2.2}" y="${y-1.6}" width="4.4" height="3.2" rx="0.6" fill="#e07b28" stroke="#8a4510" stroke-width="${sw*2}"/><rect x="${x-0.5}" y="${y-3.6}" width="1" height="2" fill="#8a4510"/>`;
+ const no=[];const N=(x,y,yazi,dx=-1.8,dy=-1.8)=>{no.push([x,y,yazi,dx,dy])};
+ // --- KESİT ---
+ s+=`<text x="0" y="${-Hr-6-f*0.9}" font-weight="700" font-size="${f*1.05}">A — Kesit: yoldan vana bölmesine ve kasaya</text>`;
+ s+=`<rect x="0" y="0" width="${xE}" height="${gom+16}" fill="url(#sdz)"/><line x1="0" y1="0" x2="${xE}" y2="0" stroke="#5b4a35" stroke-width="${sw*3}"/>`;
+ s+=`<rect x="14" y="${gom-8}" width="22" height="16" fill="#efe6cf" stroke="#b9a77f" stroke-width="${sw}" stroke-dasharray="${f*0.5} ${f*0.3}"/>`;
+ s+=`<rect x="${xB}" y="${-soil}" width="${xE-xB}" height="${soil}" fill="#6b4a32" fill-opacity="0.55"/><path d="M${xE} ${-soil-2} l-2 ${soil*0.35} l3 ${soil*0.3} l-2 ${soil*0.4}" fill="none" stroke="#555" stroke-width="${sw*2}"/>`;
+ s+=`<rect x="${xW}" y="${-Hr}" width="${t}" height="${Hr}" ${ws}/><rect x="${xP}" y="${-Hr}" width="${t}" height="${Hr}" ${ws}/>`;
+ s+=`<rect x="${xC+2}" y="-5" width="5" height="5" fill="#b9874f" stroke="#4a2f14" stroke-width="${sw}"/><rect x="${xP-7}" y="-5" width="5" height="5" fill="#b9874f" stroke="#4a2f14" stroke-width="${sw}"/><rect x="${xC}" y="-6.8" width="${Dc}" height="1.8" fill="#e3c99a" stroke="#8a6a3a" stroke-width="${sw}"/>`;
+ for(let x=xC+4;x<xP-2;x+=6)s+=`<circle cx="${x}" cy="-5.9" r="0.45" fill="#fff"/>`;
+ s+=`<rect x="${xW}" y="${-Hr-1.8}" width="${xB-xW}" height="1.8" fill="#e3c99a" stroke="#8a6a3a" stroke-width="${sw*1.5}"/><circle cx="${xB-1}" cy="${-Hr-0.9}" r="0.9" fill="#555"/>`;
+ // ana hat ve yükseliş
+ s+=`<circle cx="25" cy="${gom}" r="${ana/20+0.6}" fill="#123f75"/>`;
+ s+=`<rect x="23.2" y="-10" width="3.6" height="18" fill="#9aa3a8" fill-opacity="0.45" stroke="#6d767d" stroke-width="${sw}"/>`;
+ s+=boru([[25,gom-ana/20],[25,yIn],[xC+5,yIn],[xC+5,ym]]);s+=conta(xW+t/2,yIn,false);s+=`<circle cx="25" cy="${gom-ana/20-0.4}" r="0.9" fill="#111"/>`;
+ s+=`<circle cx="${xC+5}" cy="${ym}" r="1.6" fill="#fff" stroke="#222" stroke-width="${sw*3}"/>`;
+ const xv=(xC+xP)/2+1.5;s+=boru([[xC+6.6,ym],[xP-4,ym],[xP-4,yL],[xE-2,yL]]);s+=vana(xv,ym);s+=conta(xP+t/2,yL,false);
+ for(let x=xB+ke;x<xE-3;x+=da)s+=`<circle cx="${x}" cy="${yL}" r="0.75" fill="#1f6fb2"/>`;
+ s+=`<path d="M${xB+3} ${yL-1.6} q${(xE-xB)/4} -1.5 ${(xE-xB)/2} 0" fill="none" stroke="#3b6e2a" stroke-width="${sw*2}" stroke-dasharray="${f*0.4} ${f*0.25}"/>`;
+ N(25,gom,`Ana hat Ø${ana} PE — yolda ${gom} cm derinde, kum yatakta`,-2.6,1.4);N(25,gom-ana/20-0.4,`Başlangıç conta + Ø16 çıkış (ana borudan)`,2.6,-1.2);N(25,-4,'Ø16 kör boru yükselişi; zemin çıkışında koruma kılıfı',-2.6,-1);N(xW+t/2,yIn,'Duvar geçişi: Ø20 delik + lastik conta',-2.2,-1.6);N(xC+5,ym,`Ø16 dağıtım borusu (${n} çıkış, T ile)`,-1.4,-2.2);N(xv,ym-1.6,`Ø16 mini vana (her hatta 1, toprağa değmez)`,0.6,-2.4);N(xP+t/2,yL,'Bölme geçişi: lastik conta, toprak yüzeyinde',1.4,1.9);N(xB+ke,yL,`Damlalı boru Ø16 · ${fmt(da)} cm · ${fmt(n0(S.damlaDebi))} L/sa`,0.8,2.6);N(xB+(xE-xB)/2,yL-2.4,'Malç (damlalı boruyu güneşten korur)',0,-2);N(xC+5,-5.9,'Delikli taban (kontrplak) + takoz: su birikmez',1.6,2.2);N(xB-1,-Hr-0.9,'Menteşeli kapak',2,-1.2);
+ // ölçüler
+ const olc=(x1,y1,x2,y2,yazi,yan)=>{const dik=x1===x2;s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#333" stroke-width="${sw*1.5}"/>`+[[x1,y1],[x2,y2]].map(p=>`<line x1="${dik?p[0]-1.2:p[0]}" y1="${dik?p[1]:p[1]-1.2}" x2="${dik?p[0]+1.2:p[0]}" y2="${dik?p[1]:p[1]+1.2}" stroke="#333" stroke-width="${sw*2}"/>`).join('')+`<text x="${dik?x1+(yan||-1)*1.4:(x1+x2)/2}" y="${dik?(y1+y2)/2:y1-1.2}" text-anchor="${dik?((yan||-1)<0?'end':'start'):'middle'}" font-size="${f*0.85}">${yazi}</text>`};
+ olc(xW-4,-Hr,xW-4,0,`${fmt(Hr)} cm`);olc(xC,-Hr-6,xP,-Hr-6,`${fmt(Dc)} cm`);olc(xE+3,-soil,xE+3,0,`toprak ${fmt(soil)}`,1);olc(8,0,8,gom,`${gom}`);
+ // --- PLAN (vana bölmesi, üstten, kapak açık) ---
+ s+=`<text x="0" y="${y2+f*0.6}" font-weight="700" font-size="${f*1.05}">B — Plan: vana bölmesi${mkTip?' (malzeme kasası içinde)':''}, kapak açık</text>`;
+ const py=yP0,iy0=py+t,iy1=py+t+Wc;
+ s+=`<rect x="${xW}" y="${py}" width="${xB-xW}" height="${PH}" ${ws}/><rect x="${xC}" y="${iy0}" width="${Dc}" height="${Wc}" fill="#f4efe6"/><rect x="${xB}" y="${iy0}" width="${xE-xB}" height="${Wc}" fill="#6b4a32" fill-opacity="0.45"/>`;
+ s+=`<line x1="${xB}" y1="${py}" x2="${xE}" y2="${py}" stroke="${mz.koyu}" stroke-width="${t}" stroke-opacity="0.6"/><line x1="${xB}" y1="${py+PH}" x2="${xE}" y2="${py+PH}" stroke="${mz.koyu}" stroke-width="${t}" stroke-opacity="0.6"/>`;
+ const ys=Array.from({length:n},(_,i)=>iy0+Wc*(i+0.5)/n),xm=xC+5;
+ s+=boru([[xW-14,iy0+3],[xm,iy0+3],[xm,ys[n-1]+2.5]]);s+=conta(xW+t/2,iy0+3,false);s+=`<rect x="${xm-1.2}" y="${ys[n-1]+2.5}" width="2.4" height="1.4" fill="#222"/>`;
+ ys.forEach(y=>{s+=boru([[xm,y],[xE-2,y]]);s+=`<circle cx="${xm}" cy="${y}" r="1" fill="#222"/>`+vana(xv,y)+conta(xP+t/2,y,false);for(let x=xB+ke;x<xE-3;x+=da)s+=`<circle cx="${x}" cy="${y}" r="0.75" fill="#1f6fb2"/>`;s+=`<path d="M${xE-2} ${y-1.5} v3" stroke="#222" stroke-width="${sw*4}"/>`});
+ if(n>1)olc(xE+2,ys[0],xE+2,ys[1],`${fmt(Wc/n,0)} cm`,1);olc(xW-4,iy0,xW-4,iy1,`${fmt(Wc)} cm`);
+ N(xW-10,iy0+3,'Ana hattan gelen Ø16 (yükseliş)',0,-2.2);N(xm,ys[n-1]+3.2,'Dağıtım borusu sonu: 8 tipi tapa',-2.4,1.4);N(xm,ys[0],'Ø16 T (her damla hattı için)',-2.4,0.6);N(xE-2,ys[n-1],'Hat sonu: 8 tipi tapa',-1.2,2.2);
+ // numaralı balonlar + açıklama listesi (altta)
+ const sira=[...new Set(no.map(x=>x[2]))];s+=`<text x="0" y="${yLej}" font-weight="700" font-size="${f*0.95}">Parçalar</text>`;
+ sira.forEach((yz,i)=>{const p=no.find(x=>x[2]===yz),bx=p[0]+p[3]*f,by=p[1]+p[4]*f,r=f*0.72,ly=yLej+f*1.7+i*f*1.55;
+  s+=`<line x1="${p[0]}" y1="${p[1]}" x2="${bx}" y2="${by}" stroke="#c0392b" stroke-width="${sw*1.3}"/><circle cx="${p[0]}" cy="${p[1]}" r="${f*0.16}" fill="#c0392b"/><circle cx="${bx}" cy="${by}" r="${r}" fill="#fff" stroke="#c0392b" stroke-width="${sw*1.8}"/><text x="${bx}" y="${by+f*0.3}" text-anchor="middle" font-size="${f*0.8}" font-weight="700" fill="#c0392b">${i+1}</text>`;
+  s+=`<circle cx="${f*0.75}" cy="${ly-f*0.3}" r="${r*0.85}" fill="#fff" stroke="#c0392b" stroke-width="${sw*1.5}"/><text x="${f*0.75}" y="${ly}" text-anchor="middle" font-size="${f*0.7}" font-weight="700" fill="#c0392b">${i+1}</text><text x="${f*2}" y="${ly}" font-size="${f*0.85}">${yz}</text>`});
+ s+=`<text x="0" y="${top+H-f*0.6}" font-size="${f*0.8}" fill="#555">${G.kod} grubu · ${d.besleme.length} vana bölmesi${d.besleme.length>1?' (hepsi aynı düzen)':''} · kasa başı ${d.nk} damla hattı · ölçüler cm · basınç: Denetim › Damla sulama hidroliği</text>`;
+ return s+'</svg>'}
+
+function sulamaMontaj(G,st){const S=st.sulama,d=G.d,k=G.k,b0=d.besleme[0],n=b0.vana.length,ana=n0(S.anaCap,20);return[
+ `Ana hattı (Ø${ana} PE) yolun ortasında 30 cm derin, 20 cm genişlikte hendeğe, 5 cm kum yatağın üzerine serin; üstünü önce kumla sonra toprakla örtün. Hat sonuna boşaltma tapası takın.`,
+ `Kasanın giriş noktasının hizasında ana boruyu Ø16 için delin, <b>başlangıç contasını</b> takıp Ø16 kör boruyu geçirin.`,
+ `Ø16 yükselişi kasa duvarına dik çıkarın; zeminden çıktığı yerde 50 cm <b>koruma kılıfı</b> (koruge) geçirin — çapa ve ayakla ezilmeyi önler.`,
+ `Dış duvarı yerden 12 cm yükseklikte Ø20 matkapla delin, <b>lastik conta</b> takıp boruyu ${b0.tip==='mk'?'malzeme kasasına':'vana bölmesine'} alın.`,
+ `Bölmede Ø16 dağıtım borusunu kurun: ${n} T, her çıkışa bir <b>mini vana</b>; dağıtım borusunun ucunu 8 tipi tapa ile kapatın. Vanalar tabandan yukarıda, toprakla temas etmez.`,
+ `Bölme tahtasını toprak yüzeyinin 1 cm altında, ${fmt((k.W-2*k.t)/Math.max(1,n),0)} cm arayla ${n} yerden delip conta takın; damlalı boruları vanalardan geçirerek kasaya alın.`,
+ `Damlalı boruları damlatıcılar yukarı bakacak şekilde serin, metrede bir U kazıkla sabitleyin, uçlarını 8 tipi tapa ile kapatın; üstüne 3–5 cm malç serin.`,
+ 'İlk çalıştırmada tüm tapaları açıp hatları yıkayın, sonra kapatıp kova testini yapın.',
+ 'Kış öncesi ana hattın boşaltma tapasını ve dağıtım borusu tapasını açıp suyu tamamen boşaltın; mini vanaları yarı açık bırakın.']}
 /* ---------- Yön ---------- */
 function yonSapma(st,g){const a=n0(st.alan.kuzey),b=(g.yon==='dikey'?180-a:90-a)+n0(g.aci);const m=((b%180)+180)%180;return{bearing:m,sapma:Math.min(m,180-m)}}
 function yonAdi(b){const d=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];const x=((b%360)+360)%360;const i=Math.round(x/22.5)%16;const j=(i+8)%16;return d[i]+'–'+d[j]}
@@ -1088,6 +1148,7 @@ function sulamaListe(st,H){const S=st.sulama,o=H.top,L=[];if(o.Q<=0)return L;con
  ad(`Damlalı boru Ø16 · ${fmt(S.damlaAr)} cm · ${fmt(S.damlaDebi)} L/saat`,'m',Math.ceil(o.latM*1.1),'%10 pay dahil');
  ad('Ø16 kör boru (iniş + dağıtım)','m',Math.ceil(o.korM*1.1),'%10 pay dahil');
  ad(`Başlangıç conta + geçme (Ø${S.anaCap} boruya)`,'adet',o.inisSay,'Kasa başına 1');
+ ad('Duvar geçiş contası (lastik kovan, Ø16)','adet',o.inisSay+o.lateralSay,'Dış duvar ve bölme geçişleri');ad('Koruma kılıfı (koruge Ø25), zemin çıkışı','m',Math.ceil(o.inisSay*0.5),'Yükseliş başına 50 cm');
  ad('Ø16 mini vana','adet',o.lateralSay,'Her damla hattına 1 (vana bölmesinde / malzeme kasasında)');
  const tee=H.gr.reduce((s,G)=>s+(G.d?G.d.teeSay*G.n:0),0),drs=H.gr.reduce((s,G)=>s+(G.d?G.d.dirsekSay*G.n:0),0);
  ad('Ø16 T','adet',tee);ad('Ø16 dirsek','adet',o.inisSay*3+drs);ad('Ø16 son tapa (8 tipi)','adet',o.lateralSay+o.inisSay);
@@ -1259,6 +1320,7 @@ function cizimCiz(zorla){
  if(!G){kutu.innerHTML='<p class="not" style="padding:16px">Önce bir kasa grubu ekleyin.</p>';yerArac();return}
  if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod,cizimMod==='plan'?{secili:yer.tasima?yer.secili:null,kasalar:yer.tasima?yer.kasalar:[]}:null);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası / hat vanası</span><span><i style="background:#e4d4b4;border:1px solid #8a6a3a"></i>Vana bölmesi</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
   if(cizimMod==='sulama')alt=sulamaTablo(st,H)}
+ else if(cizimMod==='suldetay'){const Gs=G.d?G:H.gr.find(x=>x.d);if(!Gs){kutu.innerHTML='<p class="not" style="padding:16px">Damla sulaması seçili grup yok.</p>'}else{if(Gs!==G)sel.value=Gs.gi;kutu.innerHTML=svgSulamaDetay(Gs,st);alt=`<div class="kart" style="margin-top:12px"><h3 style="margin-top:0">Sulama bağlantısı — kurulum sırası</h3><ol>${sulamaMontaj(Gs,st).map(x=>`<li>${x}</li>`).join('')}</ol></div>`}}
  else if(cizimMod==='kesit'){kutu.innerHTML=svgKesit(G,st);alt=kasaTablo(G)}
  else if(cizimMod==='gorunus'){kutu.innerHTML=svgGorunus(G);alt=kasaTablo(G)}
  else if(cizimMod==='mk'){if(G.k.mk==='yok'){kutu.innerHTML='<p class="not" style="padding:16px">Bu grupta malzeme kasası yok. Girdi › Kasa grupları › “Malzeme kasası” seçeneğinden ekleyebilirsiniz.</p>'}else{kutu.innerHTML=svgMK(G);alt=kasaTablo(G)}}
@@ -1368,6 +1430,7 @@ function raporCiz(){const o=H.top,M=st.meta,S=st.sulama,T=st.toprak;
   <div class="iki"><div><h3>Sistem değerleri</h3><table><tr><td>Damlatıcı</td><td class="s">${fmt(o.damla,0)} adet · ${fmt(S.damlaAr)} cm · ${fmt(S.damlaDebi)} L/sa</td></tr><tr><td>Toplam debi</td><td class="s">${fmt(o.Q,0)} L/saat</td></tr><tr><td>Ana hat kapasitesi</td><td class="s">${fmt(o.boruKap,0)} L/saat (Ø${S.anaCap})</td></tr><tr><td>Sulama bölgesi</td><td class="s">${o.bolge}</td></tr><tr><td>Basınç</td><td class="s">${fmt(S.basinc)} bar</td></tr></table>
   <h3>Sulama süresi (kasa başına)</h3><table><tr><th>Grup</th><th class="s">3 mm</th><th class="s">5 mm</th><th class="s">7 mm</th></tr>${H.gr.filter(G=>G.d).map(G=>{const t=mm=>G.d.mmh>0?Math.round(mm/G.d.mmh*60):0;return`<tr><td>${G.kod}</td><td class="s">${t(3)} dk</td><td class="s">${t(5)} dk</td><td class="s">${t(7)} dk</td></tr>`}).join('')}</table></div>
   <div><h3>Malzeme listesi</h3><table><tr><th>Kalem</th><th class="s">Miktar</th></tr>${L.map(x=>`<tr><td>${mzL(x[0])}</td><td class="s">${fmt(x[2],0)} ${x[1]}</td></tr>`).join('')}</table></div></div>
+  ${H.gr.filter(G=>G.d).map(G=>`<h3>${G.kod} grubu — sulama bağlantı detayı</h3><div class="cizim">${svgSulamaDetay(G,st)}</div><ol>${sulamaMontaj(G,st).map(x=>`<li>${x}</li>`).join('')}</ol>`).join('')}
   <h3>Kurulum sonrası kova testi</h3><p>Rastgele 3 damlatıcının altına kap koyup 10 dakika çalıştırın. Toplanan su (mL) × 6 = gerçek debi (mL/saat). Hat başı ile hat sonu arasındaki fark %10’dan fazlaysa basınç yetersizdir ya da boru tıkalıdır.</p></div>`}
  {const mh=muhHTML(st,H);if(mh)r+=`<div class="sayfa">${antet('Mühendislik kontrolleri')}<h2>Mühendislik kontrolleri</h2>${mh}</div>`}
  const B=o.bil;r+=`<div class="sayfa">${antet('Toprak karışımı')}<h2>Toprak karışımı</h2>
@@ -1868,7 +1931,7 @@ function piyasaAktar(ustune){const K=metrajKalemleri(),I=ihaleAyar();let n=0;K.f
 $('#t-ihale').addEventListener('click',e=>{if(e.target.id==='btnPiyAktar')piyasaAktar(false);if(e.target.id==='btnPiyUstune')piyasaAktar(true)});
 /* ---------- İhale dosyası sayfa içi önizleme ---------- */
 function ihaleCizimleri(){const L=[];L.push(['01_Vaziyet_plani.svg','Vaziyet planı',svgPlan(st,H,'plan')]);if(H.top.Q>0)L.push(['02_Sulama_semasi.svg','Sulama şeması',svgPlan(st,H,'sulama')]);
- H.gr.forEach(G=>{const b=G.kod+'_',a=`${G.kod} · ${duzMetin(G.g.ad)}`;if(G.g.durum==='yeni'){L.push([b+'kesit.svg',a+' — kesit',svgKesit(G,st)]);L.push([b+'kose_detayi.svg',a+' — köşe detayı',svgKose(G)])}if(G.parca.length)L.push([b+'yan_gorunus.svg',a+' — yan görünüş',svgGorunus(G)]);if(G.k.mk!=='yok')L.push([b+'malzeme_kasasi.svg',a+' — malzeme kasası',svgMK(G)])});
+ H.gr.forEach(G=>{const b=G.kod+'_',a=`${G.kod} · ${duzMetin(G.g.ad)}`;if(G.g.durum==='yeni'){L.push([b+'kesit.svg',a+' — kesit',svgKesit(G,st)]);L.push([b+'kose_detayi.svg',a+' — köşe detayı',svgKose(G)])}if(G.parca.length)L.push([b+'yan_gorunus.svg',a+' — yan görünüş',svgGorunus(G)]);if(G.k.mk!=='yok')L.push([b+'malzeme_kasasi.svg',a+' — malzeme kasası',svgMK(G)]);if(G.d)L.push([b+'sulama_detayi.svg',a+' — sulama bağlantı detayı',svgSulamaDetay(G,st)])});
  return L}
 let onSekme='sartname',ihaleTurSon=null;
 function onSartname(B){return`<div class="sayfa onDoc">${B.map(b=>{
