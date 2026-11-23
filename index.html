@@ -326,7 +326,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-7';
+const APP_VERSION = '2026.11.23-8';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -633,16 +633,19 @@ function hesapla(st){
   let boru=null;
   if(d){const uf=(c,f)=>c*pu+oU+f/100,vh=r=>r===0?-0.3:r*pw-sa/2,ov=k.ov;
    const yol=d.besleme.map(bs=>{const gu=bs.giris[0],gv=bs.giris[1];if(gv>ov+k.W){const uo=gu<k.bodyU+k.L/2?-12:k.Ls+12;return{fu:uo,pts:[[uo,gv],[gu,gv]]}}return{fu:gu,pts:[[gu,0],[gu,gv]]}});
-   const son=uf(sut-1,Math.max(...yol.map(y=>y.fu)));
-   const hatlar=[];for(let r=0;r<sira;r++)hatlar.push([T2(-0.3,vh(r)),T2(son,vh(r))]);
-   if(sira>1)hatlar.push([T2(-0.3,vh(0)),T2(-0.3,vh(sira-1))]);
-   const ust=rot(T2(-0.3,vh(0))),src=[n0(S.kx),n0(S.ky)],bag=[src,[ust[0],src[1]],ust];
-   const inis=[],dag=[];let inisM=0;
-   beds.forEach(b=>d.besleme.forEach((bs,fi)=>{const y=yol[fi],a=T2(uf(b.c,y.fu),vh(b.r)),pp=y.pts.map(q=>P(b,q[0],q[1]));const h=[a].concat(pp);inis.push(h);
+   const dkY=g.yon==='dikey',uOf=q=>dkY?q[1]-gy:q[0]-gx;
+   const rb=(b,q)=>{if(!b.aci)return q;const cx=b.x+b.w/2,cy=b.y+b.h/2,a=b.aci*Math.PI/180,c=Math.cos(a),s2=Math.sin(a);return[cx+(q[0]-cx)*c-(q[1]-cy)*s2,cy+(q[0]-cx)*s2+(q[1]-cy)*c]};
+   const inis=[],inis0=[],dag=[];let inisM=0,uMin=-0.3,uMax=uf(sut-1,Math.max(...yol.map(y=>y.fu)));
+   beds.forEach(b=>d.besleme.forEach((bs,fi)=>{const y=yol[fi],pp=y.pts.map(q=>P(b,q[0],q[1])),ppR=pp.map(q=>rb(b,q)),hv=vh(b.r);
+    const a=dkY?[gx+hv,ppR[0][1]]:[ppR[0][0],gy+hv];const u=uOf(a);uMin=Math.min(uMin,u);uMax=Math.max(uMax,u);
+    const h=[a].concat(ppR);inis.push(h);inis0.push([T2(uf(b.c,y.fu),hv)].concat(pp));
     for(let i=1;i<h.length;i++)inisM+=Math.abs(h[i][0]-h[i-1][0])+Math.abs(h[i][1]-h[i-1][1]);
     dag.push([bs.man.map(q=>P(b,q[0],q[1]))].concat(bs.bag.map(l=>l.map(q=>P(b,q[0],q[1])))))}));
-   const headerM=sira*(son+0.3),trunkM=sira>1?vh(sira-1)-vh(0):0,bagM=Math.abs(ust[0]-src[0])+Math.abs(ust[1]-src[1]);
-   boru={hatlar,bag,inis,dag,headerM,trunkM,bagM,dusus:d.besleme.length,anaM:headerM+trunkM+bagM,korM:inisM+beds.length*(d.besleme.length*(k.Hr+20)/100+d.korCm/100),dirsekBag:(Math.abs(ust[0]-src[0])>0.01&&Math.abs(ust[1]-src[1])>0.01)?1:0}}
+   const son=uMax,hatlar=[];for(let r=0;r<sira;r++)hatlar.push([T2(uMin,vh(r)),T2(son,vh(r))]);
+   if(sira>1)hatlar.push([T2(-0.3,vh(0)),T2(-0.3,vh(sira-1))]);
+   const ust=rot(T2(-0.3,vh(0))),src=[n0(S.kx),n0(S.ky)],bag=[src,[ust[0],src[1]],ust];
+   const headerM=sira*(son-uMin),trunkM=sira>1?vh(sira-1)-vh(0):0,bagM=Math.abs(ust[0]-src[0])+Math.abs(ust[1]-src[1]);
+   boru={hatlar,bag,ust,inis,inis0,dag,headerM,trunkM,bagM,bagYeni:bagM,dusus:d.besleme.length,anaM:headerM+trunkM+bagM,korM:inisM+beds.length*(d.besleme.length*(k.Hr+20)/100+d.korCm/100),dirsekBag:(Math.abs(ust[0]-src[0])>0.01&&Math.abs(ust[1]-src[1])>0.01)?1:0}}
   if(!beds.length)return;
   const n=beds.length,G={g,gi,kod,k,U,V:VV,bb,bb0,aci,pv,rot,beds,area,fill,dren,mixL,mixNet,drenL,d,boru,n,T2,P,R,sira,sut,L,ar,sa,cL,cV};
   G.parca=g.durum==='yeni'?parcalar(G):(k.mk!=='yok'?parcalar(G,true):[]);
@@ -652,6 +655,7 @@ function hesapla(st){
   o.ekim+=area*n;o.mixL+=mixL*n;o.mixNet+=mixNet*n;o.drenL+=drenL*n;
   if(d){o.Q+=d.Q*n;o.damla+=d.damla*n;o.latM+=d.latM*n;o.korM+=boru.korM;o.anaM+=boru.anaM;o.inisSay+=n*boru.dusus;o.lateralSay+=d.nk*n}
  });
+ anaHatYonlendir(st,out);
  const o=out.top,ic=BORU_IC[n0(S.anaCap,20)]||16.6;
  o.boruKap=1.5*Math.PI/4*Math.pow(ic/1000,2)*3.6e6;
  o.kap=n0(S.kaynakDebi)>0?Math.min(o.boruKap,n0(S.kaynakDebi)*0.9):o.boruKap;
@@ -832,6 +836,40 @@ function yonSapma(st,g){const a=n0(st.alan.kuzey),b=(g.yon==='dikey'?180-a:90-a)
 function yonAdi(b){const d=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];const x=((b%360)+360)%360;const i=Math.round(x/22.5)%16;const j=(i+8)%16;return d[i]+'–'+d[j]}
 
 /* ---------- Denetim ajanı ---------- */
+/* ---------- Ana hat yönlendirme: kasaların arasından, en az dirsekle ---------- */
+let ANA_ON={};
+function anaHatYonlendir(st,out){const S=st.sulama,L=out.gr.filter(G=>G.boru);if(!L.length)return;
+ const anah=JSON.stringify([S.kx,S.ky,st.alan.en,st.alan.boy,out.gr.map(G=>G.poli.map(P=>P.map(q=>[Math.round(q[0]*100),Math.round(q[1]*100)]))),L.map(G=>[G.gi,Math.round(G.boru.ust[0]*100),Math.round(G.boru.ust[1]*100)])]);
+ if(ANA_ON.k===anah){L.forEach(G=>{const r=ANA_ON.r[G.gi];if(r){const B=G.boru;Object.assign(B,r);B.anaM=B.headerM+B.trunkM+B.bagYeni}});out.top.anaM=out.gr.reduce((a,G)=>a+(G.boru?G.boru.anaM:0),0);return}
+ anaHatYonlendir0(st,out,L);const R={};L.forEach(G=>{const B=G.boru;R[G.gi]={bag:B.bag,bagM:B.bagM,bagYeni:B.bagYeni,dirsekBag:B.dirsekBag}});ANA_ON={k:anah,r:R}}
+function anaHatYonlendir0(st,out,L){const S=st.sulama;
+ const src=[n0(S.kx),n0(S.ky)],en=Math.max(1,n0(st.alan.en,1)),boy=Math.max(1,n0(st.alan.boy,1)),M=Math.max(en,boy),h=Math.max(0.1,Math.ceil(M/250*20)/20),pay=0.25;
+ const x0=src[0]-Math.ceil(Math.max(0,src[0]-Math.min(0,src[0]))/h)*h,y0=src[1]-Math.ceil(Math.max(0,src[1]-Math.min(0,src[1]))/h)*h;
+ const nx=Math.floor((Math.max(en,src[0])-x0)/h)+1,ny=Math.floor((Math.max(boy,src[1])-y0)/h)+1,N=nx*ny;if(N>400000)return;
+ const blok=new Uint8Array(N),X=i=>x0+i*h,Y=j=>y0+j*h;
+ const icinde=(p,P)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>p[1])!==(b[1]>p[1])&&p[0]<(b[0]-a[0])*(p[1]-a[1])/(b[1]-a[1])+a[0])c=!c}return c};
+ out.gr.forEach(G=>G.poli.forEach(P=>{const xs=P.map(q=>q[0]),ys=P.map(q=>q[1]);const i0=Math.max(0,Math.floor((Math.min(...xs)-pay-x0)/h)),i1=Math.min(nx-1,Math.ceil((Math.max(...xs)+pay-x0)/h)),j0=Math.max(0,Math.floor((Math.min(...ys)-pay-y0)/h)),j1=Math.min(ny-1,Math.ceil((Math.max(...ys)+pay-y0)/h));
+  for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){const p=[X(i),Y(j)];if(icinde(p,P)||P.some((a,k)=>nkMes(p,a,P[(k+1)%P.length])<pay))blok[j*nx+i]=1}}));
+ const kul=new Uint8Array(N),hucre=p=>[Math.max(0,Math.min(nx-1,Math.round((p[0]-x0)/h))),Math.max(0,Math.min(ny-1,Math.round((p[1]-y0)/h)))];
+ const DX=[1,0,-1,0],DY=[0,1,0,-1],DON=4;
+ const yol=(s0,t0)=>{const[si,sj]=s0,[ti,tj]=t0,hd=(i,j)=>Math.abs(i-ti)+Math.abs(j-tj),g=new Float32Array(N*4).fill(Infinity),onc=new Int32Array(N*4).fill(-1),H=[];
+  const it=(f,st2)=>{H.push([f,st2]);let k=H.length-1;while(k>0){const p=(k-1)>>1;if(H[p][0]<=H[k][0])break;[H[p],H[k]]=[H[k],H[p]];k=p}};
+  const al=()=>{const r=H[0],e=H.pop();if(H.length){H[0]=e;let k=0;for(;;){const l=2*k+1,rr=l+1;let m=k;if(l<H.length&&H[l][0]<H[m][0])m=l;if(rr<H.length&&H[rr][0]<H[m][0])m=rr;if(m===k)break;[H[m],H[k]]=[H[k],H[m]];k=m}}return r};
+  for(let d=0;d<4;d++){const st2=(sj*nx+si)*4+d;g[st2]=0;it(hd(si,sj),st2)}let son=-1;
+  while(H.length){const[f,st2]=al(),c=st2>>2,d=st2&3,i=c%nx,j=(c/nx)|0;if(f-hd(i,j)>g[st2]+1e-6)continue;if(i===ti&&j===tj){son=st2;break}
+   for(let d2=0;d2<4;d2++){if(d2===((d+2)&3))continue;const a=i+DX[d2],b=j+DY[d2];if(a<0||b<0||a>=nx||b>=ny)continue;const c2=b*nx+a;if(blok[c2]&&!(a===ti&&b===tj))continue;
+    const ng=g[st2]+(kul[c2]?0.35:1)+(d2!==d?DON:0),s2=c2*4+d2;if(ng<g[s2]){g[s2]=ng;onc[s2]=st2;it(ng+hd(a,b),s2)}}}
+  if(son<0)return null;const C=[];for(let x=son;x>=0;x=onc[x])C.push(x>>2);return C.reverse()};
+ const sira=L.slice().sort((a,b)=>Math.hypot(a.boru.ust[0]-src[0],a.boru.ust[1]-src[1])-Math.hypot(b.boru.ust[0]-src[0],b.boru.ust[1]-src[1]));
+ const s0=hucre(src);blok[s0[1]*nx+s0[0]]=0;
+ sira.forEach(G=>{const B=G.boru,t0=hucre(B.ust),C=yol(s0,t0);if(!C)return;
+  let yeni=0;const pts=[src];C.forEach((c,k)=>{if(k&&!kul[c])yeni+=h;kul[c]=1});
+  const P=C.map(c=>[X(c%nx),Y((c/nx)|0)]);for(let k=1;k<P.length-1;k++){const a=P[k-1],b=P[k],c=P[k+1];if(Math.abs((b[0]-a[0])*(c[1]-b[1])-(b[1]-a[1])*(c[0]-b[0]))>1e-9)pts.push(b)}
+  const z=P[P.length-1],u=B.ust;pts.push(z);if(Math.abs(z[0]-u[0])>1e-3&&Math.abs(z[1]-u[1])>1e-3)pts.push([u[0],z[1]]);pts.push(u);
+  const T=[];pts.forEach(p=>{const q=T[T.length-1];if(!q||Math.hypot(p[0]-q[0],p[1]-q[1])>1e-6)T.push(p)});
+  const uz=T.slice(1).reduce((a,p,i)=>a+Math.hypot(p[0]-T[i][0],p[1]-T[i][1]),0);
+  B.bag=T;B.bagM=uz;B.bagYeni=Math.min(uz,yeni+Math.hypot(z[0]-u[0],z[1]-u[1])+0.01);B.dirsekBag=Math.max(0,T.length-2);B.anaM=B.headerM+B.trunkM+B.bagYeni});
+ const o=out.top;o.anaM=out.gr.reduce((a,G)=>a+(G.boru?G.boru.anaM:0),0)}
 function denetle(st,H){
  const B=[],S=st.sulama,T=st.toprak,A=st.alan,o=H.top;
  const ek=(sev,baslik,mesaj,oneri='')=>B.push({sev,baslik,mesaj,oneri});
@@ -953,7 +991,7 @@ function svgPlan(st,H,mod='plan',etk=null){
   if(G.boru){const B=G.boru;B.hatlar.forEach(h=>s+=`<polyline points="${pl(h)}" fill="none" stroke="#123f75" stroke-width="${sw*(sul?4:3)}" stroke-linecap="round"/>`);
    disari+=`<polyline points="${pl(B.bag)}" fill="none" stroke="#123f75" stroke-width="${sw*(sul?4:3)}" stroke-linejoin="round"/>`;
    B.inis.forEach(h=>s+=`<polyline points="${pl(h)}" fill="none" stroke="#3b8fd9" stroke-width="${sw*2}"/>`);
-   const vp=B.bag[2];disari+=`<g transform="translate(${vp[0]} ${vp[1]})"><path d="M${-f*0.45} ${-f*0.3} L${f*0.45} ${f*0.3} L${f*0.45} ${-f*0.3} L${-f*0.45} ${f*0.3}Z" fill="#e07b28" stroke="#7a3d0c" stroke-width="${sw}"/></g>`;
+   const vp=B.bag[B.bag.length-1];disari+=`<g transform="translate(${vp[0]} ${vp[1]})"><path d="M${-f*0.45} ${-f*0.3} L${f*0.45} ${f*0.3} L${f*0.45} ${-f*0.3} L${-f*0.45} ${f*0.3}Z" fill="#e07b28" stroke="#7a3d0c" stroke-width="${sw}"/></g>`;
    if(sul){const m=B.hatlar[0][1];s+=`<text x="${m[0]+f*0.3}" y="${m[1]-f*0.3}" font-size="${f*0.8}" fill="#123f75">Ø${S.anaCap} PE ana hat</text>`}}
   // ölçüler
   const segX=g.yon==='dikey'?alt(G.sira,G.cV*100,G.sa*100):alt(G.sut,G.cL*100,G.ar*100);
@@ -1525,8 +1563,8 @@ function sahne3D(){const{THREE,root,kutuG,silG,M,pivot}=U3;
     G.d.besleme.forEach(bs=>bs.vana.forEach(q=>{const e=G.P(b,q[0],q[1]);kutu(0.05,0.04,0.05,M.vana,e[0],soilH+0.03,e[1])}))}
    if(etiket){const c=R(k.etiket.ua,k.etiket.ub,k.etiket.va,k.etiket.vb),sp=yazi3D(b.ad,mev);sp.position.set(c.x+c.w/2,Hr+0.25,c.y+c.h/2);const s=Math.min(0.9,Math.max(0.35,Mx*0.03));sp.scale.set(s*1.6,s*0.8,1);hedef.add(sp)}hedef=gi2});
   if(G.boru){const B=G.boru,y0=0.015,R=0.014;const seg=pts=>{for(let i=0;i<pts.length-1;i++)boru([pts[i][0],y0,pts[i][1]],[pts[i+1][0],y0,pts[i+1][1]],R,M.ana)};B.hatlar.forEach(seg);hedef=root;seg(B.bag);hedef=gi2;
-   B.inis.forEach((h,i)=>{const L1=B.dag[i],yb=yatak[Math.floor(i/B.dusus)]||gi2,n2=h.length,w=h[n2-2],z=h[n2-1];hedef=gi2;for(let j=0;j<n2-2;j++)boru([h[j][0],y0,h[j][1]],[h[j+1][0],y0,h[j+1][1]],0.009,M.boru);hedef=yb;boru([w[0],y0,w[1]],[w[0],Hr+0.02,w[1]],0.009,M.boru);boru([w[0],Hr+0.02,w[1]],[z[0],soilH+0.012,z[1]],0.009,M.boru);L1.forEach(q=>{for(let j=0;j<q.length-1;j++)boru([q[j][0],soilH+0.012,q[j][1]],[q[j+1][0],soilH+0.012,q[j+1][1]],0.009,M.boru)});hedef=gi2});
-   const v=B.bag[2];hedef=root;kutu(0.12,0.12,0.12,M.vana,v[0],0.06,v[1])}hedef=root});
+   B.inis.forEach((h,i)=>{const L1=B.dag[i],yb=yatak[Math.floor(i/B.dusus)]||gi2,n2=h.length,h0=B.inis0[i]||h,w=h0[n2-2],z=h0[n2-1];hedef=gi2;for(let j=0;j<n2-2;j++)boru([h[j][0],y0,h[j][1]],[h[j+1][0],y0,h[j+1][1]],0.009,M.boru);hedef=yb;boru([w[0],y0,w[1]],[w[0],Hr+0.02,w[1]],0.009,M.boru);boru([w[0],Hr+0.02,w[1]],[z[0],soilH+0.012,z[1]],0.009,M.boru);L1.forEach(q=>{for(let j=0;j<q.length-1;j++)boru([q[j][0],soilH+0.012,q[j][1]],[q[j+1][0],soilH+0.012,q[j+1][1]],0.009,M.boru)});hedef=gi2});
+   const v=B.bag[B.bag.length-1];hedef=root;kutu(0.12,0.12,0.12,M.vana,v[0],0.06,v[1])}hedef=root});
  if(H.top.Q>0){const S=st.sulama;kutu(0.12,0.9,0.12,M.kaynak,n0(S.kx),0.45,n0(S.ky))}
  // kuzey oku
  const a=n0(A.kuzey)*Math.PI/180,N=[Math.sin(a),-Math.cos(a)],c=[en/2,boy/2],r=Mx*0.62;
