@@ -34,7 +34,7 @@ async def cdn(route):
     if 'three' in u: return await route.continue_()
     await route.abort()
 
-ORNEK = """()=>{const p=bosProje();p.meta.ad='Test bostanı';p.meta.bostan='Test';p.meta.hazirlayan='Test';p.alan={en:30,boy:20,kuzey:0,enlem:39.9};p.sulama.basinc=3;p.gruplar=[
+ORNEK = """()=>{const p=bosProje();p.meta.ad='Test bostanı';p.meta.bostan='Test';p.meta.hazirlayan='Test';p.meta.ortakOlcu='hayir';p.alan={en:30,boy:20,kuzey:0,enlem:39.9};p.sulama.basinc=3;p.gruplar=[
  yeniGrup(0,{L:600,W:200,H:60,sekil:'U',kolEn:150,kolBoy:500,mk:'ic',mkD:45,mkYer:'kolBas',x:1,y:1,sutun:1}),
  yeniGrup(1,{L:300,W:120,H:45,malzeme:'galvaniz',t:0.08,tahtaH:0,dikme:4,x:10,y:1,sutun:2,mk:'dis',mkD:45,mkYer:'bas'})];projeEkle(p)}"""
 
@@ -169,6 +169,20 @@ async def gergi_secenegi(pg):
     assert r[0]['eta'] <= 1 and r[2]['eta'] > 1, r   # gergisiz 20 cm gömme yetmez: program uyarmalı
 
 @test
+async def ortak_olcu(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:1,y:1,sutun:1}),yeniGrup(1,{L:200,W:100,H:30,malzeme:'galvaniz',x:1,y:6,sutun:2}),yeniGrup(2,{L:500,W:90,H:60,x:1,y:10,sutun:1,durum:'mevcut'})];projeEkle(p);
+      const a=H.gr.map(G=>[G.k.L,G.k.W,G.k.Hr,G.k.m,G.sut]);
+      st.gruplar[0].L=400;degisti();const b=H.gr.map(G=>G.k.L);
+      renderGruplar();const tak=document.querySelectorAll('[data-ayri]').length;
+      document.querySelector('[data-ayri="1"]').click();const c=H.gr.map(G=>[G.k.L,G.k.m]);
+      return{a,b,tak,c}}""")
+    a, b, c = r['a'], r['b'], r['c']
+    assert a[0][:4] == a[1][:4] and a[1][4] == 2, r        # B, A ölçüsünü aldı; yerleşim (sütun) kendi
+    assert a[2][0] == 500, r                                # mevcut grup değişmedi
+    assert b[0] == b[1] == 400 and b[2] == 500 and r['tak'] == 1, r
+    assert c[1] == [200, 'galvaniz'], r                     # ayrı ölçüye dönünce eski değerler geri geldi
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -223,7 +237,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
