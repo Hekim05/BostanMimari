@@ -225,6 +225,13 @@ async def geri_al_ve_oto(pg):
     assert r['m'] >= 1.495 and r['uu'] == 0, r
 
 @test
+async def sinira_hizala(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:30,boy:20};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3}),yeniGrup(1,{x:16,y:5,sutun:2,aci:10})];projeEkle(p);sekme('cizim');yer.tasima=true;
+      yer.secili=null;yer.kasalar=[{gi:0,no:0},{gi:1,no:0}];cizimCiz(true);$('#hizaKapsam').value='grup';$('#sinirKenar').value='alt';$('#sinirMesafe').value='150';sinirHizala();
+      const alt=H.gr.map(G=>Math.max(...G.poli.flat().map(q=>q[1])));return{alt,boy:+st.alan.boy}}""")
+    assert all(abs(a - (r['boy'] - 1.5)) < 0.011 for a in r['alt']), r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -279,7 +286,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()

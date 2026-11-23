@@ -247,6 +247,8 @@ dialog .ic{padding:16px}
     <button class="btn kucuk" data-hiza="sol" title="Sol kenarları ilk seçilen kasaya göre">⇤ Sol</button><button class="btn kucuk" data-hiza="sag" title="Sağ kenarlar">Sağ ⇥</button><button class="btn kucuk" data-hiza="ust" title="Üst kenarlar">⤒ Üst</button><button class="btn kucuk" data-hiza="alt" title="Alt kenarlar">⤓ Alt</button>
     <button class="btn kucuk" data-hiza="y">═ Aynı sıra (y)</button><button class="btn kucuk" data-hiza="x">║ Aynı sütun (x)</button><button class="btn kucuk" data-hiza="dx">↔ Eşit aralık</button><button class="btn kucuk" data-hiza="dy">↕ Eşit aralık</button>
     <span class="not" style="flex-basis:100%">Referans: ilk dokunduğunuz kasa. Kasalar seçiliyken oklar da yalnızca onları 10 cm kaydırır.</span></span>
+   <span id="sinirKut" hidden style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-basis:100%;margin-top:4px"><b style="font-size:13px">Alan sınırına hizala</b><select id="sinirKenar" style="min-height:40px" aria-label="Sınır"><option value="alt">Alt sınır</option><option value="ust">Üst sınır</option><option value="sol">Sol sınır</option><option value="sag">Sağ sınır</option></select><input id="sinirMesafe" type="number" inputmode="decimal" value="150" style="width:76px;min-height:40px" aria-label="Sınıra mesafe (cm)"><span class="not">cm</span><button class="btn kucuk dolu" id="btnSinirHiza">Hizala</button>
+    <span class="not" style="flex-basis:100%">Kırmızı kesikli çizgi alanın o kenarından verilen mesafede tüm alanı keser; seçili kasaların (ya da seçimdeki grupların / seçili grubun) ilgili kenarı bu çizgiye oturur.</span></span>
    <span id="grupYap" hidden style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;flex-basis:100%"><button class="btn kucuk dolu" id="btnYeniGrup">▣ Seçilenlerle yeni grup</button><select id="selHedefGrup" style="min-height:40px;max-width:170px"></select><button class="btn kucuk" id="btnGrubaEkle">Gruba ekle</button></span>
    <span class="not" style="flex-basis:100%">Kasaya dokunun: seçilir ve üstünde ⟳ tutamağı çıkar; kasa kendi yerinde döner. Birden fazla kasaya dokunursanız hepsi kendi merkezinde birlikte döner. Seçtiğiniz kasalarla (farklı gruplardan da olabilir) yeni grup kurabilir ya da onları başka bir gruba ekleyebilirsiniz; kasalar yerinde kalır, boşalan grup kaldırılır. Kasa seçili değilken açı tüm grubu çevirir.</span></div>
  </div>
@@ -331,7 +333,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-13';
+const APP_VERSION = '2026.11.23-14';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -984,6 +986,7 @@ function svgPlan(st,H,mod='plan',etk=null){
  const gs=M>60?5:1;s+=`<g stroke="#e9eee7" stroke-width="${sw*0.8}">`;for(let x=gs;x<en-1e-6;x+=gs)s+=`<line x1="${x}" y1="0" x2="${x}" y2="${boy}"/>`;for(let y=gs;y<boy-1e-6;y+=gs)s+=`<line x1="0" y1="${y}" x2="${en}" y2="${y}"/>`;s+='</g>';
  s+=`<rect x="0" y="0" width="${en}" height="${boy}" fill="#f3f6ef" fill-opacity="0.5" stroke="#2b3a2e" stroke-width="${sw*2.2}"/>`;
  const sul=mod==='sulama';
+ if(etk&&etk.kilavuz){const{e,d}=etk.kilavuz,v=e==='alt'?boy-d:e==='sag'?en-d:d,yat=e==='alt'||e==='ust';s+=`<line x1="${yat?0:v}" y1="${yat?v:0}" x2="${yat?en:v}" y2="${yat?v:boy}" stroke="#c0392b" stroke-width="${sw*1.6}" stroke-dasharray="${f*0.6} ${f*0.35}"/><text x="${yat?en-f*0.3:v+f*0.3}" y="${yat?v-f*0.35:f*1.2}" text-anchor="${yat?'end':'start'}" font-size="${f*0.75}" fill="#c0392b">${e==='alt'?'alt':e==='ust'?'üst':e==='sol'?'sol':'sağ'} sınırdan ${fmt(d*100)} cm</text>`}
  H.gr.forEach(G=>{let disari='';s+=`<g data-grup="${G.gi}"><g data-rot="1" data-px="${G.pv[0]}" data-py="${G.pv[1]}" transform="rotate(${G.aci} ${G.pv[0]} ${G.pv[1]})">`;const g=G.g,k=G.k,mev=g.durum==='mevcut',mz=MALZ[g.malzeme]||MALZ.ahsap,dash=mev?`stroke-dasharray="${f*0.5} ${f*0.3}"`:'';
   G.beds.forEach((b,bi)=>{s+=`<g data-krot="${b.no}" transform="rotate(${b.aci} ${b.x+b.w/2} ${b.y+b.h/2})">`;const R=(a,c,va,vb)=>G.R(b,a,c,va,vb),rr=(r,fill,ex='')=>`<rect x="${r.x}" y="${r.y}" width="${r.w}" height="${r.h}" fill="${fill}" ${ex}/>`;
    k.icler.forEach(r=>s+=rr(R(r.ua,r.ub,r.va,r.vb),mev?'#b9b1a4':'#7b5b3d',`fill-opacity="${sul?0.25:0.55}"`));
@@ -1412,7 +1415,7 @@ function cizimCiz(zorla){
  const gsec=()=>H.gr.find(x=>x.gi===+sel.value);if(cizimMod==='mk'&&gsec()&&gsec().k.mk==='yok'){const y=H.gr.find(x=>x.k.mk!=='yok');if(y)sel.value=y.gi}
  const G=gsec()||H.gr[0],kutu=$('#cizimKutu');let alt='',lj='';
  if(!G){kutu.innerHTML='<p class="not" style="padding:16px">Önce bir kasa grubu ekleyin.</p>';yerArac();return}
- if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod,cizimMod==='plan'?{secili:yer.tasima?yer.secili:null,kasalar:yer.tasima?yer.kasalar:[]}:null);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası / hat vanası</span><span><i style="background:#e4d4b4;border:1px solid #8a6a3a"></i>Vana bölmesi</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
+ if(cizimMod==='plan'||cizimMod==='sulama'){kutu.innerHTML=svgPlan(st,H,cizimMod,cizimMod==='plan'?{secili:yer.tasima?yer.secili:null,kasalar:yer.tasima?yer.kasalar:[],kilavuz:yer.tasima?yer.kilavuz:null}:null);lj=`<span><i style="background:#d2a76c"></i>Yeni kasa</span><span><i style="background:#d6d6d6;border:1px dashed #777"></i>Mevcut kasa</span><span><i style="background:#123f75;height:4px"></i>Ana hat</span><span><i style="background:#3b8fd9;height:3px"></i>Ø16 iniş/dağıtım</span><span><i style="background:#1d6fc4;height:2px"></i>Damlalı boru</span><span><i style="background:#e07b28"></i>Grup vanası / hat vanası</span><span><i style="background:#e4d4b4;border:1px solid #8a6a3a"></i>Vana bölmesi</span><span><i style="background:#1f6fb2;border-radius:50%"></i>S: su kaynağı</span>`;
   if(cizimMod==='sulama')alt=sulamaTablo(st,H)}
  else if(cizimMod==='suldetay'){const Gs=G.d?G:H.gr.find(x=>x.d);if(!Gs){kutu.innerHTML='<p class="not" style="padding:16px">Damla sulaması seçili grup yok.</p>'}else{if(Gs!==G)sel.value=Gs.gi;kutu.innerHTML=svgSulamaDetay(Gs,st);alt=`<div class="kart" style="margin-top:12px"><h3 style="margin-top:0">Sulama bağlantısı — kurulum sırası</h3><ol>${sulamaMontaj(Gs,st).map(x=>`<li>${x}</li>`).join('')}</ol></div>`}}
  else if(cizimMod==='kesit'){kutu.innerHTML=svgKesit(G,st);alt=kasaTablo(G)}
@@ -1449,6 +1452,7 @@ function yerArac(){const t=$('#btnTasi');t.textContent=`✋ Taşıma modu: ${yer
  const ay=$('#btnAyir');ay.hidden=!(sk.length===1&&sk[0].G.beds.length>1);if(!ay.hidden)ay.textContent=`✂ ${sk[0].b.ad} kasasını gruptan ayır`;
  {const g=G&&G.g;$('#yerAra').textContent=g?`Kasa arası ${fmt(G.ar*100)} cm · sıra arası ${fmt(G.sa*100)} cm${g.durum==='yeni'?` (en az ${fmt(n0(st.alan.kasaMin,150))})`:''}`:'';$$('#yerSecili [data-ara]').forEach(b=>b.hidden=!G||!!sk.length);$('#yerAra').hidden=!G||!!sk.length}
  {const gs=st.gruplar[yer.secili];$('#btnSirala').hidden=!(yer.tasima&&gs&&Array.isArray(gs.serbest)&&gs.serbest.length)}$('#btnGeri').disabled=!GERI.length;
+ $('#sinirKut').hidden=!(sk.length||G);if(!$('#sinirKut').hidden&&!yer.kilavuz)yer.kilavuz={e:$('#sinirKenar').value,d:Math.max(0,n0($('#sinirMesafe').value,150))/100};if($('#sinirKut').hidden)yer.kilavuz=null;
  $('#grupYap').hidden=!sk.length;$('#hizaKut').hidden=sk.length<1;$$('#hizaKut [data-hiza]').forEach(b=>b.disabled=b.dataset.hiza.startsWith('d')?sk.length<3:sk.length<2);if(sk.length){$('#selHedefGrup').innerHTML='<option value="">Hedef grup…</option>'+H.gr.map(x=>`<option value="${x.gi}">${x.kod} · ${esc(x.g.ad)}</option>`).join('');$('#btnYeniGrup').textContent=`▣ Seçilen ${sk.length} kasayla yeni grup`}
  $('#btnSecimBirak').hidden=!sk.length;$('#btnTumunuSec').hidden=!G;$('#btnDondur').hidden=!!sk.length;
  $$('#yerSecili [data-it]').forEach(b=>b.hidden=false)}
@@ -1532,6 +1536,18 @@ function otoYerlestir(){const A=st.alan,en=n0(A.en),boy=n0(A.boy),km=n0(A.kasaMi
  L.forEach(G=>{const w=G.bb.w,h=G.bb.h;if(x>ke+1e-6&&x+w>en-ke+1e-6){x=ke;y+=sat+km;sat=0}const g=G.g;g.x=r2(n0(g.x)+x-G.bb.x);g.y=r2(n0(g.y)+y-G.bb.y);if(y+h>boy-ke+1e-6||x+w>en-ke+1e-6)tasti=true;x+=w+km;sat=Math.max(sat,h)});
  yer.kasalar=[];YS=null;degisti();renderForm();cizimCiz(true);toast(tasti?'Gruplar yan yana dizildi ama alan yetmiyor; alanı büyütün ya da kasa sayısını azaltın. ↶ Geri al ile dönebilirsiniz.':`${L.length} grup kenardan ${fmt(ke*100)} cm, aralarında ${fmt(km*100)} cm bırakılarak dizildi. ↶ Geri al ile dönebilirsiniz.`)}
 function grupSirala(){const g=st.gruplar[yer.secili];if(!g||!Array.isArray(g.serbest))return;const n=g.serbest.length;delete g.serbest;g.sira=1;g.sutun=n;g.haric=[];g.kasaAci={};g.aci=0;yer.kasalar=[];degisti();renderForm();cizimCiz(true);toast(`${harf(yer.secili)} grubu ${n} kasa yan yana olacak şekilde düzenlendi`)}
+function kilavuzAyarla(){yer.kilavuz={e:$('#sinirKenar').value,d:Math.max(0,n0($('#sinirMesafe').value,150))/100};cizimCiz(true)}
+$('#sinirKenar').onchange=kilavuzAyarla;$('#sinirMesafe').oninput=()=>{clearTimeout(kilavuzAyarla._z);kilavuzAyarla._z=setTimeout(kilavuzAyarla,250)};
+function sinirHizala(){const A=st.alan,en=n0(A.en),boy=n0(A.boy),ke=n0(A.kenarMin,100)/100,e=$('#sinirKenar').value;let d=Math.max(0,n0($('#sinirMesafe').value,150))/100;if(!(en>0&&boy>0))return;const az=d<ke-1e-6;d=Math.max(d,ke);
+ const sk=seciliKasalar(),grup=$('#hizaKapsam').value==='grup'||!sk.length,once=JSON.stringify(st.gruplar),onceK=JSON.stringify(yer.kasalar),u0=ustUste();
+ const kutuG=G=>{let x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;G.poli.forEach(P=>P.forEach(q=>{x0=Math.min(x0,q[0]);x1=Math.max(x1,q[0]);y0=Math.min(y0,q[1]);y1=Math.max(y1,q[1])}));return{x0,x1,y0,y1}};
+ const fark=k=>e==='alt'?[0,boy-d-k.y1]:e==='ust'?[0,d-k.y0]:e==='sol'?[d-k.x0,0]:[en-d-k.x1,0];const L=[];
+ if(grup){const gis=sk.length?[...new Set(sk.map(x=>x.gi))]:[yer.secili];gis.forEach(gi=>{const G=H.gr.find(x=>x.gi===gi);if(!G)return;const[dx,dy]=fark(kutuG(G));L.push({gi,no:G.beds[0].no,dx:r2(dx),dy:r2(dy),tum:true})})}
+ else sk.forEach(x=>{const[dx,dy]=fark(kasaKutu(x.G,x.b));L.push({gi:x.gi,no:x.no,dx:r2(dx),dy:r2(dy)})});
+ if(!L.length)return;const sec=sk.map(x=>({gi:x.gi,no:x.no,G:x.G,b:x.b}));kasalariKaydir(L);if(sec.length)kasaSecYenile(sec);degisti();
+ if(ustUste()>u0){st.gruplar=JSON.parse(once);yer.kasalar=JSON.parse(onceK);SON_G=null;YS=null;degisti();if(GERI[GERI.length-1]===SON_G)GERI.pop();renderForm();cizimCiz(true);toast('Hizalanmadı: kasalar üst üste gelecekti. Önce yoldaki kasayı ya da grubu taşıyın.');return}
+ renderForm();cizimCiz(true);toast(`${L.length} ${grup?'grup':'kasa'} ${({alt:'alt',ust:'üst',sol:'sol',sag:'sağ'})[e]} sınırdan ${fmt(d*100)} cm'e hizalandı`+(az?` (en az kenar boşluğu ${fmt(ke*100)} cm uygulandı)`:''))}
+$('#btnSinirHiza').onclick=sinirHizala;
 $('#btnGeri').onclick=geriAl;$('#btnOtoYer').onclick=otoYerlestir;$('#btnSirala').onclick=grupSirala;
 $('#hizaKut').addEventListener('click',e=>{const b=e.target.closest('[data-hiza]');if(b)hizala(b.dataset.hiza)});
 $('#btnYeniGrup').onclick=()=>grupDuzenle(null);
