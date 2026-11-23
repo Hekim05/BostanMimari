@@ -210,6 +210,21 @@ async def hizalama(pg):
     assert abs(r['g2'][0] - r['g2'][1]) < 0.011, r
 
 @test
+async def geri_al_ve_oto(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:30,boy:20};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3,sira:2}),yeniGrup(1,{x:2,y:9,sutun:2})];projeEkle(p);sekme('cizim');
+      const uu=()=>H.sorun.filter(b=>b.sev==='kritik'&&/üst üste/.test(b.baslik)).length;const x0=JSON.stringify(st.gruplar);
+      // çakıştıracak hizalama reddedilmeli: A1 referans, A5'i aynı sütuna (A4 ile çakışır)
+      yer.kasalar=[{gi:0,no:0},{gi:0,no:4}];$('#hizaKapsam').value='kasa';hizala('x');const red=JSON.stringify(st.gruplar)===x0&&uu()===0;
+      // grubu taşı, sonra geri al
+      st.gruplar[1].x=8;degisti();const tasindi=st.gruplar[1].x;geriAl();const geri=st.gruplar[1].x;
+      // dağınık hale getir ve otomatik yerleştir
+      st.gruplar[0].x=15;st.gruplar[1].x=14.5;st.gruplar[1].y=2.5;YS=null;degisti();otoYerlestir();
+      let m=Infinity;for(let i=0;i<H.gr.length;i++)for(let j=i+1;j<H.gr.length;j++)m=Math.min(m,grupMes(H.gr[i],H.gr[j]));
+      return{red,tasindi,geri,m,uu:uu()}}""")
+    assert r['red'] and r['tasindi'] == 8 and r['geri'] == 2, r
+    assert r['m'] >= 1.495 and r['uu'] == 0, r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -264,7 +279,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
