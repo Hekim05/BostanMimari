@@ -104,6 +104,7 @@ body.ev .alt{display:none}body.ev{padding-bottom:24px}
 .adimlar .sira{display:flex;gap:6px;flex-wrap:wrap}.adimlar button{color:#1f2a21;-webkit-text-fill-color:#1f2a21;font-weight:600;flex:1 1 30%;justify-content:center;border:1px solid var(--cz);background:#fff;border-radius:18px;padding:6px 10px;font-size:13px;min-height:38px;display:flex;align-items:center;gap:5px}
 .adimlar button.ok{border-color:#9cc8a2;background:#eef7ee}.adimlar button.kr{border-color:#e8a59d;background:#fdeeec}.adimlar button.uy{border-color:#e6c77d;background:#fff6e0}.adimlar button.sonra{border-color:var(--y);box-shadow:0 0 0 2px rgba(46,107,58,.35)}
 .adimlar p{margin:8px 2px 0;font-size:13.5px;color:#1f2a21}
+@media(max-width:430px){#btnProje span{display:none}#btnProje{padding:0!important}}#dlgSorgu{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;background:#eef1ec;display:none;flex-direction:column}#dlgSorgu[open]{display:flex}.sgUst{display:flex;gap:8px;padding:12px 12px 8px;padding-top:calc(12px + env(safe-area-inset-top));background:#2e6b3a}.sgUst input{flex:1;min-height:46px;border-radius:12px;border:0;padding:0 14px;font-size:17px;color:#1f2a21;background:#fff}.sgOn{display:flex;gap:6px;overflow-x:auto;padding:8px 12px;flex:0 0 auto}.sgOn .btn{white-space:nowrap;flex:0 0 auto}.sgS{overflow-y:auto;padding:4px 12px 24px;flex:1}.sgB{margin:14px 0 6px;font-size:15px}.sgB small{color:#667;font-weight:400}.sgK{background:#fff;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14.5px;line-height:1.4;border-left:4px solid #9bb59a}.sgK.kr{border-left-color:#c0392b}.sgK.uy{border-left-color:#e0a11b}.sgK>div{color:#334}.sgK mark{background:#fde68a;color:inherit;border-radius:3px}.sgA{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
 #dlgIhaleOn{width:100vw;max-width:100vw;height:100dvh;max-height:100dvh;border-radius:0;margin:0;background:#eef1ec;display:none;flex-direction:column}#dlgIhaleOn[open]{display:flex}
 .onUst{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--y);color:#fff}.onUst .btn{background:#fff}
 .onSekmeler{display:flex;gap:6px;overflow-x:auto;padding:8px 10px;background:#fff;border-bottom:1px solid var(--cz);flex:0 0 auto}.onSekmeler button{flex:0 0 auto;border:1px solid var(--cz);background:#fff;border-radius:16px;padding:7px 12px;font-size:13px;min-height:36px;color:var(--sl)}.onSekmeler button.on{background:var(--y);color:#fff;border-color:var(--y);font-weight:700}
@@ -187,6 +188,7 @@ dialog .ic{padding:16px}
   <svg width="36" height="36" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff"/><rect x="9" y="19" width="22" height="9" rx="1.5" fill="#c49a63"/><rect x="11" y="16.5" width="18" height="3" fill="#6b4a2a"/><path d="M14 16c0-4 2-6 4-7M20 16c0-5 1-7 3-8M26 16c0-3-1-5-3-6" stroke="#2e6b3a" stroke-width="2" fill="none" stroke-linecap="round"/><path d="M8 31h24" stroke="#1f6fb2" stroke-width="2" stroke-dasharray="2 2"/></svg>
   <div><b>Bostan Mimarı</b><small id="projeAdUst">—</small></div>
  </div>
+ <button class="ikbtn" id="btnSorgu" aria-label="Sorgu: projede ara"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg></button>
  <button class="ikbtn" id="btnProje" aria-label="Çalışmalarım" style="padding:0 12px;gap:6px;display:flex;align-items:center;font-size:14px;font-weight:600"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Çalışmalar</span></button>
 </header>
 
@@ -318,11 +320,12 @@ dialog .ic{padding:16px}
  <div class="satir"><label class="btn" style="flex-direction:row">📷 Kendi fotoğrafımı ekle<input type="file" id="malzFoto" accept="image/*" hidden></label><button class="btn kirmizi" id="malzFotoSil" hidden>Fotoğrafı kaldır</button><button class="btn dolu" id="malzKapat" style="margin-left:auto">Kapat</button></div>
 </div></dialog>
 <dialog id="dlgIhaleOn"><div class="onUst"><b>Hazırlık klasörü önizleme</b><button class="btn kucuk" id="onKapat">Kapat ✕</button></div><div class="onSekmeler" id="onSekmeler"></div><div id="onIcerik"></div></dialog>
+<dialog id="dlgSorgu"><div class="sgUst"><input id="sorguGir" type="search" placeholder="Projede ara: malzeme, adım, terim…" autocomplete="off" enterkeyhint="search"><button class="btn kucuk" id="sorguKapat">Kapat ✕</button></div><div class="sgOn" id="sorguOneri"></div><div id="sorguSonuc" class="sgS"></div></dialog>
 <div id="toast"></div>
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-5';
+const APP_VERSION = '2026.11.23-6';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1309,7 +1312,7 @@ function rozetCiz(){const kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sor
 
 /* ---------- Sekmeler ---------- */
 $$('#altNav button').forEach(b=>b.onclick=()=>sekme(b.dataset.t));
-function sekme(t){aktifTab=t;document.body.classList.toggle('ev',t==='ev');if(t==='ev'){$('#projeAdUst').textContent='Çalışmalarım';$('#btnProje').style.visibility='hidden';evCiz()}else{$('#projeAdUst').textContent=st.meta.ad||'—';$('#btnProje').style.visibility=''}$$('#altNav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.tab').forEach(s=>s.classList.toggle('aktif',s.id==='t-'+t));window.scrollTo(0,0);
+function sekme(t){aktifTab=t;document.body.classList.toggle('ev',t==='ev');if(t==='ev'){$('#projeAdUst').textContent='Çalışmalarım';$('#btnProje').style.visibility='hidden';$('#btnSorgu').style.display='none';evCiz()}else{$('#projeAdUst').textContent=st.meta.ad||'—';$('#btnProje').style.visibility='';$('#btnSorgu').style.display=''}$$('#altNav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));$$('.tab').forEach(s=>s.classList.toggle('aktif',s.id==='t-'+t));window.scrollTo(0,0);
  if(t==='cizim')cizimCiz();if(t==='denetim')denetimCiz();if(t==='rapor')raporCiz();if(t==='3d')uc3D();if(t==='ihale'){ihaleSon=null;ihaleTurSon=null;$('#ihaleCikti').hidden=true;$('#ihaleKontrol').hidden=true;$('#ihaleDurum').textContent='';$('#btnIhaleTaslak').hidden=true;ihaleCiz()}}
 
 /* ---------- Çizim sekmesi ---------- */
@@ -1963,6 +1966,74 @@ $('#btnIhaleOn').onclick=()=>{H=hesapla(st);onSekme='sartname';onizleCiz();$('#d
 $('#onSekmeler').addEventListener('click',e=>{const b=e.target.closest('[data-on]');if(!b)return;onSekme=b.dataset.on;onizleCiz()});
 $('#onKapat').onclick=()=>$('#dlgIhaleOn').close();
 /* ---------- Çalışmalar (ana sayfa) ---------- */
+/* ---------- Sorgu ---------- */
+const SOZLUK=[
+ ['EPDM bant','Kauçuk esaslı ayırıcı şerit. Galvaniz parçayı bakırlı emprenyeli ahşaptan ayırır; temas ederse çinko kaplama hızla aşınır.'],
+ ['Emprenye (UC3 / UC4)','Ahşaba basınçla verilen koruyucu. UC3: toprağa değmeyen dış ortam. UC4: toprak ve sürekli nemle temas eden ahşap; bostan kasasında UC4 istenir.'],
+ ['Sıcak daldırma galvaniz','Çeliğin erimiş çinkoya daldırılmasıyla yapılan kalın kaplama (yaklaşık 50–85 µm). Elektro galvaniz (5–15 µm) toprakta birkaç yılda paslanır.'],
+ ['Ara dikme','Uzun kenarlarda köşe dikmeleri arasına konan dikme. Tahtanın açıklığını kısaltır; eğilmeyi ve esnemeyi azaltır.'],
+ ['Gergi','Karşılıklı dikmeleri kasanın içinden bağlayan çubuk ya da çıta. Toprağın itmesiyle duvarların dışa açılmasını önler.'],
+ ['Gömme derinliği','Dikmenin toprağa giren boyu. Gergisiz dikmeyi devrilmeye karşı tutar.'],
+ ['Sehim','Yük altında tahtanın ortasında oluşan esneme. Sınır L/150: 100 cm açıklıkta en çok 6,7 mm.'],
+ ['Sünme','Islak ahşabın sürekli yük altında zamanla daha çok esnemesi. Sehim hesabı bunu içerir.'],
+ ['Yanal toprak itkisi (K0)','Toprağın duvara yaptığı yatay basınç. K0 = 1 − sin φ; derinlikle artar, en büyük değer tabandadır.'],
+ ['Kullanım oranı','Hesaplanan etkinin taşıma sınırına oranı. %100’ün altı yeterli, %80’in üstü sınırda sayılır.'],
+ ['Basınç kompanzeli (PC) damlatıcı','Basınç değişse de aynı debiyi veren damlatıcı. Uzun hatlarda ve düşük şebeke basıncında eşit sulama sağlar.'],
+ ['Basınç düşürücü (regülatör)','Şebeke basıncını damla sulamanın çalışma basıncına (yaklaşık 1–1,5 bar) indirir; 2,5 barın üstünde gerekir.'],
+ ['Debi (L/sa)','Bir damlatıcının ya da hattın saatte verdiği su. Toplam debi şebekenin ya da deponun verebileceğini aşmamalı.'],
+ ['Christiansen katsayısı','Üzerinde çok sayıda çıkış olan borudaki sürtünme kaybını düzelten katsayı; damlalı boru hesabında kullanılır.'],
+ ['Kova testi','Kurulumdan sonra birkaç damlatıcının altına kap koyup belli sürede biriken suyu ölçerek sulamanın eşit olup olmadığını denetlemek.'],
+ ['Koruge kılıf','Esnek oluklu plastik boru. Yerden çıkan sulama borusunu çapa ve ayak darbesinden korur.'],
+ ['Malç','Toprak yüzeyine serilen saman, yaprak, yonga gibi örtü. Buharlaşmayı azaltır, damlalı boruyu güneşten korur.'],
+ ['Vana bölmesi','Kasanın bir ucunda vanaların durduğu, toprak doldurulmayan küçük bölme.'],
+ ['Malzeme kasası','Kasaya bitişik ya da içinde yer alan kapaklı alet ve malzeme dolabı.'],
+ ['Toprak üstü boşluk','Toprak yüzeyi ile kasa üst kenarı arasındaki pay; sulamada taşmayı önler, malçı tutar.'],
+ ['Hazırlık klasörü','Satın alma ya da ihale için metraj, yaklaşık maliyet, teklif cetveli, piyasa araştırması, şartname ve çizimlerin toplandığı klasör.'],
+ ['Yaklaşık maliyet','İşe başlamadan hesaplanan tahmini bedel: birim fiyat × miktar.'],
+ ['Metraj','Her iş kaleminin miktarının (adet, m, m², m³) çıkarılması.'],
+ ['Köşegen kontrolü','Dikdörtgen kasada iki köşegen eşitse köşeler 90°’dir.'],
+ ['Kış boşaltması','Donma öncesi ana hattaki ve dağıtım borusundaki suyun tapalar açılarak tamamen boşaltılması; boru ve vanaların çatlamasını önler.']];
+const trN=s=>String(s??'').toLocaleLowerCase('tr').replace(/[çğıöşüâîû]/g,c=>({ç:'c',ğ:'g',ı:'i',ö:'o',ş:'s',ü:'u',â:'a',î:'i',û:'u'}[c])).replace(/×/g,'x');
+const DUR=new Set('ne nedir neden niye kac kadar nerede nereye nasil mi mu icin ve ile bir bu su o olan var hangi lazim gerekir gerek midir mudur'.split(' '));
+const SORGU_TUR={soz:['📖','Nedir?'],ozet:['📊','Proje özeti'],parca:['🔩','Malzeme'],sulama:['💧','Sulama malzemesi'],hesap:['📐','Dayanım hesabı'],omur:['⏳','Ömür'],bulgu:['⚠️','Denetim bulguları'],montaj:['🛠️','Kurulum adımları']};
+function sorguDizin(){const D=[],ek=(tur,baslik,metin,o={})=>D.push({tur,baslik,metin:String(metin||'').replace(/<[^>]+>/g,''),...o}),o=H.top;
+ ek('ozet','Proje özeti',`${o.kasa} kasa (${o.kasaYeni} yeni) · ekim alanı ${fmt(o.ekim,1)} m² · toprak karışımı ${fmt(o.mixL/1000,2)} m³ · damla debisi ${fmt(o.Q,0)} L/sa${o.bolge>1?` · ${o.bolge} sulama bölgesi`:''}`,{git:'girdi'});
+ H.gr.forEach(G=>{const a=`${G.kod} grubu`;
+  (G.parca||[]).forEach(p=>ek('parca',p.kalem,`${a} · ${p.olcu||''} · ${fmt(p.adet,2)} ${p.birim}${p.not?' · '+p.not:''}`,{git:'rapor',malz:p.kalem}));
+  try{montaj(G,st).forEach((x,i)=>ek('montaj',`${a} — kurulum ${i+1}. adım`,x,{git:'rapor'}))}catch(e){}
+  if(G.d)sulamaMontaj(G,st).forEach((x,i)=>ek('montaj',`${a} — sulama bağlantısı ${i+1}. adım`,x,{git:'cizim',ciz:'suldetay',gi:G.gi}));
+  if(G.day)G.day.K.forEach(x=>ek('hesap',`${a} — ${x.ad}`,`${x.deger} / ${x.sinir} · kullanım %${fmt(x.oran*100,0)}${x.acik?' · '+x.acik:''}`,{git:'denetim'}));
+  if(G.om)G.om.L.forEach(x=>ek('omur',`${a} — ${x.p}`,`${x.a[0]}–${x.a[1]} yıl${x.n?' · '+x.n:''}`,{git:'denetim'}))});
+ sulamaListe(st,H).forEach(r=>ek('sulama',r[0],`${fmt(r[2],2)} ${r[1]}${r[3]?' · '+r[3]:''}`,{git:'rapor',malz:r[0]}));
+ (H.sorun||[]).forEach(b=>ek('bulgu',b.baslik,`${b.mesaj||''}${b.oneri?' → '+b.oneri:''}`,{git:'denetim',sev:b.sev}));
+ SOZLUK.forEach(([t,m])=>ek('soz',t,m));
+ Object.entries(MALZ_GOR).forEach(([k,M])=>{if(k!=='genel'&&M.a)ek('soz',M.ad,M.a+(M.i?' '+M.i:''),{malz:M.ad})});
+ return D}
+function sorguKok(t){return t.length>5?t.slice(0,Math.max(4,t.length-3)):t}
+function sorgula(q){const T=[...new Set(trN(q).split(/[^a-z0-9ø]+/).filter(w=>w&&!DUR.has(w)))];if(!T.length)return[];
+ const nedir=/\b(ne|nedir|neden|niye)\b/.test(trN(q)),kac=/\b(kac|kadar|miktar|adet)\b/.test(trN(q));
+ const R=sorguDizin().map(d=>{const b=' '+trN(d.baslik).replace(/[^a-z0-9ø]+/g,' '),m=' '+trN(d.metin).replace(/[^a-z0-9ø]+/g,' ');let p=0,n=0;
+  T.forEach(t=>{const k=' '+sorguKok(t)+(t.length<=3?' ':'');if((b+' ').includes(k)){p+=3;n++}else if((m+' ').includes(k)){p+=1;n++}else if(t.length>=5&&(b+m).includes(t)){p+=0.5;n++}});
+  if(n<Math.ceil(T.length*0.6)||!p)return null;if(nedir&&d.tur==='soz')p+=2;if(kac&&(d.tur==='parca'||d.tur==='sulama'))p+=2;if(d.sev==='kritik')p+=0.5;return{...d,p:p+n*2}}).filter(Boolean);
+ return R.sort((a,b)=>b.p-a.p).slice(0,60)}
+function sorguVurgu(s,q){let h=esc(s);const T=[...new Set(trN(q).split(/[^a-z0-9ø]+/).filter(w=>w.length>=3&&!DUR.has(w)))].map(sorguKok);if(!T.length)return h;
+ const n=trN(h);const isr=new Array(h.length).fill(0);T.forEach(t=>{let i=n.indexOf(t);while(i>=0){for(let j=i;j<i+t.length;j++)isr[j]=1;i=n.indexOf(t,i+t.length)}});
+ let o='',ac=false;for(let i=0;i<h.length;i++){if(isr[i]&&!ac){o+='<mark>';ac=true}if(!isr[i]&&ac){o+='</mark>';ac=false}o+=h[i]}return o+(ac?'</mark>':'')}
+const SORGU_ONERI=['vida kaç adet','EPDM nedir','lama','dayanım','sulama basıncı','toprak karışımı','kış boşaltması','kova testi','ömür','vana bölmesi'];
+function sorguCiz(){const q=$('#sorguGir').value.trim(),el=$('#sorguSonuc');
+ if(!q){const D=sorguDizin(),c=t=>D.filter(x=>x.tur===t).length;el.innerHTML=`<p class="not">Bu çalışmada aranabilir: ${c('parca')+c('sulama')} malzeme kalemi, ${c('montaj')} kurulum adımı, ${c('hesap')} dayanım kontrolü, ${c('bulgu')} denetim bulgusu ve ${c('soz')} terim açıklaması. Kelime yazın ya da bir öneriye dokunun.</p>`;return}
+ const R=sorgula(q);if(!R.length){el.innerHTML=`<p class="not">“${esc(q)}” için sonuç yok. Daha kısa ya da farklı bir kelime deneyin (ör. “vida”, “conta”, “basınç”).</p>`;return}
+ const gr={};R.forEach(r=>(gr[r.tur]=gr[r.tur]||[]).push(r));const sira=Object.keys(gr).sort((a,b)=>Math.max(...gr[b].map(x=>x.p))-Math.max(...gr[a].map(x=>x.p)));
+ el.innerHTML=`<p class="not">${R.length} sonuç</p>`+sira.map(t=>`<h3 class="sgB">${SORGU_TUR[t][0]} ${SORGU_TUR[t][1]} <small>${gr[t].length}</small></h3>`+gr[t].slice(0,t==='soz'?4:12).map(r=>{const i=R.indexOf(r);
+  return`<div class="sgK${r.sev==='kritik'?' kr':r.sev==='uyari'?' uy':''}"><b>${sorguVurgu(r.baslik,q)}</b><div>${sorguVurgu(r.metin.length>260?r.metin.slice(0,257)+'…':r.metin,q)}</div><div class="sgA">${r.malz?`<button class="btn kucuk" data-sgm="${i}">Nedir, neye benzer?</button>`:''}${r.git?`<button class="btn kucuk" data-sgg="${i}">${({girdi:'Girdiye',rapor:'Rapora',denetim:'Denetime',cizim:'Çizime'})[r.git]} git →</button>`:''}</div></div>`}).join('')).join('');
+ el._R=R}
+function sorguAc(){$('#sorguOneri').innerHTML=SORGU_ONERI.map(x=>`<button class="btn kucuk" data-sgo="${esc(x)}">${esc(x)}</button>`).join('');$('#dlgSorgu').showModal();sorguCiz();setTimeout(()=>$('#sorguGir').focus(),50)}
+$('#btnSorgu').onclick=sorguAc;$('#sorguKapat').onclick=()=>$('#dlgSorgu').close();
+$('#sorguGir').oninput=()=>{clearTimeout(sorguCiz._z);sorguCiz._z=setTimeout(sorguCiz,150)};
+$('#dlgSorgu').addEventListener('click',e=>{const o=e.target.closest('[data-sgo]');if(o){$('#sorguGir').value=o.dataset.sgo;sorguCiz();return}
+ const R=$('#sorguSonuc')._R||[],m=e.target.closest('[data-sgm]');if(m){malzAc(R[+m.dataset.sgm].malz);return}
+ const g=e.target.closest('[data-sgg]');if(g){const r=R[+g.dataset.sgg];$('#dlgSorgu').close();if(r.ciz){cizimMod=r.ciz;$$('#segCizim button').forEach(x=>x.classList.toggle('on',x.dataset.v===r.ciz));if(r.gi!=null)$('#selGrupCizim').value=r.gi}sekme(r.git);if(r.ciz)cizimCiz(true)}});
+
 function calismaOzet(p){try{const q=onar(JSON.parse(JSON.stringify(p))),h=hesapla(q),kr=h.sorun.filter(b=>b.sev==='kritik').length,uy=h.sorun.filter(b=>b.sev==='uyari').length;return{h,kr,uy,eksik:(h.eksik||[]).length}}catch(e){return null}}
 function evCiz(){const L=Object.entries(DB.projeler).sort((a,b)=>(b[1]._t||0)-(a[1]._t||0));
  $('#evListe').innerHTML=L.length?L.map(([id,p])=>{const o=calismaOzet(p),t=o&&o.h.top;

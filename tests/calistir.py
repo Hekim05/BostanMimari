@@ -136,6 +136,18 @@ async def ara_dikme_lamasi(pg):
     assert r['a'] == r['ar'] > 0 and r['b'] == 0 and r['d'] and r['gal'] == 0, r
 
 @test
+async def sorgu(pg):
+    await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
+    r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
+    assert r['v']['tur'] == 'parca' and 'vida' in r['v']['baslik'].lower(), r
+    assert r['e']['tur'] == 'soz' and 'EPDM' in r['e']['baslik'], r
+    assert not any('gömülü' in b for b in r['k']) and r['y'] == 0, r
+    await pg.click('#btnSorgu'); await pg.fill('#sorguGir', 'conta'); await pg.wait_for_timeout(400)
+    assert await pg.locator('#sorguSonuc .sgK').count() > 0
+    await pg.locator('[data-sgg]').first.click(); await pg.wait_for_timeout(300)
+    assert not await pg.evaluate("$('#dlgSorgu').open")
+
+@test
 async def sulama_detayi(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>{const G=H.gr.find(x=>x.d);const s=svgSulamaDetay(G,st);const d=new DOMParser().parseFromString(s,'image/svg+xml');
@@ -178,7 +190,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
