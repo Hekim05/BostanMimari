@@ -1,4 +1,4 @@
-const VERSION = '2026.11.23-16';
+const VERSION = '2026.11.23-17';
 const CACHE = 'app-' + VERSION;
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const CDN = [

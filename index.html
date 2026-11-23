@@ -219,7 +219,7 @@ dialog .ic{padding:16px}
  <details class="kart" open id="d-proje"><summary>1 · Proje bilgisi</summary><div class="ic alanlar" id="f-proje"></div></details>
  <details class="kart" open id="d-alan"><summary>2 · Alan ve yön</summary><div class="ic"><div class="alanlar" id="f-alan"></div><p class="not">Konumlar, alanın <b>sol üst köşesinden</b> metre olarak verilir (x sağa, y aşağı). Kuzey açısı: planın üst kenarından saat yönünde kuzey okuna kadar olan açı (kuzey tam yukarıdaysa 0°).</p></div></details>
  <details class="kart" open id="d-gruplar"><summary>3 · Kasa grupları</summary><div class="ic"><div id="f-gruplar"></div><div class="satir"><button class="btn" id="btnGrupEkle">＋ Yeni grup ekle</button></div><p class="not">Her grup aynı ölçüdeki kasaların sıra × sütun dizisidir. Bir bostana ek yapılıyorsa var olan kasaları "Mevcut" grup olarak girin; bunlar çizimde gri görünür, imalat listesine girmez.</p></div></details>
- <details class="kart"><summary>4 · Damla sulama</summary><div class="ic"><div class="alanlar" id="f-sulama"></div><p class="not">Kaynak debisi bilinmiyorsa 0 bırakın; 10 litrelik kova dolum süresinden hesaplanabilir: debi (L/saat) = 36000 ÷ saniye.</p></div></details>
+ <details class="kart"><summary>4 · Damla sulama</summary><div class="ic"><div class="alanlar" id="f-sulama"></div><button class="btn dolu" id="btnSulOpt" style="margin:8px 0">💧 Sulama malzemesini en aza indir</button><p class="not">Kaynak debisi bilinmiyorsa 0 bırakın; 10 litrelik kova dolum süresinden hesaplanabilir: debi (L/saat) = 36000 ÷ saniye.</p></div></details>
  <details class="kart"><summary>5 · Toprak karışımı</summary><div class="ic"><div class="alanlar" id="f-toprak"></div><h3>Karışım bileşenleri</h3><div id="f-bilesen"></div><div class="satir"><button class="btn kucuk" id="btnBilEkle">＋ Bileşen ekle</button><span class="not" id="oranTop"></span></div><p class="not">Paket hacmi: çuval/torba/balya başına litre. Sıkıştırılmış torf balyasında etiketteki "açılmış hacim" değerini girin.</p></div></details>
 </section>
 
@@ -330,11 +330,20 @@ dialog .ic{padding:16px}
 </div></dialog>
 <dialog id="dlgIhaleOn"><div class="onUst"><b>Hazırlık klasörü önizleme</b><button class="btn kucuk" id="onKapat">Kapat ✕</button></div><div class="onSekmeler" id="onSekmeler"></div><div id="onIcerik"></div></dialog>
 <dialog id="dlgSorgu"><div class="sgUst"><input id="sorguGir" type="search" placeholder="Projede ara: malzeme, adım, terim…" autocomplete="off" enterkeyhint="search"><button class="btn kucuk" id="sorguKapat">Kapat ✕</button></div><div class="sgOn" id="sorguOneri"></div><div id="sorguSonuc" class="sgS"></div></dialog>
+<dialog id="dlgSulOpt"><div class="ic">
+ <h2 style="margin:0 0 6px">Sulama malzemesini en aza indir</h2>
+ <p class="not" style="margin:0 0 8px">Ajan; damla hattı sayısını, damlatıcı aralığını ve ana boru çapını bitkinin ıslanma ihtiyacını ve basınç hesabını bozmadan en düşük malzemeye göre seçer.</p>
+ <div class="alanlar"><label>Toprağın ıslanma genişliği<select id="soIslak"><option value="30">Kumlu / çok süzek — 30 cm</option><option value="40" selected>Bahçe karışımı, tınlı — 40 cm</option><option value="50">Killi / ağır — 50 cm</option></select></label>
+ <label>Su kaynağının yeri<select id="soKaynak"><option value="sabit" selected>Sabit (musluk yerinde kalsın)</option><option value="serbest">Değişebilir (en iyi yeri öner)</option></select></label></div>
+ <button class="btn dolu" id="soHesap" style="margin:8px 0">Hesapla</button>
+ <div id="soSonuc"></div>
+ <div class="satir" style="margin-top:10px"><button class="btn dolu" id="soUygula" hidden>Uygula</button><button class="btn" id="soKapat" style="margin-left:auto">Kapat</button></div>
+</div></dialog>
 <div id="toast"></div>
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-16';
+const APP_VERSION = '2026.11.23-17';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -1227,7 +1236,7 @@ function sulamaListe(st,H){const S=st.sulama,o=H.top,L=[];if(o.Q<=0)return L;con
  ad('Ø16 mini vana','adet',o.lateralSay,'Her damla hattına 1 (vana bölmesinde / malzeme kasasında)');
  const tee=H.gr.reduce((s,G)=>s+(G.d?G.d.teeSay*G.n:0),0),drs=H.gr.reduce((s,G)=>s+(G.d?G.d.dirsekSay*G.n:0),0);
  ad('Ø16 T','adet',tee);ad('Ø16 dirsek','adet',o.inisSay*3+drs);ad('Ø16 son tapa (8 tipi)','adet',o.lateralSay+o.inisSay);
- ad(`Ø${S.anaCap} T`,'adet',T);ad(`Ø${S.anaCap} dirsek`,'adet',D);ad(`Ø${S.anaCap} son tapa`,'adet',K);ad(`Ø${S.anaCap} küresel vana (grup vanası)`,'adet',V);
+ ad(`Ø${S.anaCap} T (ana hat)`,'adet',T);ad(`Ø${S.anaCap} dirsek (ana hat)`,'adet',D);ad(`Ø${S.anaCap} son tapa (ana hat)`,'adet',K);ad(`Ø${S.anaCap} küresel vana (grup vanası)`,'adet',V);
  ad('Disk filtre 3/4" (120 mesh)','adet',1);if(H.hid?H.hid.reg>0:n0(S.basinc)>2)ad(`Basınç düşürücü ${H.hid&&H.hid.reg?fmt(H.hid.reg,1):'1,5'} bar`,'adet',1);ad('Musluk adaptörü + kaplin','takım',1);
  ad('Boru sabitleme kazığı (U)','adet',Math.ceil(o.latM/1));return L}
 
@@ -1387,8 +1396,8 @@ function oranGoster(){const t=st.toprak.bil.reduce((s,b)=>s+n0(b.oran),0);$('#or
 /* ---------- Özet ve değişim ---------- */
 let kirli={cizim:1,uc:1,denetim:1,rapor:1},aktifTab='girdi';
 let YS=null,GERI=[],SON_G=null;
-function geriKaydet(){const c=JSON.stringify(st.gruplar);if(SON_G!==null&&c!==SON_G){GERI.push(SON_G);if(GERI.length>40)GERI.shift()}SON_G=c;const b=document.getElementById('btnGeri');if(b)b.disabled=!GERI.length}
-function geriAl(){if(!GERI.length)return;const c=GERI.pop();st.gruplar=JSON.parse(c);SON_G=c;yer.kasalar=[];YS=null;degisti();renderForm();cizimCiz(true);toast(`Geri alındı${GERI.length?` (${GERI.length} adım daha geri alınabilir)`:''}`)}
+function geriKaydet(){const c=JSON.stringify({g:st.gruplar,s:st.sulama});if(SON_G!==null&&c!==SON_G){GERI.push(SON_G);if(GERI.length>40)GERI.shift()}SON_G=c;const b=document.getElementById('btnGeri');if(b)b.disabled=!GERI.length}
+function geriAl(){if(!GERI.length)return;const c=GERI.pop(),o=JSON.parse(c);st.gruplar=o.g;st.sulama=o.s;SON_G=c;yer.kasalar=[];YS=null;degisti();renderForm();cizimCiz(true);toast(`Geri alındı${GERI.length?` (${GERI.length} adım daha geri alınabilir)`:''}`)}
 function yerSnap(){const m={};st.gruplar.forEach(g=>m[g.id]=JSON.stringify(g));return m}
 function yerlesimDuzelt(degisen){const A=st.alan,en=n0(A.en),boy=n0(A.boy),km=Math.max(0,n0(A.kasaMin,150))/100,ke=Math.max(0,n0(A.kenarMin,100))/100,T=[];
  const sinirOk=(G,dx,dy)=>!(en>0&&boy>0)||G.poli.every(P=>P.every(q=>q[0]+dx>=ke-0.005&&q[1]+dy>=ke-0.005&&q[0]+dx<=en-ke+0.005&&q[1]+dy<=boy-ke+0.005));
@@ -1563,6 +1572,36 @@ function sinirHizala(){const A=st.alan,en=n0(A.en),boy=n0(A.boy),ke=n0(A.kenarMi
  if(ustUste()>u0){st.gruplar=JSON.parse(once);yer.kasalar=JSON.parse(onceK);SON_G=null;YS=null;degisti();if(GERI[GERI.length-1]===SON_G)GERI.pop();renderForm();cizimCiz(true);toast('Hizalanmadı: kasalar üst üste gelecekti. Önce yoldaki kasayı ya da grubu taşıyın.');return}
  renderForm();cizimCiz(true);toast(`${L.length} ${grup?'grup':'kasa'} ${({alt:'alt',ust:'üst',sol:'sol',sag:'sağ'})[e]} sınırdan ${fmt(d*100)} cm'e hizalandı`+(az?` (en az kenar boşluğu ${fmt(ke*100)} cm uygulandı)`:''))}
 $('#btnSinirHiza').onclick=sinirHizala;
+function sulamaDene(deg){const s0=st,H0=H;try{st=JSON.parse(JSON.stringify(s0));Object.assign(st.sulama,deg.S||{});if(deg.hs)Object.entries(deg.hs).forEach(([i,v])=>{st.gruplar[i].hatSayisi=v});
+  const H2=hesapla(st),L=sulamaListe(st,H2);let tl=0,fiyatsiz=0;L.forEach(r=>{const f=piyasaFiyat({kalem:r[0],olcu:'',birim:r[1],miktar:r[2]});if(f)tl+=f.dahil*r[2];else fiyatsiz++});
+  return{L,tl,fiyatsiz,sor:new Set(H2.sorun.filter(b=>b.sev==='kritik'||b.sev==='uyari').map(b=>b.baslik)),Q:H2.top.Q,bolge:H2.top.bolge,anaM:H2.top.anaM,latM:H2.top.latM}}finally{st=s0;H=H0}}
+let SO=null;
+function sulamaEnAz(){const isl=+$('#soIslak').value,S=st.sulama,once=sulamaDene({});
+ const hs={};H.gr.forEach(G=>{if(!G.d||G.g.durum!=='yeni')return;const k=G.k,ic=k.W-2*k.t;let n=Math.max(1,Math.ceil(ic/isl-1e-9));if(k.sekil==='U')n=Math.max(2,n);hs[G.gi]=n});
+ const da=[20,25,30,33,40,50].filter(x=>x<=isl).pop()||20;
+ let kaynak=[[n0(S.kx),n0(S.ky)]];if($('#soKaynak').value==='serbest'){const en=n0(st.alan.en),boy=n0(st.alan.boy),m=0.3;kaynak=kaynak.concat([[m,m],[en/2,m],[en-m,m],[m,boy/2],[en-m,boy/2],[m,boy-m],[en/2,boy-m],[en-m,boy-m]])}
+ let en=null;const caplar=[16,20,25,32];
+ kaynak.forEach(([kx,ky])=>{const ref=sulamaDene({S:{damlaAr:da,anaCap:n0(S.anaCap,20),kx,ky},hs});let sec=ref,cap=n0(S.anaCap,20);
+  for(const c of caplar){if(c>=cap)break;const r=sulamaDene({S:{damlaAr:da,anaCap:c,kx,ky},hs});if([...r.sor].every(x=>ref.sor.has(x))){sec=r;cap=c;break}}
+  const yeniSorun=[...sec.sor].filter(x=>!once.sor.has(x));if(yeniSorun.length)return;
+  if(!en||sec.tl<en.r.tl-0.5)en={r:sec,deg:{S:{damlaAr:da,anaCap:cap,kx,ky},hs}}});
+ SO=null;const el=$('#soSonuc');if(!en){el.innerHTML='<p class="not">Basınç ya da sulama denetimini bozmadan daha az malzemeli bir düzen bulunamadı.</p>';$('#soUygula').hidden=true;return}
+ const r=en.r,d=en.deg,kazanc=once.tl-r.tl;
+ const an=x=>/ana boru|ana hat|boruya|grup vanası/.test(x)?x.replace(/Ø\d+/g,'Ø'):x,m=new Map();once.L.forEach(x=>m.set(an(x[0]),[x[2],0,x[1],x[0]]));r.L.forEach(x=>{const v=m.get(an(x[0]))||[0,0,x[1],x[0]];v[1]=x[2];v[3]=x[0];m.set(an(x[0]),v)});
+ const satir=[...m.entries()].filter(([,v])=>v[0]!==v[1]).map(([k,v])=>`<tr><td>${esc(v[3])}</td><td style="text-align:right">${fmt(v[0],1)}</td><td style="text-align:right"><b>${fmt(v[1],1)}</b></td><td>${esc(v[2])}</td></tr>`).join('');
+ const deg=[];H.gr.forEach(G=>{if(d.hs[G.gi]!=null&&G.d&&d.hs[G.gi]!==G.d.nk)deg.push(`${G.kod}: kasa başı ${G.d.nk} → <b>${d.hs[G.gi]}</b> damla hattı (hat arası ≈ ${fmt((G.k.W-2*G.k.t)/d.hs[G.gi],0)} cm)`)});
+ if(d.S.damlaAr!==n0(S.damlaAr))deg.push(`Damlatıcı aralığı ${fmt(S.damlaAr)} → <b>${d.S.damlaAr} cm</b>`);
+ if(d.S.anaCap!==n0(S.anaCap))deg.push(`Ana boru Ø${S.anaCap} → <b>Ø${d.S.anaCap}</b> (basınç hesabı yeterli)`);
+ if(d.S.kx!==n0(S.kx)||d.S.ky!==n0(S.ky))deg.push(`Su kaynağı (${fmt(S.kx,1)}; ${fmt(S.ky,1)}) → <b>(${fmt(d.S.kx,1)}; ${fmt(d.S.ky,1)}) m</b>`);
+ if(!deg.length||kazanc<1){el.innerHTML='<p class="not">Mevcut ayarlar zaten bu ıslanma genişliği için en az malzemeyi veriyor.</p>';$('#soUygula').hidden=true;return}
+ SO=d;el.innerHTML=`<h3 style="margin:6px 0">Önerilen değişiklikler</h3><ul style="margin:0 0 8px;padding-left:18px">${deg.map(x=>`<li>${x}</li>`).join('')}</ul>
+ <div class="tablo"><table><thead><tr><th>Kalem</th><th>Şimdi</th><th>Öneri</th><th>Birim</th></tr></thead><tbody>${satir}</tbody></table></div>
+ <p style="margin:8px 0 2px"><b>Tahmini sulama malzemesi: ${fmt(once.tl,0)} TL → ${fmt(r.tl,0)} TL (−${fmt(kazanc,0)} TL, %${fmt(kazanc/Math.max(1,once.tl)*100,0)})</b></p>
+ <p class="not" style="margin:0">Damlatıcı sayısı ${fmt(once.Q/Math.max(0.01,n0(S.damlaDebi,2)),0)} → ${fmt(r.Q/Math.max(0.01,n0(S.damlaDebi,2)),0)}, toplam debi ${fmt(once.Q,0)} → ${fmt(r.Q,0)} L/sa${r.bolge>1?` (${r.bolge} bölge)`:''}. Fiyatlar piyasa referansıdır (KDV dahil)${r.fiyatsiz?`; ${r.fiyatsiz} kalemin fiyatı yok, miktarı tabloda`:''}. Daha az damlatıcı, aynı suyu vermek için sulama süresinin uzaması demektir.</p>`;
+ $('#soUygula').hidden=false}
+$('#btnSulOpt').onclick=()=>{$('#soSonuc').innerHTML='';$('#soUygula').hidden=true;$('#dlgSulOpt').showModal();setTimeout(sulamaEnAz,30)};
+$('#soHesap').onclick=sulamaEnAz;$('#soKapat').onclick=()=>$('#dlgSulOpt').close();
+$('#soUygula').onclick=()=>{if(!SO)return;Object.assign(st.sulama,SO.S);Object.entries(SO.hs).forEach(([i,v])=>{st.gruplar[i].hatSayisi=v});$('#dlgSulOpt').close();degisti();renderForm();if(aktifTab==='cizim')cizimCiz(true);toast('Sulama düzeni en az malzemeye göre güncellendi. ↶ Geri al ile dönebilirsiniz.')};
 $('#btnGeri').onclick=geriAl;$('#btnOtoYer').onclick=otoYerlestir;$('#btnSirala').onclick=grupSirala;
 $('#hizaKut').addEventListener('click',e=>{const b=e.target.closest('[data-hiza]');if(b)hizala(b.dataset.hiza)});
 $('#btnYeniGrup').onclick=()=>grupDuzenle(null);

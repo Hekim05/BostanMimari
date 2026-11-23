@@ -248,6 +248,14 @@ async def ana_hat_agaci(pg):
     assert r['tee'] >= 2, r
 
 @test
+async def sulama_en_az(pg):
+    r = await pg.evaluate("""async()=>{const p=bosProje();p.alan={...p.alan,en:30,boy:20};p.sulama.kx=0.5;p.sulama.ky=10;p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3,sira:2}),yeniGrup(1,{x:15,y:12,sutun:3})];projeEkle(p);
+      const once=sulamaDene({});$('#soIslak').value='40';$('#soKaynak').value='sabit';sulamaEnAz();const var_=!$('#soUygula').hidden;$('#soUygula').click();const sonra=sulamaDene({});
+      const yeniKritik=[...sonra.sor].filter(x=>!once.sor.has(x));return{var_,once:once.latM,sonra:sonra.latM,tl0:once.tl,tl1:sonra.tl,yeniKritik,nk:H.gr.map(G=>G.d.nk),bos:H.gr.map(G=>(G.k.W-2*G.k.t)/G.d.nk)}}""")
+    assert r['var_'] and r['sonra'] < r['once'] and r['tl1'] < r['tl0'] and not r['yeniKritik'], r
+    assert all(b <= 40 for b in r['bos']), r     # ıslanma genişliği aşılmadı
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -302,7 +310,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, aci_esitle, ana_hat_agaci, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, aci_esitle, ana_hat_agaci, sulama_en_az, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
