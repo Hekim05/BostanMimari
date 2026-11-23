@@ -87,6 +87,7 @@ td.s,th.s{text-align:right;white-space:nowrap}
 .bulgu.gizli{opacity:.55}
 .malzLink{text-decoration:underline dotted #7a9a80;text-underline-offset:3px;cursor:pointer}.malzLink::after{content:" 🖼";font-size:.8em}
 .pdfKap{position:fixed;left:-12000px;top:0;width:794px;background:#fff;z-index:-1}.pdfKap .sayfa{width:794px;max-width:none!important;margin:0!important;box-shadow:none!important;border-radius:0!important;padding:40px 36px!important;overflow:visible!important}.pdfKap .iki{grid-template-columns:1fr 1fr!important}.pdfKap .kutu4{grid-template-columns:repeat(4,1fr)!important}.pdfKap .cizim>svg{max-height:880px}.pdfKap .malzLink{text-decoration:none}.pdfKap .malzLink::after{content:""}
+#muhIc table{font-size:13px}#muhIc td,#muhIc th{vertical-align:top}#muhIc .tablo table:has(th:nth-child(6)){min-width:620px}
 #piyasaListe td{vertical-align:top;overflow-wrap:anywhere}#piyasaListe table{table-layout:fixed;width:100%}#piyasaListe th:first-child{width:42px}#piyasaListe th:last-child{width:38%}#piyasaListe td.s,#piyasaListe th.s{white-space:normal}.piyAra{display:flex;gap:6px;margin-top:4px;flex-wrap:wrap}.piyKay{padding-left:20px;font-size:13px}.piyKay li{margin-bottom:4px}.piyAra a{font-size:11.5px;padding:2px 7px;border:1px solid var(--cz);border-radius:10px;text-decoration:none;color:var(--y)}
 
 body.ev .alt{display:none}body.ev{padding-bottom:24px}
@@ -195,6 +196,11 @@ dialog .ic{padding:16px}
  <p class="not" style="margin-top:0">Her bostan planı bir çalışmadır. Açmak için karta dokunun.</p>
  <div class="satir"><button class="btn dolu" id="evYeni">＋ Yeni çalışma</button><button class="btn" id="evOrnek">Örnek çalışma</button></div>
  <div class="evListe" id="evListe"></div>
+ <div class="kart" id="syncKart"><h3 style="margin-top:0">☁️ Cihazlar arası eşitleme</h3><p class="not" id="syncDurum" style="margin-top:0"></p>
+  <div id="syncKur"><ol class="not" style="padding-left:18px;margin:4px 0 8px"><li>GitHub’da <a href="https://github.com/settings/tokens/new?scopes=gist&description=Bostan%20Mimar%C4%B1" target="_blank" rel="noopener">yeni anahtar sayfasını</a> açın; yalnızca <b>gist</b> izni seçili gelir. Süre olarak “No expiration” seçip <b>Generate token</b>’a basın ve anahtarı kopyalayın.</li><li>Anahtarı aşağıya yapıştırıp <b>Bağlan</b>’a basın.</li><li>Diğer cihazlarda: bu cihazda “Bağlantı kodunu kopyala”ya basın, kodu o cihazda aynı kutuya yapıştırın.</li></ol>
+  <div class="satir"><input id="syncToken" type="password" placeholder="ghp_… anahtar ya da BM1:… bağlantı kodu" autocomplete="off" style="flex:1;min-width:200px"><button class="btn dolu" id="syncBaglan">Bağlan</button></div></div>
+  <div class="satir" id="syncBagli" hidden><button class="btn dolu" id="syncSimdi">⟳ Şimdi eşitle</button><button class="btn" id="syncKod">🔗 Bağlantı kodunu kopyala</button><button class="btn kirmizi" id="syncKes">Bağlantıyı kes</button></div>
+  <p class="not" style="margin-bottom:0">Çalışmalar GitHub hesabınızda gizli (listelenmeyen) bir gist’te tutulur; uygulama açılınca, öne gelince ve her değişiklikten 5 sn sonra eşitlenir. Aynı çalışma iki cihazda değiştirilirse en son kaydedilen geçerli olur.</p></div>
  <details class="kart"><summary>Yedekleme ve başka cihaza aktarma</summary><div class="ic">
  <p class="not" style="margin-top:0">Önizleme, telefondaki uygulama ve tarayıcı projeleri ayrı ayrı saklar. Aktarmak için: burada “Kopyala”ya basın, diğer yerde Çalışmalar sayfasında bu bölümü açıp “Yapıştır”a basın.</p>
  <div class="satir"><button class="btn dolu" id="pKopyala">📋 Tüm çalışmaları kopyala</button><button class="btn" id="pYapistirAc">📥 Yapıştırarak yükle</button></div>
@@ -267,6 +273,7 @@ dialog .ic{padding:16px}
 <section id="t-denetim" class="tab">
  <h2>Mimar denetimi</h2>
  <div class="kart" id="mimarNot"></div>
+ <details class="kart" id="muhKart" open><summary>📐 Mühendislik hesapları (dayanım, ömür, sulama)</summary><div class="ic" id="muhIc"></div></details>
  <div id="bulgular"></div>
 </section>
 
@@ -314,7 +321,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.22-17';
+const APP_VERSION = '2026.11.23-1';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -341,7 +348,7 @@ function varsayilanBilesen(){return[
  {ad:'Yanmış hayvan gübresi',tur:'gubre',oran:10,paket:40,pAd:'çuval',yog:0.6},
  {ad:'Perlit',tur:'perlit',oran:5,paket:100,pAd:'torba',yog:0.1},
  {ad:'Pomza',tur:'pomza',oran:5,paket:50,pAd:'çuval',yog:0.6}]}
-function bosProje(){return{v:1,meta:{ad:'Yeni bostan projesi',bostan:'',tur:'yeni',hazirlayan:'',tarih:bugun(),not:''},alan:{en:15,boy:10,kuzey:0,enlem:39.9},gruplar:[yeniGrup(0,{x:1.5,y:1.5,sira:2,sutun:3})],sulama:{kx:0.5,ky:0.5,basinc:2,kaynakDebi:0,damlaAr:40,damlaDebi:2,hatAr:30,anaCap:20,kenar:15},toprak:{bos:3,drenaj:0,ust:15,oturma:10,bil:varsayilanBilesen()}}}
+function bosProje(){return{v:1,meta:{ad:'Yeni bostan projesi',bostan:'',tur:'yeni',hazirlayan:'',tarih:bugun(),not:''},alan:{en:15,boy:10,kuzey:0,enlem:39.9},gruplar:[yeniGrup(0,{x:1.5,y:1.5,sira:2,sutun:3})],sulama:{kx:0.5,ky:0.5,basinc:2,basincMin:'',damlaTip:'normal',reg:'oto',filtreK:0.2,kaynakDebi:0,damlaAr:40,damlaDebi:2,hatAr:30,anaCap:20,kenar:15},toprak:{bos:3,drenaj:0,ust:15,oturma:10,gamma:'',phi:30,q:1,emp:'UC4',bil:varsayilanBilesen()}}}
 function ornekProje(){const p=bosProje();p.meta={ad:'Örnek: mevcut bostana ek kasa',bostan:'Örnek bostan',tur:'ek',hazirlayan:'',tarih:bugun(),not:''};p.alan={en:18,boy:12,kuzey:15,enlem:39.9};
  p.gruplar=[yeniGrup(0,{ad:'Mevcut kasalar',durum:'mevcut',L:300,W:120,H:45,x:1.5,y:1.5,sutun:3,sira:1,toprak:'ust',dip:'yok',icKaplama:'hayir'}),yeniGrup(1,{ad:'Yeni kasalar',L:300,W:120,H:45,x:1.5,y:4.8,sutun:3,sira:2})];return p}
 function onar(p){const b=bosProje();for(const k of['meta','alan','sulama','toprak'])p[k]=Object.assign({},b[k],p[k]||{});if(!Array.isArray(p.toprak.bil))p.toprak.bil=varsayilanBilesen();if(!Array.isArray(p.gruplar))p.gruplar=[];p.gruplar=p.gruplar.map((g,i)=>Object.assign(yeniGrup(i),g.mkYer?{}:{mkYer:g.mkUc||'bas'},g));return p}
@@ -644,6 +651,108 @@ function hesapla(st){
  o.kg=o.bil.reduce((s,b)=>s+b.kg,0);
  out.sorun=denetle(st,out);return out}
 
+/* ---------- Mühendislik: kasa dayanımı, ömür, damla hidroliği ---------- */
+const DAY={ahsap:{fmd:9.2,E:3700,ad:'emprenyeli çam C24 (ıslak ortam, kalıcı yük: kmod 0,5, γM 1,3; E sünmeli)'},kompozit:{fmd:5,E:1200,ad:'WPC kompozit (dolu kesit kabulü; üretici değeriyle doğrulayın)'}};
+const EMP_AD={UC4:'Toprak temaslı (UC4)',UC3:'Toprak dışı (UC3)',yok:'Emprenyesiz'};
+function zeminPar(st,H){const T=st.toprak,yog=(H&&H.top&&H.top.yogOrt)||0.75,oto=!(n0(T.gamma)>0);
+ const g=oto?Math.round((yog+0.45)*9.81*10)/10:n0(T.gamma),phi=Math.min(40,Math.max(20,n0(T.phi,30))),K0=1-Math.sin(phi*Math.PI/180);
+ return{g,phi,K0,q:Math.max(0,n0(T.q,1)),oto,yog}}
+function dayanim(G,st,H){if(G.g.durum!=='yeni')return null;const k=G.k,Z=zeminPar(st,H),T=st.toprak;
+ const Hs=Math.max(0.05,(k.Hr-Math.max(0,n0(T.bos)))/100),pk=Z.K0*(Z.g*Hs+Z.q),pd=1.35*Z.K0*Z.g*Hs+1.5*Z.K0*Z.q;
+ const K=[],ek=(ad,deger,sinir,oran,acik,bilgi)=>K.push({ad,deger,sinir,oran,acik,bilgi:!!bilgi}),O=[];
+ const postEtkin=k.m!=='beton'&&(k.gm>=15||k.gergi>0),araVar=k.kenar.some(e=>e.ara>0);
+ const ke=k.kenar.map(e=>({uz:e.uz,ara:e.ara,s:(postEtkin?e.uz/(e.ara+1):e.uz)/100})),sMax=Math.max(...ke.map(e=>e.s)),Lmax=Math.max(...k.kenar.map(e=>e.uz))/100;
+ const R={Hs,pk,pd,Z,postEtkin,sMax,K,O,sIz:null};
+ if(araVar&&!postEtkin)O.push(`Ara dikmeler toprağa gömülmediği (${fmt(k.gm)} cm) ve gergi olmadığı için yük taşımaz; hesap köşeler arası ${fmt(sMax*100,0)} cm açıklıkla yapıldı. Dikmeleri en az 20 cm gömün ya da gergi ekleyin.`);
+ if(k.m==='ahsap'||k.m==='kompozit'){const P=DAY[k.m],th=k.th/100,t=k.t/100,s=sMax;
+  const wd=pd*th,wk=pk*th,Md=wd*s*s/8,S=th*t*t/6,sig=Md/S/1000,I=th*1000*Math.pow(t*1000,3)/12,dl=5*wk*Math.pow(s*1000,4)/(384*P.E*I),dlim=s*1000/150;
+  ek('Alt sıra tahta — eğilme',`${fmt(sig,1)} MPa`,`${fmt(P.fmd,1)} MPa`,sig/P.fmd,`${fmt(s*100,0)} cm açıklık, ${fmt(k.t)}×${fmt(k.th)} cm tahta; tabanda ${fmt(pk,2)} kPa yanal itki`);
+  ek('Alt sıra tahta — sehim (sünme dahil)',`${fmt(dl,1)} mm`,`${fmt(dlim,1)} mm (L/150)`,dl/dlim,'Islak ahşabın zamanla esnemesi dahil');
+  const sS=Math.sqrt(8*P.fmd*1000*S/wd),sD=Math.cbrt(384*P.E*I/(150*5*wk))/1000;R.sIz=Math.min(sS,sD);
+  if(sig>P.fmd||dl>dlim){const ac=Math.floor(R.sIz*100/5)*5,n=Math.max(0,Math.ceil(Lmax/R.sIz-1e-9)-1),treq=Math.sqrt(6*Md/(P.fmd*1000*th))*100;
+   O.push(`Dikme aralığını en fazla ${fmt(ac,0)} cm yapın (en uzun kenara ${n} ara dikme)${postEtkin?'':' ve dikmeleri gömün / gergi ekleyin'}; ya da tahta kalınlığını en az ${fmt(Math.ceil(treq*2)/2,1)} cm yapın.`)}
+  const Rk=wd*s/2,nv=Math.max(2,Math.ceil(Rk/0.6-1e-9));ek('Tahta ucu bağlantısı (alt sıra)',`${fmt(Rk,2)} kN`,`${nv} × Ø5 vida = ${fmt(nv*0.6,1)} kN`,Rk/(nv*0.6),`Alt sırada her tahta ucuna en az ${nv} vida (köşebent ya da dikme üzerinden)`);
+  if(postEtkin&&k.dikme>0){const d=k.d/100,sp=araVar?Math.max(...ke.filter(e=>e.ara>0).map(e=>e.s)):s,w0=1.35*Z.K0*Z.g*Hs*sp,wq=1.5*Z.K0*Z.q*sp,gg=k.gergi>0;
+   const M=gg?w0*Hs*Hs/(9*Math.sqrt(3))+wq*Hs*Hs/8:w0*Hs*Hs/6+wq*Hs*Hs/2,sg=M/(d*d*d/6)/1000;
+   ek(`Dikme ${fmt(k.d)}×${fmt(k.d)} cm — eğilme`,`${fmt(sg,1)} MPa`,'9,2 MPa',sg/9.2,gg?'Üstten gergiyle tutulan dikme':'Toprağa gömülü, gergisiz (konsol) dikme');
+   if(sg>9.2){const dr=Math.cbrt(6*M/(9.2*1000))*100;O.push(`Dikme kesitini en az ${fmt(Math.ceil(dr),0)}×${fmt(Math.ceil(dr),0)} cm yapın${gg?'':' ya da gergi ekleyin'}.`)}
+   if(!gg){const gmin=Math.max(20,Math.ceil(Hs*100*0.5));ek('Dikme gömme derinliği',`${fmt(k.gm)} cm`,`≥ ${fmt(gmin,0)} cm`,gmin/Math.max(1,k.gm),'Gergisiz dikme devrilmeye karşı gömülerek tutulur');if(k.gm<gmin)O.push(`Gergisiz dikmeleri en az ${fmt(gmin,0)} cm gömün ya da gergi ekleyin.`)}}
+  if(k.gergi>0){const n=(k.gergiL[0]||{n:1}).n,trib=(k.L/100)/(n+1),Tf=trib*(1.35*Z.K0*Z.g*Hs*Hs/6+1.5*Z.K0*Z.q*Hs/2);ek('Gergi çekme kuvveti',`${fmt(Tf,2)} kN`,'10,5 kN (Ø8, 4.6)',Tf/10.5,`Her gergi ${fmt(trib*100,0)} cm duvar şeridini tutar`)}}
+ else if(k.m==='galvaniz'){const tt=k.t*10,a=9,I=tt*a*a/2*1000,W=I/a,s=sMax*1000,Md=pd*sMax*sMax/8,sg=Md*1e6/W,dl=5*pk*Math.pow(s,4)/(384*210000*I),dlim=s/150;
+  ek('Oluklu sac — eğilme (1 m şerit)',`${fmt(sg,0)} MPa`,'250 MPa',sg/250,`${fmt(s/10,0)} cm açıklık, ${fmt(tt,1)} mm sac, 18 mm oluk kabulü`);
+  ek('Oluklu sac — sehim',`${fmt(dl,1)} mm`,`${fmt(dlim,1)} mm (L/150)`,dl/dlim,'Panel dikmeler arasında yatay çalışır');
+  const sS=Math.sqrt(8*250*W/1e6/pd),sD=Math.cbrt(384*210000*I/(150*5*pk))/1000;R.sIz=Math.min(sS,sD);
+  if(sg>250||dl>dlim)O.push(`Dikme aralığını en fazla ${fmt(Math.floor(R.sIz*20)*5,0)} cm yapın ya da gergi ekleyin.`)}
+ else if(k.m==='beton'){const t=k.t/100,Hr=k.Hr/100,Mk=Z.K0*Z.g*Math.pow(Hs,3)/6+Z.K0*Z.q*Hs*Hs/2,Md=1.35*Z.K0*Z.g*Math.pow(Hs,3)/6+1.5*Z.K0*Z.q*Hs*Hs/2,sg=Md/(t*t/6)/1000,W=12*t*Hr,FS=W*t/2/Mk;
+  ek('Duvar — harç derzinde eğilme çekmesi',`${fmt(sg,3)} MPa`,'0,040 MPa (M5 harç)',sg/0.04,`${fmt(k.t)} cm duvar, ${fmt(Hs*100,0)} cm toprak; köşeler kısa duvarlarda ek destek sağlar`);
+  ek('Devrilme güvenliği (harçsız kabul)',fmt(FS,2),'≥ 1,5',1.5/FS,'Yalnızca bilgi: harçsız (kuru) örgü bu değere güvenir',true);
+  if(sg>0.04)O.push('Briket boşluklarına her 40 cm’de Ø10 dikey donatı koyup betonla doldurun ve donatıyı temele bağlayın ya da duvarı 1–1,2 m’de bir payanda ile destekleyin.');
+  if(FS<1.5)O.push('Briketi harçsız (kuru) dizmeyin.')}
+ const ana=K.filter(x=>!x.bilgi);R.eta=ana.length?Math.max(...ana.map(x=>x.oran)):0;R.durum=R.eta>1?'kritik':R.eta>0.8?'uyari':'ok';return R}
+const OMUR={ahsap:{UC4:[8,15],UC3:[4,8],yok:[2,5]},kompozit:[15,25],galvaniz:[15,25],beton:[30,50]};
+function omur(G,st){const g=G.g,k=G.k,em=st.toprak.emp||'UC4',L=[],ek=(p,a,n)=>L.push({p,a,n});
+ if(g.durum!=='yeni')return null;
+ let b=k.m==='ahsap'?OMUR.ahsap[em]||OMUR.ahsap.UC4:OMUR[k.m];b=b.slice();
+ if(k.m==='ahsap'&&g.icKaplama==='evet'){b[0]+=1;b[1]+=3}
+ ek(`Duvar (${MALZ[k.m].ad})`,b,k.m==='ahsap'?`${EMP_AD[em]} emprenye${g.icKaplama==='evet'?'; iç yüz kaplaması +1–3 yıl':'; iç yüze jeotekstil/naylon kaplama ömrü uzatır'}`:k.m==='galvaniz'?'Asidik toprak ve gübre tuzları çinko kaplamayı hızlandırarak aşındırır; iç kaplama önerilir':k.m==='kompozit'?'Çürümez; güneşte solma ve uzun sürede esneme (sünme) görülür':'Derzlerde donma–çözülme bakımı');
+ if(k.m==='ahsap'&&k.gm>0)ek('Dikmelerin gömülü kısmı',[Math.max(2,b[0]-3),Math.max(4,b[1]-4)],'İlk çürüyen yer; bitüm kaplama ve çakıl yatak ömrü uzatır');
+ if(k.m==='ahsap'||k.m==='kompozit')ek('Köşebent ve vidalar (sıcak daldırma galvaniz)',k.m==='ahsap'&&em!=='yok'?[8,15]:[10,20],k.m==='ahsap'&&em!=='yok'?'Bakırlı emprenye galvanizi aşındırır; vidalarda paslanmaz (A2) kullanılırsa 25+ yıl':'Elektro galvaniz (ince kaplama) 2–5 yılda paslanır');
+ if(k.gergi>0)ek('Gergiler (galvaniz)',[10,20],'');
+ if(g.dip==='tel')ek('Taban kemirgen teli (galvaniz)',[8,15],'Toprak içinde, nemli ortam');
+ if(g.icKaplama==='evet')ek('İç jeotekstil',[10,15],'Güneş görmediği sürece');
+ if(k.mk!=='yok')ek('Malzeme kasası kapağı (kontrplak)',[5,8],'Her 2 yılda dış cephe verniği');
+ if(G.d){ek('Damlalı boru (PE)',[5,10],'Güneşte açıkta kalırsa kısalır; malç ile örtün, kışın boşaltın');ek('Ana hat PE boru',[15,25],'Toprak altında')}
+ const yapi=L.filter(x=>/^Duvar|gömülü|Köşebent/.test(x.p)),sin=yapi.reduce((m,x)=>x.a[0]<m.a[0]?x:m,yapi[0]);
+ return{L,sinirlayan:sin,aralik:sin.a}}
+/* Damla sulama hidroliği */
+function hf(Qlh,L,D){if(Qlh<=0||L<=0)return 0;const Q=Qlh/3.6e6,v=Q/(Math.PI*D*D/4),Re=v*D/1.0e-6,f=Re<2300?64/Math.max(Re,1):0.316*Math.pow(Re,-0.25);return f*L/D*v*v/19.62/10.2}
+const Fch=N=>N<=1?1:1/2.75+1/(2*N)+Math.sqrt(0.75)/(6*N*N);
+function hidrolikSenaryo(st,H,Ps,regAyar){const S=st.sulama,o=H.top,pc=S.damlaTip==='pc',qn=Math.max(0.1,n0(S.damlaDebi,2)),Da=(BORU_IC[n0(S.anaCap,20)]||16.6)/1000,Dk=0.0136,Kf=Math.max(0,n0(S.filtreK,0.2))+0.1,da=Math.max(0.05,n0(S.damlaAr,30)/100);
+ const qP=P=>P<=0?0:pc?(P<0.5?qn*Math.sqrt(P/0.5):qn):qn*Math.sqrt(P/1.0);
+ let r=1,sonuc=null;
+ for(let it=0;it<4;it++){const Qz=Math.min(o.Q,o.kap)*r,P1=Ps-Kf*Math.pow(Math.min(1.5,Qz/1500),2),P2=regAyar>0?Math.min(P1,regAyar):P1;
+  const gr=[];let qmin=Infinity,qmax=0,Pmin=Infinity,Pmax=-Infinity,qTop=0,nTop=0;
+  H.gr.filter(G=>G.d&&G.boru).forEach(G=>{const B=G.boru,Qbed=G.d.Q*r,Qg=Math.min(Qbed*G.n,Qz);
+   const hm=hf(Qz,B.bagM,Da)+hf(Qg,B.trunkM,Da)+Fch(G.n)*hf(Qg,B.headerM/G.sira,Da);
+   const inisOrt=B.inis.length?B.inis.reduce((s,h)=>s+h.slice(1).reduce((a,p,i)=>a+Math.abs(p[0]-h[i][0])+Math.abs(p[1]-h[i][1]),0),0)/B.inis.length:0;
+   const hk=hf(Qbed,inisOrt+G.k.Hr/100+0.2,Dk)+0.5*hf(Qbed,G.d.korCm/100,Dk)+0.03;
+   const Pin=P2-hm-hk;let hlMax=0,Pend=Pin;
+   G.d.hat.forEach(h=>{const N=Math.max(1,h.n),Ql=N*qn*r,Leq=h.len/100+N*0.1,hl=Fch(N)*hf(Ql,Leq,Dk);if(hl>hlMax){hlMax=hl}Pend=Math.min(Pend,Pin-hl)});
+   const qa=qP(Pin),qb=qP(Pend);qmin=Math.min(qmin,qb,qa);qmax=Math.max(qmax,qa,qb);Pmin=Math.min(Pmin,Pend);Pmax=Math.max(Pmax,Pin);
+   const qOrt=(qa+qb)/2;qTop+=qOrt*G.d.damla*G.n;nTop+=G.d.damla*G.n;
+   gr.push({kod:G.kod,hm,hk,hl:hlMax,Pin,Pend,qa,qb,sure5:G.area>0?5*G.area/((qOrt*G.d.damla)||1)*60:0})});
+  const rYeni=nTop?qTop/nTop/qn:1;sonuc={Ps,P1,P2,reg:regAyar,gr,qmin,qmax,Pmin,Pmax,vary:qmax>0?1-qmin/qmax:0,qOrt:nTop?qTop/nTop:0,Qgercek:o.Q*rYeni/o.bolge,v:(Math.min(o.Q,o.kap)*rYeni/3.6e6)/(Math.PI*Da*Da/4)};
+  if(Math.abs(rYeni-r)<0.005)break;r=rYeni}
+ return sonuc}
+function hidrolik(st,H){const S=st.sulama,o=H.top;if(!(o.Q>0)||!H.gr.some(G=>G.d))return null;
+ const Pmax0=n0(S.basinc),Pmin0=n0(S.basincMin)>0?Math.min(n0(S.basincMin),Pmax0||n0(S.basincMin)):Pmax0,pc=S.damlaTip==='pc';
+ const ust=pc?4:2.5;let reg=S.reg==='yok'?0:S.reg==='oto'?0:parseFloat(S.reg)||0,oto=false;
+ if(S.reg==='oto'){const den=hidrolikSenaryo(st,H,Pmax0,0);if(den&&den.Pmax>ust){reg=pc?3:1.5;oto=true}}
+ const tas=hidrolikSenaryo(st,H,Pmin0,reg),ust2=hidrolikSenaryo(st,H,Pmax0,reg);
+ return{tas,ust:ust2,reg,oto,pc,Pmin0,Pmax0,ustSinir:ust}}
+function hidrolikBulgu(hid,ek,st){if(!hid)return;const t=hid.tas,u=hid.ust,pc=hid.pc,v=t.vary*100;
+ if(!pc&&t.Pmin>=0.3&&t.Pmin<0.6)ek('uyari',`Hat sonunda basınç ${fmt(t.Pmin,2)} bar`,`Basınç ayarsız damlatıcılar bu basınçta ${fmt(t.qmin,2)} L/saat verir (etiket ${fmt(n0(st.sulama.damlaDebi),1)}); sulama süresi uzar.`,'Sulama sürelerini tablodaki “5 mm için” değerine göre ayarlayın ya da bölge sayısını artırın.');
+ if(t.Pmin<(pc?0.5:0.3))ek('kritik',`Hat sonunda basınç ${fmt(t.Pmin,2)} bar`,`Şebeke en düşük ${fmt(hid.Pmin0,1)} bar iken uzak kasalarda damlatıcılar ${pc?'basınç ayarını kaybeder':'çok az su verir'}.`,'Sulamayı daha fazla bölgeye ayırın, ana hat çapını büyütün ya da depo + pompa kullanın.');
+ if(v>20)ek('kritik',`Damlatıcı debi farkı %${fmt(v,0)}`,`En az ${fmt(t.qmin,2)}, en çok ${fmt(t.qmax,2)} L/saat. Bazı bitkiler diğerlerinin ${fmt(t.qmax/t.qmin,1)} katı su alır.`,pc?'Hatları kısaltın ya da bölge sayısını artırın.':'Basınç ayarlı (PC) damlatıcılı boru kullanın, hatları kısaltın ya da bölge sayısını artırın.');
+ else if(v>10)ek('uyari',`Damlatıcı debi farkı %${fmt(v,0)}`,`En az ${fmt(t.qmin,2)}, en çok ${fmt(t.qmax,2)} L/saat (hedef ≤ %10).`,pc?'Bölge sayısını artırın.':'Basınç ayarlı (PC) damlatıcı ile fark %5’in altına iner.');
+ if(u.Pmax>hid.ustSinir)ek('kritik',`Damla hatlarında ${fmt(u.Pmax,2)} bar`,`Şebeke ${fmt(hid.Pmax0,1)} bar iken hat girişindeki basınç ${pc?'4':'2,5'} bar sınırını aşıyor; ek yerleri çıkar.`,`Filtreden sonra ${pc?'3':'1,5'} bar basınç düşürücü takın (Basınç düşürücü: Otomatik seçilirse ajan ekler).`);
+ if(v<=10&&t.Pmin>=(pc?0.5:0.3)&&u.Pmax<=hid.ustSinir)ek('ok','Damla sulama hidroliği uygun',`Şebeke ${fmt(hid.Pmin0,1)}–${fmt(hid.Pmax0,1)} bar aralığında debi farkı %${fmt(v,0)}; hat sonunda en az ${fmt(t.Pmin,2)} bar.${hid.reg?` ${fmt(hid.reg,1)} bar basınç düşürücü ${hid.oto?'ajan tarafından eklendi':'ile'}.`:''}`)}
+function dayanimBulgu(st,H,ek){H.gr.forEach(G=>{const R=G.day;if(!R)return;const a=`${G.kod} · ${G.g.ad}`;const en=R.K.filter(x=>!x.bilgi).reduce((m,x)=>x.oran>m.oran?x:m,{oran:0});
+  if(R.durum==='kritik')ek('kritik',`${a}: dayanım yetersiz (%${fmt(R.eta*100,0)})`,`${en.ad}: ${en.deger} > ${en.sinir}.`,R.O.join(' ')||'Denetim › Kasa dayanımı tablosuna bakın.');
+  else if(R.durum==='uyari')ek('uyari',`${a}: dayanım sınırda (%${fmt(R.eta*100,0)})`,`${en.ad}: ${en.deger} / ${en.sinir}.`,R.O.join(' ')||'Bir ara dikme eklemek güvenlik payını artırır.');
+  else ek('ok',`${a}: dayanım yeterli (%${fmt(R.eta*100,0)})`,`En zorlanan: ${en.ad||'—'} (${en.deger||''}).`,R.O.join(' '));
+  if(G.om)ek('ok',`${a}: tahmini ömür ${G.om.aralik[0]}–${G.om.aralik[1]} yıl`,`Sınırlayan: ${G.om.sinirlayan.p}.`,G.om.sinirlayan.n)})}
+function muhHTML(st,H){const Z=zeminPar(st,H),hid=H.hid,S=st.sulama;let h='';const durumY=o=>o>1?'<b style="color:#c0392b">Yetersiz</b>':o>0.8?'<b style="color:#8a5d00">Sınırda</b>':'<span style="color:#2e6b3a">Uygun</span>';
+ const Gd=H.gr.filter(G=>G.day);
+ if(Gd.length){h+=`<h3>Kasa dayanımı</h3><p class="not" style="margin-top:0">Islak karışım ${fmt(Z.g,1)} kN/m³${Z.oto?' (karışımdan otomatik)':''}, içsel sürtünme ${fmt(Z.phi,0)}°, sükûnetteki itki katsayısı K₀ = ${fmt(Z.K0,2)}, kenara ${fmt(Z.q,1)} kN/m² ek yük (insan). Yük katsayıları 1,35 / 1,5.</p>`;
+  Gd.forEach(G=>{const R=G.day;h+=`<h4 style="margin:10px 0 4px">${G.kod} · ${esc(G.g.ad)} — ${MALZ[G.g.malzeme].ad}, toprak yüksekliği ${fmt(R.Hs*100,0)} cm: ${durumY(R.eta)} (%${fmt(R.eta*100,0)})</h4><div class="tablo"><table><tr><th>Kontrol</th><th class="s">Hesap / sınır</th><th class="s">Kullanım</th></tr>${R.K.map(x=>`<tr><td>${esc(x.ad)}<br><small class="not">${esc(x.acik)}</small></td><td class="s">${x.deger}<br><small class="not">${x.sinir}</small></td><td class="s">${x.bilgi?'<small class="not">bilgi</small>':`%${fmt(x.oran*100,0)}<br>${durumY(x.oran)}`}</td></tr>`).join('')}</table></div>${R.O.length?`<p class="on">→ ${R.O.map(esc).join('<br>→ ')}</p>`:''}`;
+   if(G.om)h+=`<table><tr><th>Parça</th><th class="s">Tahmini ömür</th><th>Not</th></tr>${G.om.L.map(x=>`<tr><td>${esc(x.p)}</td><td class="s">${x.a[0]}–${x.a[1]} yıl</td><td><small>${esc(x.n)}</small></td></tr>`).join('')}</table>`});
+  h+=`<p class="not">Ömürler tipik aralıklardır; drenaj, güneş, toprak pH’ı ve bakım ile değişir. Dayanım hesabı basitleştirilmiş mühendislik kontrolüdür (alt sıra tahtası basit kiriş, dikmeler gergili/konsol); büyük ya da halka açık yapılarda statik proje gerekir.</p>`}
+ if(hid){const t=hid.tas,u=hid.ust;h+=`<h3>Damla sulama hidroliği</h3><p class="not" style="margin-top:0">Şebeke ${fmt(hid.Pmin0,1)} bar (en düşük) – ${fmt(hid.Pmax0,1)} bar · ${hid.pc?'basınç ayarlı (PC)':'basınç ayarsız'} damlatıcı ${fmt(S.damlaDebi)} L/sa · filtre+bağlantı kaybı ${fmt(n0(S.filtreK,0.2)+0.1,2)} bar · ${hid.reg?`basınç düşürücü ${fmt(hid.reg,1)} bar${hid.oto?' (ajan ekledi)':''}`:'basınç düşürücü yok'}.</p>
+  <div class="tablo"><table><tr><th>Grup</th><th class="s">Ana hat kaybı</th><th class="s">İniş/dağıtım</th><th class="s">En uzun hatta kayıp</th><th class="s">Hat başı</th><th class="s">Hat sonu</th><th class="s">Damlatıcı (L/sa)</th><th class="s">5 mm için</th></tr>${t.gr.map(g=>`<tr><td>${g.kod}</td><td class="s">${fmt(g.hm,3)} bar</td><td class="s">${fmt(g.hk,3)} bar</td><td class="s">${fmt(g.hl,3)} bar</td><td class="s">${fmt(g.Pin,2)} bar</td><td class="s">${fmt(g.Pend,2)} bar</td><td class="s">${fmt(g.qb,2)}–${fmt(g.qa,2)}</td><td class="s">${fmt(g.sure5,0)} dk</td></tr>`).join('')}</table></div>
+  <table><tr><td>Debi farkı (en düşük basınçta)</td><td class="s"><b>%${fmt(t.vary*100,1)}</b> ${t.vary>0.2?durumY(2):t.vary>0.1?durumY(0.9):durumY(0.5)}</td></tr><tr><td>En yüksek hat basıncı (şebeke ${fmt(hid.Pmax0,1)} bar)</td><td class="s">${fmt(u.Pmax,2)} bar ${u.Pmax>hid.ustSinir?durumY(2):durumY(0.5)}</td></tr><tr><td>Ana hatta su hızı</td><td class="s">${fmt(t.v,2)} m/s ${t.v>1.5?durumY(0.9):durumY(0.5)}</td></tr><tr><td>Gerçek bölge debisi</td><td class="s">${fmt(t.Qgercek,0)} L/saat</td></tr></table>
+  <p class="not">Hesap: Darcy–Weisbach (Blasius), çok çıkışlı hat için Christiansen katsayısı, damlatıcı başına 0,1 m eşdeğer boy. Şebeke basıncını musluğa takılan manometreyle, su açıkken ölçün; ASKİ bölgelerinde gün içinde basınç düşebildiği için yaz öğleden sonrası değerini “en düşük basınç” olarak girin.</p>`}
+ return h}
 /* ---------- Yön ---------- */
 function yonSapma(st,g){const a=n0(st.alan.kuzey),b=(g.yon==='dikey'?180-a:90-a)+n0(g.aci);const m=((b%180)+180)%180;return{bearing:m,sapma:Math.min(m,180-m)}}
 function yonAdi(b){const d=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB','GB','BGB','B','BKB','KB','KKB'];const x=((b%360)+360)%360;const i=Math.round(x/22.5)%16;const j=(i+8)%16;return d[i]+'–'+d[j]}
@@ -652,6 +761,7 @@ function yonAdi(b){const d=['K','KKD','KD','DKD','D','DGD','GD','GGD','G','GGB',
 function denetle(st,H){
  const B=[],S=st.sulama,T=st.toprak,A=st.alan,o=H.top;
  const ek=(sev,baslik,mesaj,oneri='')=>B.push({sev,baslik,mesaj,oneri});
+ H.gr.forEach(G=>{G.day=dayanim(G,st,H);G.om=omur(G,st)});H.hid=hidrolik(st,H);dayanimBulgu(st,H,ek);
  const en=n0(A.en),boy=n0(A.boy);
  (H.eksik||[]).forEach(e=>ek('kritik',`${e.kod} · ${e.ad}: ölçüler eksik`,`Eksik: ${e.liste.join(', ')}. Bu grup doldurulana kadar çizime ve hesaplara girmez.`,'Girdi › Kasa grupları’nda şekil üzerindeki boş kutulara ölçüleri girin.'));
  if(!H.gr.length&&!(H.eksik||[]).length)ek('kritik','Kasa grubu yok','Planlamak için en az bir kasa grubu ekleyin.');
@@ -704,8 +814,7 @@ function denetle(st,H){
  if(o.Q>0){
   if(o.bolge>1)ek('uyari',`Sulama ${o.bolge} bölgeye ayrılmalı`,`Toplam debi ${fmt(o.Q,0)} L/saat; Ø${S.anaCap} mm ana hat ${fmt(o.boruKap,0)} L/saat taşır${n0(S.kaynakDebi)>0?`, kaynak ${fmt(S.kaynakDebi,0)} L/saat verir`:''}.`,`Grupları vanalarla ${o.bolge} bölgeye ayırıp sırayla sulayın ya da ana hattı büyütün.`);
   else ek('ok','Ana hat yeterli',`Toplam ${fmt(o.Q,0)} L/saat, Ø${S.anaCap} mm hattın taşıma sınırı ${fmt(o.boruKap,0)} L/saat (1,5 m/s).`);
-  if(n0(S.basinc)>2.5)ek('kritik',`Şebeke basıncı ${fmt(S.basinc)} bar`,'Basınç ayarsız damlalı boruda ek yerleri çıkar, damlatıcılar eşit akmaz.','Filtreden sonra 1,5–2 bar basınç düşürücü takın.');
-  else if(n0(S.basinc)<0.8)ek('uyari',`Basınç düşük (${fmt(S.basinc)} bar)`,'Hat sonundaki damlatıcılar az su verir.','Bölge sayısını artırın ya da depo + pompa kullanın; basınç ayarlı (PC) damlatıcı seçin.');
+  hidrolikBulgu(H.hid,ek,st);
   if(n0(S.kaynakDebi)<=0)ek('ok','Kaynak debisi girilmedi','Kaynağın gerçekte ne kadar su verdiği bilinmiyor.','Musluğu tam açıp 10 L kovanın kaç saniyede dolduğunu ölçün: debi = 36000 ÷ saniye.');
   if(n0(S.damlaAr)>50)ek('uyari',`Damlatıcı aralığı ${fmt(S.damlaAr)} cm`,'Karışık dikimde ıslak şerit kopar, damlatıcı arasında kalan bitkiler susuz kalır.','Kasa yetiştiriciliğinde 20–40 cm aralık kullanın.');
   if(n0(S.hatAr)>40)ek('uyari',`Hat aralığı ${fmt(S.hatAr)} cm`,'Hatlar arasında kuru şerit oluşur.','Hat aralığını 25–35 cm yapın.');
@@ -977,7 +1086,7 @@ function sulamaListe(st,H){const S=st.sulama,o=H.top,L=[];if(o.Q<=0)return L;con
  const tee=H.gr.reduce((s,G)=>s+(G.d?G.d.teeSay*G.n:0),0),drs=H.gr.reduce((s,G)=>s+(G.d?G.d.dirsekSay*G.n:0),0);
  ad('Ø16 T','adet',tee);ad('Ø16 dirsek','adet',o.inisSay*3+drs);ad('Ø16 son tapa (8 tipi)','adet',o.lateralSay+o.inisSay);
  ad(`Ø${S.anaCap} T`,'adet',T);ad(`Ø${S.anaCap} dirsek`,'adet',D);ad(`Ø${S.anaCap} son tapa`,'adet',K);ad(`Ø${S.anaCap} küresel vana (grup vanası)`,'adet',V);
- ad('Disk filtre 3/4" (120 mesh)','adet',1);if(n0(S.basinc)>2)ad('Basınç düşürücü 1,5–2 bar','adet',1);ad('Musluk adaptörü + kaplin','takım',1);
+ ad('Disk filtre 3/4" (120 mesh)','adet',1);if(H.hid?H.hid.reg>0:n0(S.basinc)>2)ad(`Basınç düşürücü ${H.hid&&H.hid.reg?fmt(H.hid.reg,1):'1,5'} bar`,'adet',1);ad('Musluk adaptörü + kaplin','takım',1);
  ad('Boru sabitleme kazığı (U)','adet',Math.ceil(o.latM/1));return L}
 
 /* ---------- Şekil üzerinde ölçü girişi ---------- */
@@ -1091,8 +1200,8 @@ function renderForm(){
  const M=st.meta,A=st.alan,S=st.sulama,T=st.toprak;
  $('#f-proje').innerHTML=fld('meta.ad','Proje adı',M.ad,{tip:'text',tam:1})+fld('meta.bostan','Bostan / yer',M.bostan,{tip:'text'})+fld('meta.tur','Çalışma türü',M.tur,{sec:[['yeni','Yeni bostan'],['ek','Mevcut bostana ek']]})+fld('meta.hazirlayan','Hazırlayan',M.hazirlayan,{tip:'text'})+fld('meta.tarih','Tarih',M.tarih,{tip:'date'})+fld('meta.not','Notlar (rapora girer)',M.not,{tip:'alan',tam:1});
  $('#f-alan').innerHTML=fld('alan.en','Alan genişliği (m)',A.en,{i:'x yönü'})+fld('alan.boy','Alan derinliği (m)',A.boy,{i:'y yönü'})+fld('alan.kuzey','Kuzey açısı (°)',A.kuzey,{i:'planın üstünden saat yönünde'})+fld('alan.enlem','Enlem (°)',A.enlem,{i:'Ankara ≈ 39,9 (güneş için)'});
- $('#f-sulama').innerHTML=fld('sulama.kx','Su kaynağı x (m)',S.kx)+fld('sulama.ky','Su kaynağı y (m)',S.ky)+fld('sulama.basinc','Basınç (bar)',S.basinc)+fld('sulama.kaynakDebi','Kaynak debisi (L/saat)',S.kaynakDebi,{i:'0 = bilinmiyor'})+fld('sulama.damlaAr','Damlatıcı aralığı (cm)',S.damlaAr)+fld('sulama.damlaDebi','Damlatıcı debisi (L/saat)',S.damlaDebi)+fld('sulama.hatAr','Hatlar arası (cm)',S.hatAr,{i:'kasa içinde'})+fld('sulama.kenar','Uçtaki boşluk (cm)',S.kenar,{i:'ilk damlatıcıya'})+fld('sulama.anaCap','Ana hat çapı',S.anaCap,{sec:[[16,'Ø16 mm'],[20,'Ø20 mm'],[25,'Ø25 mm'],[32,'Ø32 mm'],[40,'Ø40 mm']]});
- $('#f-toprak').innerHTML=fld('toprak.bos','Üstte bırakılan boşluk (cm)',T.bos)+fld('toprak.drenaj','Drenaj katmanı (cm)',T.drenaj,{i:'0 = yok'})+fld('toprak.ust','Üst katman kalınlığı (cm)',T.ust,{i:'"Üst katman" seçili gruplar'})+fld('toprak.oturma','Oturma payı (%)',T.oturma,{i:'sulamayla çökme'});
+ $('#f-sulama').innerHTML=fld('sulama.kx','Su kaynağı x (m)',S.kx)+fld('sulama.ky','Su kaynağı y (m)',S.ky)+fld('sulama.basinc','Şebeke basıncı (bar)',S.basinc,{i:'musluktan manometreyle'})+fld('sulama.basincMin','En düşük basınç (bar)',S.basincMin,{i:'boş = aynı; yaz öğleden sonra'})+fld('sulama.damlaTip','Damlatıcı tipi',S.damlaTip,{sec:[['normal','Basınç ayarsız'],['pc','Basınç ayarlı (PC)']]})+fld('sulama.reg','Basınç düşürücü',S.reg,{sec:[['oto','Otomatik (ajan seçer)'],['yok','Yok'],['1','1,0 bar'],['1.5','1,5 bar'],['2','2,0 bar'],['3','3,0 bar']]})+fld('sulama.filtreK','Filtre kaybı (bar)',S.filtreK,{i:'temiz disk filtre ≈ 0,2'})+fld('sulama.kaynakDebi','Kaynak debisi (L/saat)',S.kaynakDebi,{i:'0 = bilinmiyor'})+fld('sulama.damlaAr','Damlatıcı aralığı (cm)',S.damlaAr)+fld('sulama.damlaDebi','Damlatıcı debisi (L/saat)',S.damlaDebi)+fld('sulama.hatAr','Hatlar arası (cm)',S.hatAr,{i:'kasa içinde'})+fld('sulama.kenar','Uçtaki boşluk (cm)',S.kenar,{i:'ilk damlatıcıya'})+fld('sulama.anaCap','Ana hat çapı',S.anaCap,{sec:[[16,'Ø16 mm'],[20,'Ø20 mm'],[25,'Ø25 mm'],[32,'Ø32 mm'],[40,'Ø40 mm']]});
+ $('#f-toprak').innerHTML=fld('toprak.bos','Üstte bırakılan boşluk (cm)',T.bos)+fld('toprak.drenaj','Drenaj katmanı (cm)',T.drenaj,{i:'0 = yok'})+fld('toprak.ust','Üst katman kalınlığı (cm)',T.ust,{i:'"Üst katman" seçili gruplar'})+fld('toprak.oturma','Oturma payı (%)',T.oturma,{i:'sulamayla çökme'})+fld('toprak.gamma','Islak birim ağırlık (kN/m³)',T.gamma,{i:`boş = otomatik (${fmt(zeminPar(st,H).g,1)})`})+fld('toprak.phi','İçsel sürtünme açısı (°)',T.phi,{i:'gevşek karışım 28–32'})+fld('toprak.q','Kenar ek yükü (kN/m²)',T.q,{i:'kenara oturan/dayanan kişi ≈ 1'})+fld('toprak.emp','Ahşap emprenye sınıfı',T.emp,{sec:[['UC4','Toprak temaslı (UC4)'],['UC3','Toprak dışı (UC3)'],['yok','Emprenyesiz']]});
  renderGruplar();renderBilesen()}
 function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const p=`gruplar.${i}.`;const gal=g.malzeme==='galvaniz',bet=g.malzeme==='beton';
  return`<div class="grup ${g.durum==='mevcut'?'mevcut':''}"><div class="grup-bas"><span class="rozet">${harf(i)}</span><input data-k="${p}ad" type="text" value="${esc(g.ad)}" style="flex:1"><button class="btn kucuk" data-kopya="${i}" aria-label="Grubu kopyala">⧉</button><button class="btn kucuk kirmizi" data-sil="${i}" aria-label="Grubu sil">✕</button></div>
@@ -1103,9 +1212,9 @@ function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const 
  +fld(p+'dip','Taban',g.dip,{sec:[['tel','Kemirgen teli'],['jeotekstil','Jeotekstil'],['yok','Yok']]})+(bet?'':fld(p+'icKaplama','İç jeotekstil',g.icKaplama,{sec:EH}))+fld(p+'sulama','Damla sulama',g.sulama,{sec:EH})+(g.sulama==='evet'?fld(p+'hatSayisi','Damla hattı sayısı',g.hatSayisi,{i:g.sekil==='U'?'her kol başına, en az 2; boş = otomatik':'giriş başına; boş = otomatik'})+fld(p+'vanaD','Vana bölmesi derinliği (cm)',g.vanaD,{i:'malzeme kasası yoksa'})+((!g.sekil||g.sekil==='I')?fld(p+'girisUc','Sulama girişi',g.girisUc||'bas',{sec:[['bas','Ön uç'],['son','Arka uç']]}):''):'')+fld(p+'toprak','Toprak',g.toprak,{sec:[['tam','Tam dolum'],['ust','Üst katman yenileme'],['yok','Hesaplama']]})}</div></div>`}).join('');sekilleriCiz()}
 function renderBilesen(){const b=st.toprak.bil;$('#f-bilesen').innerHTML=b.map((x,i)=>{const p=`toprak.bil.${i}.`;return`<div class="grup" style="border-left-color:#8d6a48"><div class="grup-bas"><input data-k="${p}ad" type="text" value="${esc(x.ad)}" style="flex:1"><button class="btn kucuk kirmizi" data-bsil="${i}" aria-label="Bileşeni sil">✕</button></div><div class="alanlar">${fld(p+'tur','Tür',x.tur,{sec:TURLER})+fld(p+'oran','Oran (%)',x.oran)+fld(p+'paket','Paket hacmi (L)',x.paket)+fld(p+'pAd','Paket adı',x.pAd,{tip:'text'})+fld(p+'yog','Yoğunluk (kg/L)',x.yog,{i:'kuru, gevşek'})}</div></div>`}).join('')}
 function setPath(o,p,v){const a=p.split('.');let x=o;for(let i=0;i<a.length-1;i++)x=x[a[i]];x[a[a.length-1]]=v}
-const SAYI_DEGIL=/\.(ad|tur|pAd|durum|yon|malzeme|dip|icKaplama|sulama|toprak|sekil|kolUc|mk|mkUc|mkYer|takviye|girisUc)$|^meta\./;
+const SAYI_DEGIL=/\.(damlaTip|reg|emp|ad|tur|pAd|durum|yon|malzeme|dip|icKaplama|sulama|toprak|sekil|kolUc|mk|mkUc|mkYer|takviye|girisUc)$|^meta\./;
 document.addEventListener('input',e=>{const el=e.target,k=el.dataset&&el.dataset.k;if(!k)return;let v=el.value;
- if((!SAYI_DEGIL.test(k)||k==='sulama.anaCap')&&!(v===''&&/^gruplar\./.test(k))){v=parseFloat(String(v).replace(',','.'));if(!Number.isFinite(v))return}
+ if((!SAYI_DEGIL.test(k)||k==='sulama.anaCap')&&!(v===''&&/^gruplar\.|^toprak\.gamma$|^sulama\.basincMin$/.test(k))){v=parseFloat(String(v).replace(',','.'));if(!Number.isFinite(v))return}
  setPath(st,k,v);
  const mm=k.match(/^gruplar\.(\d+)\.(malzeme|durum|sekil|mk|kolUc|mkUc|mkYer|sulama)$/);if(mm){const g=st.gruplar[+mm[1]];if(mm[2]==='malzeme'){const z=MALZ[v];g.t=z.t;g.tahtaH=z.tahtaH;g.dikme=z.dikme;if(v==='beton')g.gomme=0}renderGruplar()}
  if(k.startsWith('toprak.bil'))oranGoster();
@@ -1225,7 +1334,7 @@ $('#btnDondur').onclick=()=>{const g=st.gruplar[yer.secili];if(!g)return;g.yon=g
 /* ---------- Denetim sekmesi ---------- */
 function raporGizli(){if(!Array.isArray(st.raporGizli))st.raporGizli=[];return st.raporGizli}
 function raporBulgulari(){const gz=raporGizli();return H.sorun.filter(b=>b.sev!=='ok'&&!gz.includes(b.baslik))}
-function denetimCiz(){const gz=raporGizli(),gizliSay=H.sorun.filter(b=>b.sev!=='ok'&&gz.includes(b.baslik)).length;
+function denetimCiz(){$('#muhIc').innerHTML=muhHTML(st,H)||'<p class="not">Hesaplanacak yeni kasa ya da damla sulama yok.</p>';const gz=raporGizli(),gizliSay=H.sorun.filter(b=>b.sev!=='ok'&&gz.includes(b.baslik)).length;
  $('#mimarNot').innerHTML=mimarNotu(st,H)+(gizliSay?`<br><span class="not">${gizliSay} bulgu raporda gösterilmeyecek olarak işaretli.</span>`:'');
  $('#bulgular').innerHTML=H.sorun.map(b=>{const gizli=b.sev!=='ok'&&gz.includes(b.baslik);return`<div class="bulgu ${b.sev}${gizli?' gizli':''}"><b>${b.sev==='kritik'?'⛔ ':b.sev==='uyari'?'⚠️ ':'✓ '}${b.baslik}</b><p>${b.mesaj}</p>${b.oneri?`<p class="on">→ ${b.oneri}</p>`:''}${b.sev!=='ok'?`<label class="gizleKut"><input type="checkbox" data-gizle="${esc(b.baslik)}"${gizli?' checked':''}> Raporda gösterme</label>`:''}</div>`}).join('');kirli.denetim=0}
 $('#bulgular').addEventListener('change',e=>{const c=e.target.closest('[data-gizle]');if(!c)return;const gz=raporGizli(),k=c.dataset.gizle,i=gz.indexOf(k);
@@ -1254,6 +1363,7 @@ function raporCiz(){const o=H.top,M=st.meta,S=st.sulama,T=st.toprak;
   <h3>Sulama süresi (kasa başına)</h3><table><tr><th>Grup</th><th class="s">3 mm</th><th class="s">5 mm</th><th class="s">7 mm</th></tr>${H.gr.filter(G=>G.d).map(G=>{const t=mm=>G.d.mmh>0?Math.round(mm/G.d.mmh*60):0;return`<tr><td>${G.kod}</td><td class="s">${t(3)} dk</td><td class="s">${t(5)} dk</td><td class="s">${t(7)} dk</td></tr>`}).join('')}</table></div>
   <div><h3>Malzeme listesi</h3><table><tr><th>Kalem</th><th class="s">Miktar</th></tr>${L.map(x=>`<tr><td>${mzL(x[0])}</td><td class="s">${fmt(x[2],0)} ${x[1]}</td></tr>`).join('')}</table></div></div>
   <h3>Kurulum sonrası kova testi</h3><p>Rastgele 3 damlatıcının altına kap koyup 10 dakika çalıştırın. Toplanan su (mL) × 6 = gerçek debi (mL/saat). Hat başı ile hat sonu arasındaki fark %10’dan fazlaysa basınç yetersizdir ya da boru tıkalıdır.</p></div>`}
+ {const mh=muhHTML(st,H);if(mh)r+=`<div class="sayfa">${antet('Mühendislik kontrolleri')}<h2>Mühendislik kontrolleri</h2>${mh}</div>`}
  const B=o.bil;r+=`<div class="sayfa">${antet('Toprak karışımı')}<h2>Toprak karışımı</h2>
  <table><tr><th>Grup</th><th>Uygulama</th><th class="s">Kasa başı (L)</th><th class="s">Adet</th><th class="s">Toplam (L)</th></tr>${H.gr.map(G=>`<tr><td>${G.kod} · ${esc(G.g.ad)}</td><td>${G.g.toprak==='tam'?`Tam dolum (${fmt(G.fill)} cm)`:G.g.toprak==='ust'?`Üst katman (${fmt(G.fill)} cm)`:'—'}</td><td class="s">${fmt(G.mixL,0)}</td><td class="s">${G.n}</td><td class="s">${fmt(G.mixL*G.n,0)}</td></tr>`).join('')}<tr><th colspan="4">Toplam (oturma payı %${fmt(T.oturma)} dahil)</th><th class="s">${fmt(o.mixL,0)} L = ${fmt(o.mixL/1000,2)} m³</th></tr></table>
  ${o.drenL>0?`<p>Drenaj katmanı: ${fmt(o.drenL/1000,2)} m³ (budama dalı, iri odun parçası ya da çakıl).</p>`:''}
@@ -1453,11 +1563,64 @@ async function raporPDF(ilerle){await Promise.all([kutuphane('h2c'),kutuphane('j
 async function pdfIslem(paylas){const b=$('#btnPdfIndir'),d=$('#pdfDurum');if(b.disabled)return;b.disabled=true;$('#btnPdfPaylas').disabled=true;
  try{d.textContent='PDF hazırlanıyor…';const r=await raporPDF((i,n)=>d.textContent=`PDF hazırlanıyor… bölüm ${i}/${n}`);
   const ad=dosyaAdi(st.meta.ad)+'_Kurulum_Raporu.pdf',s=await dosyaVer(r.blob,ad,paylas);
-  d.textContent=s==='iptal'?'İşlem iptal edildi.':`${ad} ${s} (${r.sayfa} sayfa, ${fmt(r.blob.size/1048576,1)} MB). Yazdırmak için dosyayı açıp yazdır deyin.`}
+  d.textContent=s==='iptal'?'İşlem iptal edildi.':`${ad} ${s} (${r.sayfa} sayfa, ${fmt(r.blob.size/1048576,1)} MB, ${r.metin?'metin tabanlı: yazılar seçilebilir ve aranabilir':'resim tabanlı: yazı tipi indirilemedi'}). Yazdırmak için dosyayı açıp yazdır deyin.`}
  catch(e){console.error(e);d.textContent='PDF oluşturulamadı: '+(e.message||e)}finally{b.disabled=false;$('#btnPdfPaylas').disabled=false}}
 $('#btnPdfIndir').onclick=()=>pdfIslem(false);
 $('#btnPdfPaylas').onclick=()=>pdfIslem(true);
 $('#btnPdfPaylas').hidden=!paylasilir();
+/* ---------- Metin tabanlı PDF (jsPDF + DejaVu + tablo + vektör çizim) ---------- */
+Object.assign(KUTUP,{autotable:['https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js','__autotable'],svg2pdf:['https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.3/dist/svg2pdf.umd.min.js','svg2pdf']});
+const FONT_URL={n:'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf',b:'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans-Bold.ttf'};
+let fontB64=null;
+async function fontlar(){if(fontB64)return fontB64;const b64=async u=>{const r=await fetch(u);if(!r.ok)throw new Error('Yazı tipi indirilemedi');const a=new Uint8Array(await r.arrayBuffer());let s='';for(let i=0;i<a.length;i+=0x8000)s+=String.fromCharCode.apply(null,a.subarray(i,i+0x8000));return btoa(s)};
+ const[n,b]=await Promise.all([b64(FONT_URL.n),b64(FONT_URL.b)]);return fontB64={n,b}}
+async function pdfKutuphaneler(){await kutuphane('jspdf');await new Promise((ok,hata)=>{if(window.jspdf.jsPDF.API.autoTable)return ok();const s=document.createElement('script');s.src=KUTUP.autotable[0];s.onload=ok;s.onerror=()=>hata(new Error('Tablo eklentisi indirilemedi'));document.head.appendChild(s)});await kutuphane('svg2pdf')}
+const duzYazi=el=>{const c=el.cloneNode(true);c.querySelectorAll('br').forEach(b=>b.replaceWith('\n'));c.querySelectorAll('.malzLink').forEach(x=>x.replaceWith(x.textContent));return c.textContent.replace(/[ \t ]+/g,' ').replace(/ *\n */g,'\n').trim()};
+async function raporPDFMetin(ilerle){await pdfKutuphaneler();const F=await fontlar();raporCiz();
+ const doc=new window.jspdf.jsPDF({unit:'mm',format:'a4',compress:true});
+ doc.addFileToVFS('DejaVuSans.ttf',F.n);doc.addFont('DejaVuSans.ttf','DejaVu','normal');doc.addFileToVFS('DejaVuSans-Bold.ttf',F.b);doc.addFont('DejaVuSans-Bold.ttf','DejaVu','bold');doc.setFont('DejaVu','normal');
+ const ML=15,MR=15,MT=16,MB=16,PW=210,PH=297,W=PW-ML-MR,M=st.meta;let y=MT,ilk=true;
+ const kap=document.createElement('div');kap.className='pdfKap';kap.innerHTML=$('#rapor').innerHTML;document.body.appendChild(kap);
+ const ust=()=>{doc.setFont('DejaVu','bold');doc.setFontSize(8.5);doc.setTextColor(46,107,58);doc.text(M.ad||'Bostan',ML,10);doc.setFont('DejaVu','normal');doc.setTextColor(110);doc.text(`${M.bostan||''}${M.tarih?' · '+M.tarih:''}`,PW-MR,10,{align:'right'});doc.setDrawColor(46,107,58);doc.setLineWidth(0.4);doc.line(ML,12,PW-MR,12);doc.setTextColor(25)};
+ const yeniSayfa=()=>{if(!ilk)doc.addPage();ilk=false;ust();y=MT+2};
+ const yer=h=>{if(y+h>PH-MB)yeniSayfa()};
+ const yazi=(t,o={})=>{if(!t)return;const fs=o.fs||9.5,lh=fs*0.42+0.6,x=ML+(o.ic||0),w=W-(o.ic||0);doc.setFont('DejaVu',o.b?'bold':'normal');doc.setFontSize(fs);if(o.renk)doc.setTextColor(...o.renk);else doc.setTextColor(25);
+  const satir=doc.splitTextToSize(t,w);if(o.once)y+=o.once;for(const s of satir){yer(lh);doc.text(s,x,y+lh*0.75);y+=lh}if(o.sonra!=null)y+=o.sonra;else y+=1.2;doc.setTextColor(25)};
+ const tablo=(tb,x0=ML,w0=W)=>{const R=[...tb.rows].map(tr=>[...tr.cells].map(c=>({content:duzYazi(c),th:c.tagName==='TH',s:c.classList.contains('s')})));if(!R.length)return;
+  const bas=R[0].every(c=>c.th)?R.shift():null,sag=(bas||R[0]||[]).map((c,i)=>R.some(r=>r[i]&&r[i].s)||(bas&&bas[i]&&bas[i].s));
+  doc.autoTable({head:bas?[bas.map(c=>c.content)]:undefined,body:R.map(r=>r.map(c=>c.content)),startY:y,margin:{left:x0,right:PW-x0-w0,top:MT+2,bottom:MB},tableWidth:w0,theme:'grid',
+   styles:{font:'DejaVu',fontSize:7.6,cellPadding:1.1,lineColor:[180,192,176],lineWidth:0.15,textColor:25,overflow:'linebreak',valign:'top'},headStyles:{font:'DejaVu',fontStyle:'bold',fillColor:[227,238,223],textColor:20},
+   columnStyles:Object.fromEntries(sag.map((v,i)=>[i,v?{halign:'right'}:{}]).filter(([,v])=>v.halign)),didDrawPage:d=>{if(d.pageNumber>1||doc.getNumberOfPages()>1){}},willDrawPage:()=>{}});
+  y=doc.lastAutoTable.finalY+3};
+ const cizim=async(svg,x0,w0,hMax=200)=>{const vb=(svg.getAttribute('viewBox')||'0 0 100 70').split(/[\s,]+/).map(Number);let w=w0,h=w0*vb[3]/vb[2];if(h>hMax){h=hMax;w=h*vb[2]/vb[3]}
+  if(y+h>PH-MB)yeniSayfa();const c=svg.cloneNode(true);c.setAttribute('font-family','DejaVu');c.querySelectorAll('[font-family]').forEach(e=>e.setAttribute('font-family','DejaVu'));
+  const tmp=document.createElement('div');tmp.style.cssText='position:fixed;left:-9000px;top:0;width:800px';tmp.appendChild(c);document.body.appendChild(tmp);
+  try{await doc.svg(c,{x:x0+(w0-w)/2,y,width:w,height:h})}finally{tmp.remove()}return h};
+ const resim=async(img,x0,w0)=>{const src=img.getAttribute('src');if(!src||!src.startsWith('data:'))return;const p=doc.getImageProperties(src),h=w0*p.height/p.width,hh=Math.min(h,170),ww=hh*p.width/p.height;yer(hh+2);doc.addImage(src,src.includes('png')?'PNG':'JPEG',x0+(w0-ww)/2,y,ww,hh,undefined,'FAST');y+=hh+3};
+ const isle=async(el)=>{const tg=el.tagName,c=el.classList;
+  if(c&&c.contains('antet'))return;
+  if(tg==='H1')return yazi(duzYazi(el),{fs:16,b:true,renk:[46,107,58],sonra:2});
+  if(tg==='H2')return yazi(duzYazi(el),{fs:12.5,b:true,renk:[46,107,58],once:2.5,sonra:1.5});
+  if(tg==='H3')return yazi(duzYazi(el),{fs:10.5,b:true,once:1.5,sonra:1});
+  if(tg==='H4')return yazi(duzYazi(el),{fs:9.5,b:true,once:1,sonra:0.8});
+  if(tg==='P')return yazi(duzYazi(el),{fs:el.style.fontSize&&parseFloat(el.style.fontSize)<12?7.8:9.2,renk:c.contains('not')?[95,105,98]:null});
+  if(tg==='OL'||tg==='UL'){[...el.children].forEach((li,i)=>yazi(`${tg==='OL'?(i+1)+'.':'•'} ${duzYazi(li)}`,{fs:9,ic:2,sonra:0.6}));y+=1;return}
+  if(tg==='TABLE')return tablo(el);
+  if(c&&c.contains('tablo')){const t=el.querySelector('table');if(t)tablo(t);return}
+  if(c&&c.contains('kutu4')){const K=[...el.children],bw=(W-3*3)/4;yer(16);K.forEach((d,i)=>{const x=ML+i*(bw+3);doc.setDrawColor(195,207,189);doc.setFillColor(247,250,245);doc.roundedRect(x,y,bw,14,1.5,1.5,'FD');const b=d.querySelector('b'),s=d.querySelector('span');doc.setFont('DejaVu','bold');doc.setFontSize(12);doc.setTextColor(25);doc.text(b?b.textContent:'',x+3,y+6.5);doc.setFont('DejaVu','normal');doc.setFontSize(7.5);doc.setTextColor(95,105,98);doc.text(s?s.textContent:'',x+3,y+11)});doc.setTextColor(25);y+=17;return}
+  if(c&&c.contains('cizim')){const s=el.querySelector('svg');if(s)y+=await cizim(s,ML,W)+3;return}
+  if(c&&c.contains('iki')){const ch=[...el.children];if(ch.length===2&&ch.every(d=>d.classList.contains('cizim'))){const s1=ch[0].querySelector('svg'),s2=ch[1].querySelector('svg'),wh=(W-4)/2,hgt=sv=>{const vb=(sv.getAttribute('viewBox')||'0 0 100 70').split(/[\s,]+/).map(Number);return Math.min(150,wh*vb[3]/vb[2])},h=Math.max(hgt(s1),hgt(s2));yer(h+3);const y0=y;await cizim(s1,ML,wh,150);y=y0;await cizim(s2,ML+wh+4,wh,150);y=y0+h+3;return}
+   for(const d of ch)for(const e of d.children)await isle(e);return}
+  if(tg==='IMG')return resim(el,ML,W);
+  if(c&&c.contains('imza')){yer(22);y+=12;doc.setDrawColor(120);doc.setLineWidth(0.2);[ML+10,ML+W/2+10].forEach(x=>doc.line(x,y,x+W/2-20,y));doc.setFont('DejaVu','normal');doc.setFontSize(8.5);doc.text('Hazırlayan',ML+W/4,y+4,{align:'center'});doc.text('Onaylayan',ML+3*W/4,y+4,{align:'center'});y+=8;return}
+  if(tg==='DIV'||tg==='SECTION'){for(const e of el.children)await isle(e);return}
+  const t=duzYazi(el);if(t)yazi(t,{fs:9})};
+ try{const S=[...kap.querySelectorAll('.sayfa')];for(let i=0;i<S.length;i++){ilerle&&ilerle(i+1,S.length);yeniSayfa();for(const e of S[i].children)await isle(e)}
+  const n=doc.getNumberOfPages();for(let i=1;i<=n;i++){doc.setPage(i);doc.setFont('DejaVu','normal');doc.setFontSize(7.5);doc.setTextColor(120);doc.text(`Bostan Mimarı ${APP_VERSION}`,ML,PH-8);doc.text(`${i} / ${n}`,PW-MR,PH-8,{align:'right'})}
+  doc.setProperties({title:`${M.ad||'Bostan'} — kurulum raporu`,author:M.hazirlayan||'',creator:'Bostan Mimarı '+APP_VERSION});
+  return{blob:doc.output('blob'),sayfa:n,bolum:S.length,metin:true}}finally{kap.remove()}}
+const raporPDFResim=raporPDF;
+raporPDF=async function(ilerle){try{return await raporPDFMetin(ilerle)}catch(e){console.warn('Metin PDF olmadı, resimli PDF’e geçiliyor',e);const r=await raporPDFResim(ilerle);r.metin=false;r.uyari=e.message;return r}};
 
 /* ---------- İhale dosyası ---------- */
 const IH_VARS={idare:'Çankaya Belediyesi Park ve Bahçeler Müdürlüğü',isAdi:'',yer:'',sure:30,usul:'dogrudan',teklif:'birim',garanti:12,kdv:20,ekPdf:'evet',fiyat:{}};
@@ -1596,7 +1759,7 @@ async function ihaleKontrol2(zipBlob,beklenen,K){const R=[],ek=(d,x)=>R.push({d,
  let svgOk=0;for(const y of beklenen.filter(y=>y.endsWith('.svg'))){if(!z.file(y))continue;const d=dp.parseFromString(await z.file(y).async('string'),'image/svg+xml');if(d.getElementsByTagName('parsererror').length||d.documentElement.nodeName!=='svg'||!d.documentElement.getAttribute('viewBox'))ek('kritik',`Çizim bozuk: ${y}`);else svgOk++}
  if(svgOk)ek('ok',`${svgOk} çizim dosyası geçerli SVG olarak açıldı.`);
  const pf=beklenen.find(y=>y.endsWith('.pdf'));if(pf&&z.file(pf)){const u=await z.file(pf).async('uint8array'),bas=String.fromCharCode(...u.slice(0,5)),txt=new TextDecoder('latin1').decode(u),n=(txt.match(/\/Type\s*\/Page[^s]/g)||[]).length;
-  if(bas!=='%PDF-'||!n)ek('kritik','Kurulum raporu PDF’i geçersiz.');else ek('ok',`Kurulum raporu PDF’i geçerli (${n} sayfa).`)}
+  if(bas!=='%PDF-'||!n)ek('kritik','Kurulum raporu PDF’i geçersiz.');else ek('ok',`Kurulum raporu PDF’i geçerli (${n} sayfa, ${/\/FontFile2/.test(txt)?'metin tabanlı':'resim tabanlı'}).`)}
  const js=beklenen.find(y=>y.endsWith('.json'));if(js&&z.file(js)){try{const v=JSON.parse(await z.file(js).async('string'));if(JSON.stringify(v)!==JSON.stringify(st))ek('kritik','Proje verisi dosyası güncel projeyle aynı değil.');else ek('ok','Proje verisi dosyası güncel projeyle birebir aynı.')}catch(e){ek('kritik','Proje verisi okunamadı.')}}
  return R}
 
@@ -1727,12 +1890,12 @@ function evCiz(){const L=Object.entries(DB.projeler).sort((a,b)=>(b[1]._t||0)-(a
  $('#evListe').innerHTML=L.length?L.map(([id,p])=>{const o=calismaOzet(p),t=o&&o.h.top;
   const roz=!o?'':o.eksik?`<span class="rozet kr">${o.eksik} grupta ölçü eksik</span>`:o.kr?`<span class="rozet kr">${o.kr} kritik bulgu</span>`:o.uy?`<span class="rozet uy">${o.uy} uyarı</span>`:`<span class="rozet ok">✓ Hazır</span>`;
   const son=p._t?new Date(p._t).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}):'';
-  return`<div class="evKart${id===DB.aktif?' on':''}"><button class="evAc" data-pid="${id}"><b>${esc(p.meta.ad||'Adsız çalışma')}</b><small>${esc(p.meta.bostan||'Bostan belirtilmedi')}${p.meta.tur==='ek'?' · ek kurulum':''}${son?` · son değişiklik ${son}`:''}</small>${t?`<div class="evSay"><span>${t.kasa} kasa</span><span>${fmt(t.ekim,1)} m² ekim</span><span>${fmt(t.mixL/1000,2)} m³ toprak</span>${t.Q>0?`<span>${fmt(t.Q,0)} L/sa damla</span>`:''}</div>`:''}${roz}</button><div class="evIs"><button data-kopyap="${id}">Kopyala</button><button class="sil" data-silp="${id}">Sil</button></div></div>`}).join(''):'<div class="kart"><p style="margin:0">Henüz çalışma yok. “Yeni çalışma” ile başlayın ya da örneği açıp inceleyin.</p></div>'}
+  return`<div class="evKart${id===DB.aktif?' on':''}"><button class="evAc" data-pid="${id}"><b>${esc(p.meta.ad||'Adsız çalışma')}</b><small>${esc(p.meta.bostan||'Bostan belirtilmedi')}${p.meta.tur==='ek'?' · ek kurulum':''}${son?` · son değişiklik ${son}`:''}</small>${t?`<div class="evSay"><span>${t.kasa} kasa</span><span>${fmt(t.ekim,1)} m² ekim</span><span>${fmt(t.mixL/1000,2)} m³ toprak</span>${t.Q>0?`<span>${fmt(t.Q,0)} L/sa damla</span>`:''}</div>`:''}${roz}</button><div class="evIs"><button data-kopyap="${id}">Kopyala</button><button class="sil" data-silp="${id}">Sil</button></div></div>`}).join(''):'<div class="kart"><p style="margin:0">Henüz çalışma yok. “Yeni çalışma” ile başlayın ya da örneği açıp inceleyin.</p></div>';if(typeof syncDurum==='function')syncDurum()}
 function evAc(){sekme('ev')}
 $('#btnProje').onclick=evAc;
 $('#evListe').addEventListener('click',e=>{const a=e.target.closest('[data-pid]');if(a){projeAc(a.dataset.pid);return}
  const k=e.target.closest('[data-kopyap]');if(k){const p=JSON.parse(JSON.stringify(DB.projeler[k.dataset.kopyap]));p.meta.ad+=' (kopya)';p._t=Date.now();DB.projeler[uid()]=p;kaydet();evCiz();toast('Kopya oluşturuldu');return}
- const d=e.target.closest('[data-silp]');if(d){const id=d.dataset.silp,ad=DB.projeler[id].meta.ad;if(!confirm(`"${ad}" silinsin mi? Bu işlem geri alınamaz.`))return;delete DB.projeler[id];
+ const d=e.target.closest('[data-silp]');if(d){const id=d.dataset.silp,ad=DB.projeler[id].meta.ad;if(!confirm(`"${ad}" silinsin mi? Bu işlem geri alınamaz.`))return;delete DB.projeler[id];DB.silinen=DB.silinen||{};DB.silinen[id]=Date.now();
   if(!Object.keys(DB.projeler).length){const nid=uid();DB.projeler[nid]=bosProje();DB.aktif=nid}else if(DB.aktif===id)DB.aktif=Object.keys(DB.projeler)[0];
   st=onar(DB.projeler[DB.aktif]);DB.projeler[DB.aktif]=st;H=hesapla(st);renderForm();oranGoster();kaydet();evCiz();toast('Silindi')}});
 function projeAc(id){DB.aktif=id;st=onar(DB.projeler[id]);DB.projeler[id]=st;ucGorsel=null;renderForm();oranGoster();const t0=st._t;degisti();st._t=t0;kaydet();if(U3)U3.ilk=0;sekme('girdi')}
@@ -1763,10 +1926,49 @@ $('#pYukle').onclick=()=>{let v;try{v=JSON.parse($('#pMetin').value.trim())}catc
  projeAc(sonId);$('#pMetin').value='';$('#pAktar').hidden=true;toast(`${n} çalışma yüklendi`)};
 $('#pIce').onchange=e=>{const f=e.target.files[0];if(!f)return;f.text().then(t=>{try{const p=JSON.parse(t);if(!p.gruplar)throw 0;projeEkle(onar(p))}catch(x){toast('Dosya okunamadı')}});e.target.value=''};
 
+/* ---------- Cihazlar arası eşitleme (gizli GitHub gist) ---------- */
+const SYNC_LS='bostanMimari.sync',SYNC_AD='BostanMimari veri (otomatik eşitleme)',SYNC_DOSYA='bostan-mimari.json';
+let ESY=(()=>{try{return JSON.parse(localStorage.getItem(SYNC_LS))||{}}catch(e){return{}}})(),syncZ=null,syncCalisiyor=false;
+const syncKaydet=()=>{try{localStorage.setItem(SYNC_LS,JSON.stringify(ESY))}catch(e){}};
+async function gh(yol,o={}){const r=await fetch('https://api.github.com'+yol,{...o,headers:{Authorization:'Bearer '+ESY.token,Accept:'application/vnd.github+json','X-GitHub-Api-Version':'2022-11-28',...(o.body?{'Content-Type':'application/json'}:{})}});
+ if(r.status===401)throw new Error('Anahtar geçersiz ya da süresi dolmuş');if(r.status===403||r.status===404)throw new Error('Anahtarın “gist” izni yok ya da gist silinmiş');if(!r.ok)throw new Error('GitHub yanıtı '+r.status);return r.status===204?null:r.json()}
+async function gistBul(){if(ESY.gist){try{return await gh('/gists/'+ESY.gist)}catch(e){if(!/silinmiş/.test(e.message))throw e;ESY.gist=null}}
+ for(let s=1;s<=5;s++){const L=await gh(`/gists?per_page=100&page=${s}`);const g=L.find(x=>x.description===SYNC_AD&&x.files&&x.files[SYNC_DOSYA]);if(g){ESY.gist=g.id;syncKaydet();return await gh('/gists/'+g.id)}if(L.length<100)break}
+ const g=await gh('/gists',{method:'POST',body:JSON.stringify({description:SYNC_AD,public:false,files:{[SYNC_DOSYA]:{content:JSON.stringify({v:1,projeler:{},silinen:{}})}}})});ESY.gist=g.id;syncKaydet();return g}
+async function gistOku(g){const f=g.files[SYNC_DOSYA];if(!f)return{projeler:{},silinen:{}};let t=f.content;if(f.truncated){const r=await fetch(f.raw_url);t=await r.text()}try{const v=JSON.parse(t);return{projeler:v.projeler||{},silinen:v.silinen||{}}}catch(e){return{projeler:{},silinen:{}}}}
+function birlestir(L,R){const P={},S={...R.silinen};Object.entries(L.silinen||{}).forEach(([id,t])=>S[id]=Math.max(S[id]||0,t));
+ new Set([...Object.keys(L.projeler),...Object.keys(R.projeler)]).forEach(id=>{const a=L.projeler[id],b=R.projeler[id],x=!a?b:!b?a:((a._t||0)>=(b._t||0)?a:b);if(S[id]&&S[id]>=(x._t||0))return;P[id]=x});
+ Object.keys(S).forEach(id=>{if(S[id]<Date.now()-180*864e5)delete S[id]});return{projeler:P,silinen:S}}
+async function esitle(sessiz){if(!ESY.token||syncCalisiyor||!navigator.onLine)return;syncCalisiyor=true;syncDurum('Eşitleniyor…');
+ try{clearTimeout(kz);try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}
+  const g=await gistBul(),R=await gistOku(g);if(!ESY.son&&Object.keys(R.projeler).length)Object.keys(DB.projeler).forEach(id=>{const q=DB.projeler[id];if(!q._t&&/^Örnek/.test(q.meta.ad||''))delete DB.projeler[id]});const M=birlestir({projeler:DB.projeler,silinen:DB.silinen||{}},R);
+  const eskiAktif=DB.projeler[DB.aktif],eskiT=eskiAktif?eskiAktif._t||0:0;
+  DB.projeler=M.projeler;DB.silinen=M.silinen;
+  if(!Object.keys(DB.projeler).length){const id=uid();DB.projeler[id]=bosProje();DB.projeler[id]._t=Date.now();DB.aktif=id}
+  if(!DB.projeler[DB.aktif])DB.aktif=Object.keys(DB.projeler)[0];
+  const yeni=DB.projeler[DB.aktif];if(yeni!==eskiAktif&&((yeni._t||0)!==eskiT||!eskiAktif)){st=onar(yeni);DB.projeler[DB.aktif]=st;H=hesapla(st);renderForm();oranGoster();ozetCiz();adimCiz();kirli={cizim:1,uc:1,denetim:1,rapor:1};if(aktifTab!=='ev')sekme(aktifTab)}
+  try{localStorage.setItem(LS,JSON.stringify(DB))}catch(e){}
+  const icerik=JSON.stringify({v:1,uygulama:'Bostan Mimarı',surum:APP_VERSION,projeler:DB.projeler,silinen:DB.silinen});
+  const sir=o=>JSON.stringify(Object.keys(o).sort().map(k=>[k,o[k]]));if(sir(R.projeler)!==sir(M.projeler)||sir(R.silinen)!==sir(M.silinen))await gh('/gists/'+ESY.gist,{method:'PATCH',body:JSON.stringify({files:{[SYNC_DOSYA]:{content:icerik}}})});
+  ESY.son=Date.now();ESY.hata='';syncKaydet();syncDurum();if(aktifTab==='ev')evCiz();if(!sessiz)toast(`Eşitlendi: ${Object.keys(DB.projeler).length} çalışma`)}
+ catch(e){ESY.hata=e.message;syncKaydet();syncDurum();if(!sessiz)toast('Eşitlenemedi: '+e.message)}finally{syncCalisiyor=false}}
+function syncPlanla(){if(!ESY.token)return;clearTimeout(syncZ);syncZ=setTimeout(()=>esitle(true),5000)}
+{const _k=kaydet;kaydet=function(){_k();syncPlanla()}}
+function syncDurum(m){const e=$('#syncDurum');if(!e)return;$('#syncBagli').hidden=!ESY.token;$('#syncKur').hidden=!!ESY.token;
+ e.innerHTML=m?esc(m):!ESY.token?'Kapalı. Bu cihazdaki çalışmalar yalnızca burada.':ESY.hata?`<span style="color:var(--kr)">⚠ ${esc(ESY.hata)}</span>`:ESY.son?`✓ Açık · son eşitleme ${new Date(ESY.son).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}`:'Açık'}
+$('#syncBaglan').onclick=async()=>{let v=$('#syncToken').value.trim();if(!v){toast('Anahtarı ya da bağlantı kodunu yapıştırın');return}
+ if(v.startsWith('BM1:')){try{const o=JSON.parse(atob(v.slice(4)));ESY={token:o.t,gist:o.g}}catch(e){toast('Bağlantı kodu okunamadı');return}}else ESY={token:v};
+ syncKaydet();$('#syncToken').value='';await esitle(false);if(ESY.hata){toast('Bağlanamadı: '+ESY.hata)}};
+$('#syncSimdi').onclick=()=>esitle(false);
+$('#syncKes').onclick=()=>{if(!confirm('Bu cihazda eşitleme kapatılsın mı? Çalışmalar bu cihazda kalır, buluttaki kopya silinmez.'))return;ESY={};syncKaydet();syncDurum();toast('Eşitleme kapatıldı')};
+$('#syncKod').onclick=async()=>{const k='BM1:'+btoa(JSON.stringify({t:ESY.token,g:ESY.gist}));try{await navigator.clipboard.writeText(k);toast('Bağlantı kodu kopyalandı; diğer cihazda aynı kutuya yapıştırın')}catch(e){$('#syncToken').value=k;$('#syncKur').hidden=false;$('#syncToken').select();toast('Kod kutuya yazıldı; uzun basıp kopyalayın')}};
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')esitle(true)});
+window.addEventListener('online',()=>esitle(true));
 /* ---------- Başlat ---------- */
 $('#surum').textContent=APP_VERSION;
 yukle();H=hesapla(st);renderForm();oranGoster();{const t0=st._t;degisti();st._t=t0;kaydet()}sekme('ev');
 if('serviceWorker' in navigator&&location.protocol.startsWith('http')){let yenilendi=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(yenilendi)return;yenilendi=true;sessionStorage.setItem('bmYeni','1');location.reload()});navigator.serviceWorker.register('./sw.js').catch(()=>{})}
+if(ESY.token)setTimeout(()=>esitle(true),800);
 try{if(sessionStorage.getItem('bmYeni')){sessionStorage.removeItem('bmYeni');toast('Yeni sürüm yüklendi: '+APP_VERSION)}}catch(e){}
 </script>
 </body>

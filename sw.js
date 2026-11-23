@@ -1,4 +1,4 @@
-const VERSION = '2026.11.22-17';
+const VERSION = '2026.11.23-1';
 const CACHE = 'app-' + VERSION;
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const CDN = [
@@ -6,7 +6,11 @@ const CDN = [
   'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js',
   'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js',
   'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js',
-  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'
+  'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+  'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js',
+  'https://cdn.jsdelivr.net/npm/svg2pdf.js@2.2.3/dist/svg2pdf.umd.min.js',
+  'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans.ttf',
+  'https://cdn.jsdelivr.net/npm/dejavu-fonts-ttf@2.37.3/ttf/DejaVuSans-Bold.ttf'
 ];
 self.addEventListener('install', e => {
   self.skipWaiting();
