@@ -183,6 +183,21 @@ async def ortak_olcu(pg):
     assert c[1] == [200, 'galvaniz'], r                     # ayrı ölçüye dönünce eski değerler geri geldi
 
 @test
+async def grup_belirleme(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:30,boy:20};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3,sira:2}),yeniGrup(1,{x:2,y:10,sutun:2,aci:15})];projeEkle(p);
+      const cen=(G,no)=>{const P=G.poli[G.beds.findIndex(b=>b.no===no)];return P.reduce((a,q)=>[a[0]+q[0]/4,a[1]+q[1]/4],[0,0]).map(x=>Math.round(x*100)/100)};
+      const once=[cen(H.gr[0],1),cen(H.gr[0],4),cen(H.gr[1],0)];yer.kasalar=[{gi:0,no:1},{gi:0,no:4},{gi:1,no:0}];grupDuzenle(null);
+      const G=H.gr[H.gr.length-1],sonra=G.beds.map(b=>cen(G,b.no)),say1=H.gr.map(G=>G.beds.length);
+      yer.kasalar=[{gi:1,no:1}];grupDuzenle(2);const say2=H.gr.map(G=>G.beds.length);
+      const ic=(q,P)=>{let c=false;for(let i=0,j=P.length-1;i<P.length;j=i++){const a=P[i],b=P[j];if((a[1]>q[1])!==(b[1]>q[1])&&q[0]<(b[0]-a[0])*(q[1]-a[1])/(b[1]-a[1])+a[0])c=!c}return c};
+      let kesen=0;H.gr.forEach(G=>G.boru.hatlar.map(h=>h.map(q=>G.rot(q))).concat([G.boru.bag]).forEach(h=>{for(let i=0;i<h.length-1;i++)for(let t=0.02;t<0.99;t+=0.02){const q=[h[i][0]+(h[i+1][0]-h[i][0])*t,h[i][1]+(h[i+1][1]-h[i][1])*t];H.gr.forEach(O=>O.poli.forEach(P=>{if(ic(q,P))kesen++}))}}));
+      return{once,sonra,say1,say2,kesen}}""")
+    assert r['once'] == r['sonra'], r                 # kasalar yerinde kaldı
+    assert r['say1'] == [4, 1, 3], r
+    assert sum(r['say2']) == 8 and len(r['say2']) == 2, r   # B boşaldı ve kaldırıldı
+    assert r['kesen'] == 0, r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -237,7 +252,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
