@@ -241,6 +241,7 @@ dialog .ic{padding:16px}
    <button class="btn kucuk" data-aci="-15" aria-label="15 derece sola çevir">⟲15°</button><button class="btn kucuk" data-aci="-1" aria-label="1 derece sola çevir">⟲1°</button>
    <label class="aciKut">Açı°<input id="yerAci" type="number" inputmode="decimal" step="1"></label>
    <button class="btn kucuk" data-aci="1" aria-label="1 derece sağa çevir">1°⟳</button><button class="btn kucuk" data-aci="15" aria-label="15 derece sağa çevir">15°⟳</button>
+   <span style="flex-basis:100%;height:0"></span><button class="btn kucuk" data-ara="-10" aria-label="Kasa arasını 10 cm azalt">Ara −10</button><span class="not" id="yerAra"></span><button class="btn kucuk" data-ara="10" aria-label="Kasa arasını 10 cm artır">Ara +10</button><span style="flex-basis:100%;height:0"></span>
    <button class="btn kucuk" id="btnDondur">Yatay/dikey</button><button class="btn kucuk" id="btnTumunuSec">☐ Gruptaki tüm kasaları seç</button><button class="btn kucuk" id="btnSecimBirak" hidden>Kasa seçimini kaldır</button><button class="btn kucuk" id="btnAyir" hidden>✂ Kasayı ayır</button>
    <span class="not" style="flex-basis:100%">Kasaya dokunun: seçilir ve üstünde ⟳ tutamağı çıkar; kasa kendi yerinde döner. Birden fazla kasaya dokunursanız hepsi kendi merkezinde birlikte döner. Kasa seçili değilken açı tüm grubu çevirir.</span></div>
  </div>
@@ -325,7 +326,7 @@ dialog .ic{padding:16px}
 
 <script>
 'use strict';
-const APP_VERSION = '2026.11.23-6';
+const APP_VERSION = '2026.11.23-7';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const fmt=(x,d=1)=>Number.isFinite(+x)?(+x).toLocaleString('tr-TR',{maximumFractionDigits:d,minimumFractionDigits:0}):'—';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -344,7 +345,7 @@ const MALZ={
 };
 const TURLER=[['toprak','Bahçe toprağı'],['kompost','Kompost'],['torf','Torf'],['gubre','Hayvan gübresi'],['solucan','Solucan gübresi'],['perlit','Perlit'],['pomza','Pomza'],['kum','Dere kumu'],['diger','Diğer']];
 const BORU_IC={16:13.6,20:16.6,25:21,32:27.2,40:34};
-function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:60,siraArasi:80,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:'',aci:0,haric:[],kasaAci:{},hatSayisi:'',vanaD:20,girisUc:'bas',takviye:'oneri',disL:'evet',araLama:'evet'},o)}
+function yeniGrup(i,o={}){return Object.assign({id:uid(),ad:'Grup '+harf(i),durum:'yeni',x:1.5,y:1.5,yon:'yatay',sira:1,sutun:3,L:'',W:'',H:'',aralik:150,siraArasi:150,malzeme:'ahsap',t:5,tahtaH:15,dikme:7,gomme:20,dip:'tel',icKaplama:'evet',sulama:'evet',toprak:'tam',sekil:'I',kolUc:'bas',kolEn:'',kolBoy:'',mk:'yok',mkYer:'bas',mkD:'',mkEn:'',mkH:'',aci:0,haric:[],kasaAci:{},hatSayisi:'',vanaD:20,girisUc:'bas',takviye:'oneri',disL:'evet',araLama:'evet'},o)}
 function varsayilanBilesen(){return[
  {ad:'Bahçe toprağı (elenmiş)',tur:'toprak',oran:40,paket:1000,pAd:'m³',yog:1.25},
  {ad:'Olgun kompost',tur:'kompost',oran:25,paket:50,pAd:'çuval',yog:0.55},
@@ -352,7 +353,7 @@ function varsayilanBilesen(){return[
  {ad:'Yanmış hayvan gübresi',tur:'gubre',oran:10,paket:40,pAd:'çuval',yog:0.6},
  {ad:'Perlit',tur:'perlit',oran:5,paket:100,pAd:'torba',yog:0.1},
  {ad:'Pomza',tur:'pomza',oran:5,paket:50,pAd:'çuval',yog:0.6}]}
-function bosProje(){return{v:1,meta:{ad:'Yeni bostan projesi',bostan:'',tur:'yeni',hazirlayan:'',tarih:bugun(),not:''},alan:{en:15,boy:10,kuzey:0,enlem:39.9},gruplar:[yeniGrup(0,{x:1.5,y:1.5,sira:2,sutun:3})],sulama:{kx:0.5,ky:0.5,basinc:2,basincMin:'',damlaTip:'normal',reg:'oto',filtreK:0.2,kaynakDebi:0,damlaAr:40,damlaDebi:2,hatAr:30,anaCap:20,kenar:15},toprak:{bos:3,drenaj:0,ust:15,oturma:10,gamma:'',phi:30,q:1,emp:'UC4',bil:varsayilanBilesen()}}}
+function bosProje(){return{v:1,meta:{ad:'Yeni bostan projesi',bostan:'',tur:'yeni',hazirlayan:'',tarih:bugun(),not:''},alan:{en:15,boy:10,kuzey:0,enlem:39.9,kenarMin:100,kasaMin:150},gruplar:[yeniGrup(0,{x:1.5,y:1.5,sira:2,sutun:3})],sulama:{kx:0.5,ky:0.5,basinc:2,basincMin:'',damlaTip:'normal',reg:'oto',filtreK:0.2,kaynakDebi:0,damlaAr:40,damlaDebi:2,hatAr:30,anaCap:20,kenar:15},toprak:{bos:3,drenaj:0,ust:15,oturma:10,gamma:'',phi:30,q:1,emp:'UC4',bil:varsayilanBilesen()}}}
 function ornekProje(){const p=bosProje();p.meta={ad:'Örnek: mevcut bostana ek kasa',bostan:'Örnek bostan',tur:'ek',hazirlayan:'',tarih:bugun(),not:''};p.alan={en:18,boy:12,kuzey:15,enlem:39.9};
  p.gruplar=[yeniGrup(0,{ad:'Mevcut kasalar',durum:'mevcut',L:300,W:120,H:45,x:1.5,y:1.5,sutun:3,sira:1,toprak:'ust',dip:'yok',icKaplama:'hayir'}),yeniGrup(1,{ad:'Yeni kasalar',L:300,W:120,H:45,x:1.5,y:4.8,sutun:3,sira:2})];return p}
 function onar(p){const b=bosProje();for(const k of['meta','alan','sulama','toprak'])p[k]=Object.assign({},b[k],p[k]||{});if(!Array.isArray(p.toprak.bil))p.toprak.bil=varsayilanBilesen();if(!Array.isArray(p.gruplar))p.gruplar=[];p.gruplar=p.gruplar.map((g,i)=>Object.assign(yeniGrup(i),g.mkYer?{}:{mkYer:g.mkUc||'bas'},g));return p}
@@ -610,8 +611,10 @@ function hesapla(st){
  const S=st.sulama,T=st.toprak,out={gr:[],eksik:[],top:{kasa:0,kasaYeni:0,ekim:0,mixL:0,mixNet:0,drenL:0,Q:0,damla:0,latM:0,korM:0,anaM:0,ahsap:0,inisSay:0,lateralSay:0}};
  st.gruplar.forEach((g,gi)=>{
   if(!grupHazir(g)){out.eksik.push({gi,kod:harf(gi),ad:g.ad,liste:eksikler(g)});return}
-  const k=kasaHesap(g),kod=harf(gi),L=k.Ls/100,V=k.Vs/100,ar=Math.max(0,n0(g.aralik))/100,sa=Math.max(0,n0(g.siraArasi))/100,sira=Math.max(1,Math.round(n0(g.sira,1))),sut=Math.max(1,Math.round(n0(g.sutun,1))),gx=n0(g.x),gy=n0(g.y);
-  const U=sut*L+(sut-1)*ar,VV=sira*V+(sira-1)*sa;
+  const yG=g.durum==='yeni',kMin=yG?Math.max(0,n0(st.alan.kasaMin,150)):0,k=kasaHesap(g),kod=harf(gi),L=k.Ls/100,V=k.Vs/100,ar=Math.max(kMin,n0(g.aralik))/100,sa=Math.max(kMin,n0(g.siraArasi))/100,sira=Math.max(1,Math.round(n0(g.sira,1))),sut=Math.max(1,Math.round(n0(g.sutun,1))),gx=n0(g.x),gy=n0(g.y);
+  let cL=L,cV=V;if(yG)Object.values(g.kasaAci||{}).forEach(v=>{const a=n0(v)*Math.PI/180,c=Math.abs(Math.cos(a)),s=Math.abs(Math.sin(a));cL=Math.max(cL,L*c+V*s);cV=Math.max(cV,L*s+V*c)});
+  const oU=(cL-L)/2,oV=(cV-V)/2,pu=cL+ar,pw=cV+sa;
+  const U=sut*cL+(sut-1)*ar,VV=sira*cV+(sira-1)*sa;
   const T2=(u,v)=>g.yon==='dikey'?[gx+v,gy+u]:[gx+u,gy+v];
   const a0=T2(0,0),a1=T2(U,VV),bb0={x:Math.min(a0[0],a1[0]),y:Math.min(a0[1],a1[1]),w:Math.abs(a1[0]-a0[0]),h:Math.abs(a1[1]-a0[1])};
   const aci=((n0(g.aci)%360)+360)%360,arad=aci*Math.PI/180,ca=Math.cos(arad),sn=Math.sin(arad),pv=[bb0.x+bb0.w/2,bb0.y+bb0.h/2];
@@ -624,11 +627,11 @@ function hesapla(st){
   let d=null;
   if(g.sulama==='evet'&&k.girisler.length){d=damlaKur(k,g,S);d.notlar.forEach(x=>k.notlar.push(x));if(!d.hat.length)d=null;else d.mmh=area>0?d.Q/area:0}
   const beds=[];
-  const haric=Array.isArray(g.haric)?g.haric:[];for(let r=0;r<sira;r++)for(let c=0;c<sut;c++){const no=r*sut+c;if(haric.includes(no))continue;const u0=c*(L+ar),v0=r*(V+sa),p=T2(u0,v0),q=T2(u0+L,v0+V);beds.push({ad:kod+(no+1),no,aci:((n0((g.kasaAci||{})[no])%360)+360)%360,r,c,u0,v0,x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])})}
+  const haric=Array.isArray(g.haric)?g.haric:[];for(let r=0;r<sira;r++)for(let c=0;c<sut;c++){const no=r*sut+c;if(haric.includes(no))continue;const u0=c*pu+oU,v0=r*pw+oV,p=T2(u0,v0),q=T2(u0+L,v0+V);beds.push({ad:kod+(no+1),no,aci:((n0((g.kasaAci||{})[no])%360)+360)%360,r,c,u0,v0,x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])})}
   const P=(b,u,v)=>T2(b.u0+u/100,b.v0+v/100);
   const R=(b,ua,ub,va,vb)=>{const p=P(b,ua,va),q=P(b,ub,vb);return{x:Math.min(p[0],q[0]),y:Math.min(p[1],q[1]),w:Math.abs(q[0]-p[0]),h:Math.abs(q[1]-p[1])}};
   let boru=null;
-  if(d){const uf=(c,f)=>c*(L+ar)+f/100,vh=r=>r===0?-0.3:r*(V+sa)-sa/2,ov=k.ov;
+  if(d){const uf=(c,f)=>c*pu+oU+f/100,vh=r=>r===0?-0.3:r*pw-sa/2,ov=k.ov;
    const yol=d.besleme.map(bs=>{const gu=bs.giris[0],gv=bs.giris[1];if(gv>ov+k.W){const uo=gu<k.bodyU+k.L/2?-12:k.Ls+12;return{fu:uo,pts:[[uo,gv],[gu,gv]]}}return{fu:gu,pts:[[gu,0],[gu,gv]]}});
    const son=uf(sut-1,Math.max(...yol.map(y=>y.fu)));
    const hatlar=[];for(let r=0;r<sira;r++)hatlar.push([T2(-0.3,vh(r)),T2(son,vh(r))]);
@@ -641,7 +644,7 @@ function hesapla(st){
    const headerM=sira*(son+0.3),trunkM=sira>1?vh(sira-1)-vh(0):0,bagM=Math.abs(ust[0]-src[0])+Math.abs(ust[1]-src[1]);
    boru={hatlar,bag,inis,dag,headerM,trunkM,bagM,dusus:d.besleme.length,anaM:headerM+trunkM+bagM,korM:inisM+beds.length*(d.besleme.length*(k.Hr+20)/100+d.korCm/100),dirsekBag:(Math.abs(ust[0]-src[0])>0.01&&Math.abs(ust[1]-src[1])>0.01)?1:0}}
   if(!beds.length)return;
-  const n=beds.length,G={g,gi,kod,k,U,V:VV,bb,bb0,aci,pv,rot,beds,area,fill,dren,mixL,mixNet,drenL,d,boru,n,T2,P,R,sira,sut,L,ar,sa};
+  const n=beds.length,G={g,gi,kod,k,U,V:VV,bb,bb0,aci,pv,rot,beds,area,fill,dren,mixL,mixNet,drenL,d,boru,n,T2,P,R,sira,sut,L,ar,sa,cL,cV};
   G.parca=g.durum==='yeni'?parcalar(G):(k.mk!=='yok'?parcalar(G,true):[]);
   G.poli=beds.map(b=>{const cx=b.x+b.w/2,cy=b.y+b.h/2,a=b.aci*Math.PI/180,c2=Math.cos(a),s2=Math.sin(a);return[[b.x,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h],[b.x,b.y+b.h]].map(q=>rot([cx+(q[0]-cx)*c2-(q[1]-cy)*s2,cy+(q[0]-cx)*s2+(q[1]-cy)*c2]))});
   out.gr.push(G);const o=out.top;
@@ -864,8 +867,9 @@ function denetle(st,H){
    if(Number.isFinite(k.span)&&k.araL>0)ek('ok',`${adı}: ara dikme`,`En fazla ${fmt(k.span,0)} cm açıklık için uzun kenarlara ${k.araL}’er ara dikme konur.`);
   }
   if(g.durum==='yeni'){
-  if(G.sut>1&&n0(g.aralik)<60)ek(n0(g.aralik)<40?'kritik':'uyari',`${adı}: kasalar arası ${fmt(g.aralik)} cm`,'El arabası 60–70 cm, diz çökerek çalışma en az 50 cm ister.','Kasalar arasını en az 60 cm yapın; tekerlekli sandalye/yürüteç için 120 cm gerekir.');
-  if(G.sira>1&&n0(g.siraArasi)<60)ek(n0(g.siraArasi)<40?'kritik':'uyari',`${adı}: sıralar arası ${fmt(g.siraArasi)} cm`,'Ana yol olarak dar; ana sulama hattı da bu yoldan geçer.','Sıralar arasını en az 70–80 cm yapın.');
+  if(g.durum==='yeni'){const km=n0(st.alan.kasaMin,150);if((G.sut>1&&n0(g.aralik)<km)||(G.sira>1&&n0(g.siraArasi)<km))ek('ok',`${adı}: kasa arası en az ${fmt(km)} cm uygulandı`,`Girilen değer (${fmt(n0(g.aralik))} / ${fmt(n0(g.siraArasi))} cm) en az mesafenin altında kaldığı için ${fmt(G.ar*100)} / ${fmt(G.sa*100)} cm kullanıldı.`,'Daha geniş yol için Girdi › Kasa gruplarında artırın ya da Çizim › Taşıma modunda “Ara +10” düğmesini kullanın.')}
+  else if(G.sut>1&&n0(g.aralik)<60)ek(n0(g.aralik)<40?'kritik':'uyari',`${adı}: kasalar arası ${fmt(g.aralik)} cm`,'El arabası 60–70 cm, diz çökerek çalışma en az 50 cm ister.','Kasalar arasını en az 60 cm yapın; tekerlekli sandalye/yürüteç için 120 cm gerekir.');
+  if(g.durum!=='yeni'&&G.sira>1&&n0(g.siraArasi)<60)ek(n0(g.siraArasi)<40?'kritik':'uyari',`${adı}: sıralar arası ${fmt(g.siraArasi)} cm`,'Ana yol olarak dar; ana sulama hattı da bu yoldan geçer.','Sıralar arasını en az 70–80 cm yapın.');
   const ys=yonSapma(st,g);
   if(ys.sapma>60)ek('uyari',`${adı}: doğu–batı uzanım`,`Kasaların uzun ekseni ${yonAdi(ys.bearing)} doğrultusunda (kuzey–güneyden ${fmt(ys.sapma,0)}° sapma). Uzun kenar güneye baktığı için uzun bitkiler kısa bitkileri gölgeler.`,'Uzun bitkileri (domates, mısır, fasulye sırığı) kuzey kenara, kısa bitkileri güney kenara dizin; mümkünse grubu "dikey" yerleştirin.');
   else if(ys.sapma>30)ek('ok',`${adı}: çapraz uzanım`,`Uzun eksen ${yonAdi(ys.bearing)} (kuzey–güneyden ${fmt(ys.sapma,0)}°). Gölgelenme orta düzeydedir.`);
@@ -878,9 +882,10 @@ function denetle(st,H){
   if(m<0.005)ek('kritik',`${G.beds[i].ad} ve ${G.beds[j].ad} üst üste`,'Çevrilen kasa yanındaki kasaya değiyor.','Açıyı azaltın ya da kasalar arasını açın.');
   else if(m<0.45)ek('uyari',`${G.beds[i].ad}–${G.beds[j].ad} arası ${fmt(m*100,0)} cm`,'Çevrilen kasalar arasında geçiş daraldı.','Kasalar arası en az 50–60 cm kalmalı.')}});
  // çakışma (kasa bazında, dönüş dahil)
- for(let i=0;i<H.gr.length;i++)for(let j=i+1;j<H.gr.length;j++){const gap=grupMes(H.gr[i],H.gr[j]);
+ {const km=n0(A.kasaMin,150)/100,ke=n0(A.kenarMin,100)/100,en=n0(A.en),boy=n0(A.boy);if(en>0&&boy>0)H.gr.forEach(G=>{if(G.g.durum!=='yeni')return;let m=Infinity;G.poli.forEach(P=>P.forEach(q=>{m=Math.min(m,q[0],q[1],en-q[0],boy-q[1])}));if(m>=0&&m<ke-0.005)ek('uyari',`${G.kod}: alan sınırına ${fmt(m*100,0)} cm`,`Kasa çevresinde en az ${fmt(ke*100)} cm boşluk isteniyor.`,'Grubu içeri alın ya da alanı büyütün; Çizim › Taşıma modunda bırakınca otomatik yerleşir.')});
+ for(let i=0;i<H.gr.length;i++)for(let j=i+1;j<H.gr.length;j++){const gap=grupMes(H.gr[i],H.gr[j]),yeni=H.gr[i].g.durum==='yeni'||H.gr[j].g.durum==='yeni',sin=yeni?km:0.6;
   if(gap<0.005)ek('kritik',`${H.gr[i].kod} ve ${H.gr[j].kod} grupları üst üste`,'İki grubun kasaları aynı yere düşüyor.','Gruplardan birini taşıyın ya da çevirin.');
-  else if(gap<0.6)ek('uyari',`${H.gr[i].kod}–${H.gr[j].kod} arası ${fmt(gap*100,0)} cm`,'Gruplar arasındaki yol dar; ana sulama hattı da burada olabilir.','Arayı en az 60–80 cm yapın.')}
+  else if(gap<sin-0.005)ek('uyari',`${H.gr[i].kod}–${H.gr[j].kod} arası ${fmt(gap*100,0)} cm`,`İki kasa arası en az ${fmt(sin*100)} cm olmalı; ana sulama hattı da bu yoldan geçebilir.`,'Gruplardan birini taşıyın; Çizim › Taşıma modunda bırakınca otomatik yerleşir.')}}
  // sulama
  if(o.Q>0){
   if(o.bolge>1)ek('uyari',`Sulama ${o.bolge} bölgeye ayrılmalı`,`Toplam debi ${fmt(o.Q,0)} L/saat; Ø${S.anaCap} mm ana hat ${fmt(o.boruKap,0)} L/saat taşır${n0(S.kaynakDebi)>0?`, kaynak ${fmt(S.kaynakDebi,0)} L/saat verir`:''}.`,`Grupları vanalarla ${o.bolge} bölgeye ayırıp sırayla sulayın ya da ana hattı büyütün.`);
@@ -951,9 +956,9 @@ function svgPlan(st,H,mod='plan',etk=null){
    const vp=B.bag[2];disari+=`<g transform="translate(${vp[0]} ${vp[1]})"><path d="M${-f*0.45} ${-f*0.3} L${f*0.45} ${f*0.3} L${f*0.45} ${-f*0.3} L${-f*0.45} ${f*0.3}Z" fill="#e07b28" stroke="#7a3d0c" stroke-width="${sw}"/></g>`;
    if(sul){const m=B.hatlar[0][1];s+=`<text x="${m[0]+f*0.3}" y="${m[1]-f*0.3}" font-size="${f*0.8}" fill="#123f75">Ø${S.anaCap} PE ana hat</text>`}}
   // ölçüler
-  const segX=g.yon==='dikey'?alt(G.sira,k.Vs,n0(g.siraArasi)):alt(G.sut,k.Ls,n0(g.aralik));
-  const segY=g.yon==='dikey'?alt(G.sut,k.Ls,n0(g.aralik)):alt(G.sira,k.Vs,n0(g.siraArasi));
-  const B0=G.bb0;if(!sul){s+=zincirH(B0.x,B0.y+B0.h+f*1.3,segX,f,sw);s+=zincirV(B0.y,B0.x+B0.w+f*1.3,segY,f,sw)}
+  const segX=g.yon==='dikey'?alt(G.sira,G.cV*100,G.sa*100):alt(G.sut,G.cL*100,G.ar*100);
+  const segY=g.yon==='dikey'?alt(G.sut,G.cL*100,G.ar*100):alt(G.sira,G.cV*100,G.sa*100);
+  const B0=G.bb0;if(!sul&&G.cL-G.L<1e-6&&G.cV*100-G.k.Vs<1e-4){s+=zincirH(B0.x,B0.y+B0.h+f*1.3,segX,f,sw);s+=zincirV(B0.y,B0.x+B0.w+f*1.3,segY,f,sw)}
   s+=`<text x="${B0.x}" y="${B0.y-0.3-f*0.7}" font-weight="700" font-size="${f*0.95}" fill="${mev?'#666':'#2e6b3a'}">${G.kod} · ${esc(g.ad)}${mev?' (mevcut)':''} <tspan font-weight="400" font-size="${f*0.75}" fill="#555">x=${fmt(g.x,2)} y=${fmt(g.y,2)} m${G.aci?` · ${fmt(G.aci,0)}°`:''}</tspan></text>`;
   if(etk){const sec=etk.secili===G.gi;s+=`<rect class="tut" x="${B0.x-0.35}" y="${B0.y-0.35-f*1.2}" width="${B0.w+0.7}" height="${B0.h+0.7+f*1.2}" fill="${sec?'rgba(224,123,40,.08)':'transparent'}" stroke="${sec?'#e07b28':'none'}" stroke-width="${sw*2.5}" stroke-dasharray="${f*0.6} ${f*0.35}" rx="${f*0.3}"/>`}
   const secK=etk&&etk.kasalar?etk.kasalar.filter(x=>x.gi===G.gi):[];
@@ -1275,14 +1280,14 @@ const EH=[['evet','Evet'],['hayir','Hayır']];
 function renderForm(){
  const M=st.meta,A=st.alan,S=st.sulama,T=st.toprak;
  $('#f-proje').innerHTML=fld('meta.ad','Proje adı',M.ad,{tip:'text',tam:1})+fld('meta.bostan','Bostan / yer',M.bostan,{tip:'text'})+fld('meta.tur','Çalışma türü',M.tur,{sec:[['yeni','Yeni bostan'],['ek','Mevcut bostana ek']]})+fld('meta.hazirlayan','Hazırlayan',M.hazirlayan,{tip:'text'})+fld('meta.tarih','Tarih',M.tarih,{tip:'date'})+fld('meta.not','Notlar (rapora girer)',M.not,{tip:'alan',tam:1});
- $('#f-alan').innerHTML=fld('alan.en','Alan genişliği (m)',A.en,{i:'x yönü'})+fld('alan.boy','Alan derinliği (m)',A.boy,{i:'y yönü'})+fld('alan.kuzey','Kuzey açısı (°)',A.kuzey,{i:'planın üstünden saat yönünde'})+fld('alan.enlem','Enlem (°)',A.enlem,{i:'Ankara ≈ 39,9 (güneş için)'});
+ $('#f-alan').innerHTML=fld('alan.en','Alan genişliği (m)',A.en,{i:'x yönü'})+fld('alan.boy','Alan derinliği (m)',A.boy,{i:'y yönü'})+fld('alan.kuzey','Kuzey açısı (°)',A.kuzey,{i:'planın üstünden saat yönünde'})+fld('alan.enlem','Enlem (°)',A.enlem,{i:'Ankara ≈ 39,9 (güneş için)'})+fld('alan.kenarMin','Kasa çevresi en az (cm)',A.kenarMin,{i:'alan sınırına'})+fld('alan.kasaMin','İki kasa arası en az (cm)',A.kasaMin,{i:'yeni kasalarda alt sınır'});
  $('#f-sulama').innerHTML=fld('sulama.kx','Su kaynağı x (m)',S.kx)+fld('sulama.ky','Su kaynağı y (m)',S.ky)+fld('sulama.basinc','Şebeke basıncı (bar)',S.basinc,{i:'musluktan manometreyle'})+fld('sulama.basincMin','En düşük basınç (bar)',S.basincMin,{i:'boş = aynı; yaz öğleden sonra'})+fld('sulama.damlaTip','Damlatıcı tipi',S.damlaTip,{sec:[['normal','Basınç ayarsız'],['pc','Basınç ayarlı (PC)']]})+fld('sulama.reg','Basınç düşürücü',S.reg,{sec:[['oto','Otomatik (ajan seçer)'],['yok','Yok'],['1','1,0 bar'],['1.5','1,5 bar'],['2','2,0 bar'],['3','3,0 bar']]})+fld('sulama.filtreK','Filtre kaybı (bar)',S.filtreK,{i:'temiz disk filtre ≈ 0,2'})+fld('sulama.kaynakDebi','Kaynak debisi (L/saat)',S.kaynakDebi,{i:'0 = bilinmiyor'})+fld('sulama.damlaAr','Damlatıcı aralığı (cm)',S.damlaAr)+fld('sulama.damlaDebi','Damlatıcı debisi (L/saat)',S.damlaDebi)+fld('sulama.hatAr','Hatlar arası (cm)',S.hatAr,{i:'kasa içinde'})+fld('sulama.kenar','Uçtaki boşluk (cm)',S.kenar,{i:'ilk damlatıcıya'})+fld('sulama.anaCap','Ana hat çapı',S.anaCap,{sec:[[16,'Ø16 mm'],[20,'Ø20 mm'],[25,'Ø25 mm'],[32,'Ø32 mm'],[40,'Ø40 mm']]});
  $('#f-toprak').innerHTML=fld('toprak.bos','Üstte bırakılan boşluk (cm)',T.bos)+fld('toprak.drenaj','Drenaj katmanı (cm)',T.drenaj,{i:'0 = yok'})+fld('toprak.ust','Üst katman kalınlığı (cm)',T.ust,{i:'"Üst katman" seçili gruplar'})+fld('toprak.oturma','Oturma payı (%)',T.oturma,{i:'sulamayla çökme'})+fld('toprak.gamma','Islak birim ağırlık (kN/m³)',T.gamma,{i:`boş = otomatik (${fmt(zeminPar(st,H).g,1)})`})+fld('toprak.phi','İçsel sürtünme açısı (°)',T.phi,{i:'gevşek karışım 28–32'})+fld('toprak.q','Kenar ek yükü (kN/m²)',T.q,{i:'kenara oturan/dayanan kişi ≈ 1'})+fld('toprak.emp','Ahşap emprenye sınıfı',T.emp,{sec:[['UC4','Toprak temaslı (UC4)'],['UC3','Toprak dışı (UC3)'],['yok','Emprenyesiz']]});
  renderGruplar();renderBilesen()}
 function renderGruplar(){$('#f-gruplar').innerHTML=st.gruplar.map((g,i)=>{const p=`gruplar.${i}.`;const gal=g.malzeme==='galvaniz',bet=g.malzeme==='beton';
  return`<div class="grup ${g.durum==='mevcut'?'mevcut':''}"><div class="grup-bas"><span class="rozet">${harf(i)}</span><input data-k="${p}ad" type="text" value="${esc(g.ad)}" style="flex:1"><button class="btn kucuk" data-kopya="${i}" aria-label="Grubu kopyala">⧉</button><button class="btn kucuk kirmizi" data-sil="${i}" aria-label="Grubu sil">✕</button></div>
  ${sekilHTML(g,i)}<div class="alanlar">${fld(p+'durum','Durum',g.durum,{sec:[['yeni','Yeni yapılacak'],['mevcut','Mevcut']]})+fld(p+'yon','Uzun eksen',g.yon,{sec:[['yatay','Yatay (x yönü)'],['dikey','Dikey (y yönü)']]})+fld(p+'sekil','Kasa şekli',g.sekil,{sec:[['I','I · düz'],['L','L · tek kollu'],['U','U · iki kollu']]})+(g.sekil==='L'?fld(p+'kolUc','Kol hangi uçta',g.kolUc,{sec:[['bas','Ön uç'],['son','Arka uç']]}):'')+fld(p+'x','Konum x (m)',g.x)+fld(p+'y','Konum y (m)',g.y)+fld(p+'aci','Dönüş açısı (°)',g.aci||0,{i:'saat yönünde; planda ⟳ ile de çevrilir'})
- +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi)
+ +fld(p+'sutun','Yan yana kasa',g.sutun)+fld(p+'sira','Sıra sayısı',g.sira)+fld(p+'aralik','Kasalar arası (cm)',g.aralik,{i:g.durum==='yeni'?`yan yana · en az ${fmt(n0(st.alan.kasaMin,150))}`:'yan yana'})+fld(p+'siraArasi','Sıralar arası (cm)',g.siraArasi,{i:g.durum==='yeni'?`en az ${fmt(n0(st.alan.kasaMin,150))}`:''})
  +fld(p+'malzeme','Malzeme',g.malzeme,{sec:Object.entries(MALZ).map(([k,v])=>[k,v.ad])})+(gal?'':fld(p+'t',bet?'Duvar kalınlığı (cm)':'Tahta kalınlığı (cm)',g.t))+(gal?'':fld(p+'tahtaH',bet?'Sıra yüksekliği (cm)':'Tahta yüksekliği (cm)',g.tahtaH))+(g.malzeme==='ahsap'||g.malzeme==='kompozit'?fld(p+'takviye','Galvaniz bağlantı takviyesi',g.takviye||'oneri',{sec:[['oneri','Ajan önersin'],['hafif','Hafif'],['standart','Standart'],['guclu','Güçlü'],['yok','Yok']]})+fld(p+'disL','Dış köşe L levhası',g.disL||'evet',{sec:[['evet','Var — 100×100×3 mm galvaniz'],['hayir','Yok']]})+fld(p+'araLama','Ara dikmede dikey lama',g.araLama||'evet',{sec:[['evet','Var — 40×3 mm galvaniz'],['hayir','Yok']]}):'')+(bet?'':fld(p+'dikme','Dikme kesiti (cm)',g.dikme,{i:'kare'})+fld(p+'gomme','Dikme gömme (cm)',g.gomme,{i:'0 = zemine oturur'}))
   +fld(p+'mk','Malzeme kasası',g.mk,{sec:[['yok','Yok'],['ic','Kasa içinde (bölmeli)'],['dis','Kasaya ek (dışta)']]})+(g.mk&&g.mk!=='yok'?fld(p+'mkYer','Malzeme kasası yeri',g.mkYer||g.mkUc||'bas',{sec:[...(g.sekil==='U'||(g.sekil==='L'&&g.kolUc!=='son')?[['kolBas','Ön uç tarafındaki kolun ucu']]:[]),...(g.sekil==='U'||(g.sekil==='L'&&g.kolUc==='son')?[['kolSon','Arka uç tarafındaki kolun ucu']]:[]),['bas','Ön uç (kısa kenar)'],['son','Arka uç (kısa kenar)'],['on','Ön uzun kenar'],...(g.sekil&&g.sekil!=='I'?[]:[['arka','Arka uzun kenar']]),...(g.mk==='ic'?[['orta','Arada (enine)']]:[])]})+(g.mk==='dis'?fld(p+'mkH','MK yüksekliği (cm)',g.mkH,{i:'boş = kasa ile aynı'}):''):'')
  +fld(p+'dip','Taban',g.dip,{sec:[['tel','Kemirgen teli'],['jeotekstil','Jeotekstil'],['yok','Yok']]})+(bet?'':fld(p+'icKaplama','İç jeotekstil',g.icKaplama,{sec:EH}))+fld(p+'sulama','Damla sulama',g.sulama,{sec:EH})+(g.sulama==='evet'?fld(p+'hatSayisi','Damla hattı sayısı',g.hatSayisi,{i:g.sekil==='U'?'her kol başına, en az 2; boş = otomatik':'giriş başına; boş = otomatik'})+fld(p+'vanaD','Vana bölmesi derinliği (cm)',g.vanaD,{i:'malzeme kasası yoksa'})+((!g.sekil||g.sekil==='I')?fld(p+'girisUc','Sulama girişi',g.girisUc||'bas',{sec:[['bas','Ön uç'],['son','Arka uç']]}):''):'')+fld(p+'toprak','Toprak',g.toprak,{sec:[['tam','Tam dolum'],['ust','Üst katman yenileme'],['yok','Hesaplama']]})}</div></div>`}).join('');sekilleriCiz()}
@@ -1306,7 +1311,20 @@ function oranGoster(){const t=st.toprak.bil.reduce((s,b)=>s+n0(b.oran),0);$('#or
 
 /* ---------- Özet ve değişim ---------- */
 let kirli={cizim:1,uc:1,denetim:1,rapor:1},aktifTab='girdi';
-function degisti(){H=hesapla(st);st._t=Date.now();kaydet();ozetCiz();adimCiz();if(!mkSur)sekilleriCiz();kirli={cizim:1,uc:1,denetim:1,rapor:1};if(aktifTab!=='ev')$('#projeAdUst').textContent=st.meta.ad||'—';rozetCiz()}
+let YS=null;
+function yerSnap(){const m={};st.gruplar.forEach(g=>m[g.id]=JSON.stringify(g));return m}
+function yerlesimDuzelt(degisen){const A=st.alan,en=n0(A.en),boy=n0(A.boy),km=Math.max(0,n0(A.kasaMin,150))/100,ke=Math.max(0,n0(A.kenarMin,100))/100,T=[];
+ const sinirOk=(G,dx,dy)=>!(en>0&&boy>0)||G.poli.every(P=>P.every(q=>q[0]+dx>=ke-0.005&&q[1]+dy>=ke-0.005&&q[0]+dx<=en-ke+0.005&&q[1]+dy<=boy-ke+0.005));
+ const bbM=(a,b,dx,dy)=>Math.hypot(Math.max(0,b.x-(a.x+a.w+dx),a.x+dx-(b.x+b.w)),Math.max(0,b.y-(a.y+a.h+dy),a.y+dy-(b.y+b.h)));
+ const ok=(G,dx,dy,sab,sinir)=>(!sinir||sinirOk(G,dx,dy))&&sab.every(O=>bbM(G.bb,O.bb,dx,dy)>=km-0.005||grupMes(G,O,dx,dy)>=km-0.005);
+ const ara=(G,sab,sinir)=>{for(let r=0.1;r<=15.001;r+=0.1){const n=Math.max(8,Math.min(72,Math.round(2*Math.PI*r/0.1)));for(let i=0;i<n;i++){const a=i/n*2*Math.PI,dx=Math.round(r*Math.cos(a)*100)/100,dy=Math.round(r*Math.sin(a)*100)/100;if(ok(G,dx,dy,sab,sinir))return[dx,dy]}}return null};
+ const sab=H.gr.filter(G=>G.g.durum!=='yeni'),hare=H.gr.filter(G=>G.g.durum==='yeni').sort((a,b)=>(degisen.has(a.g.id)?1:0)-(degisen.has(b.g.id)?1:0));
+ hare.forEach(G=>{if(!ok(G,0,0,sab,true)){let m=ara(G,sab,true);const kenarIcin=!!m;if(!m&&!ok(G,0,0,sab,false))m=ara(G,sab,false);
+   if(m){const g=G.g;g.x=r2(n0(g.x)+m[0]);g.y=r2(n0(g.y)+m[1]);G.poli=G.poli.map(P=>P.map(q=>[q[0]+m[0],q[1]+m[1]]));G.bb={...G.bb,x:G.bb.x+m[0],y:G.bb.y+m[1]};T.push({G,m,kenarIcin})}}
+  sab.push(G)});
+ return T}
+function degisti(){H=hesapla(st);if(YS){const S0=yerSnap(),dg=new Set(Object.keys(S0).filter(i=>S0[i]!==YS[i]));const T=yerlesimDuzelt(dg);if(T.length){H=hesapla(st);T.forEach(({G})=>['x','y'].forEach(f=>{const el=document.querySelector(`[data-k="gruplar.${G.gi}.${f}"]`);if(el&&document.activeElement!==el)el.value=G.g[f]}));
+  toast(T.map(({G,m})=>`${G.kod} grubu ${fmt(Math.hypot(m[0],m[1])*100,0)} cm kaydırıldı`).join(', ')+` (en az ${fmt(n0(st.alan.kasaMin,150))} cm kasa arası, ${fmt(n0(st.alan.kenarMin,100))} cm kenar)`)}}YS=yerSnap();st._t=Date.now();kaydet();ozetCiz();adimCiz();if(!mkSur)sekilleriCiz();kirli={cizim:1,uc:1,denetim:1,rapor:1};if(aktifTab!=='ev')$('#projeAdUst').textContent=st.meta.ad||'—';rozetCiz()}
 function ozetCiz(){const o=H.top;$('#ozet').innerHTML=`<div><b>${o.kasa}</b><span>kasa (${o.kasaYeni} yeni)</span></div><div><b>${fmt(o.ekim,1)} m²</b><span>ekim alanı</span></div><div><b>${fmt(o.mixL/1000,2)} m³</b><span>toprak karışımı</span></div><div><b>${fmt(o.Q,0)} L/sa</b><span>damla debisi${o.bolge>1?` · ${o.bolge} bölge`:''}</span></div>`}
 function rozetCiz(){const kr=H.sorun.filter(b=>b.sev==='kritik').length,uy=H.sorun.filter(b=>b.sev==='uyari').length,e=$('#sayac');if(kr||uy){e.hidden=false;e.textContent=kr||uy;e.classList.toggle('uy',!kr)}else e.hidden=true}
 
@@ -1351,7 +1369,7 @@ const aciN=a=>Math.round(((a%360)+360)%360*10)/10;
 function svgNokta(svg,e){const pt=svg.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(svg.getScreenCTM().inverse())}
 function yerDurum(gi,dx=0,dy=0){const G=H.gr.find(x=>x.gi===gi);if(!G)return{metin:'',sorun:false};const en=n0(st.alan.en),boy=n0(st.alan.boy),g=G.g;let sorun=[];
  if(alanDisi(G,en,boy,dx,dy))sorun.push('alan dışında');
- H.gr.forEach(O=>{if(O.gi===gi)return;const ar=grupMes(G,O,dx,dy);if(ar<0.005)sorun.push(`${O.kod} ile çakışıyor`);else if(ar<0.6)sorun.push(`${O.kod} ile arası ${fmt(ar*100,0)} cm`)});
+ H.gr.forEach(O=>{if(O.gi===gi)return;const ar=grupMes(G,O,dx,dy);if(ar<0.005)sorun.push(`${O.kod} ile çakışıyor`);else if(ar<(g.durum==='yeni'||O.g.durum==='yeni'?n0(st.alan.kasaMin,150)/100:0.6)-0.005)sorun.push(`${O.kod} ile arası ${fmt(ar*100,0)} cm`)});
  return{metin:`${G.kod} · ${g.ad}: x=${fmt(n0(g.x)+dx,2)} m, y=${fmt(n0(g.y)+dy,2)} m${sorun.length?' — ⚠ '+sorun.join(', '):' ✓'}`,sorun:sorun.length>0}}
 function seciliKasalar(){return yer.kasalar.map(x=>{const G=H.gr.find(g=>g.gi===x.gi);const b=G&&G.beds.find(b=>b.no===x.no);return b?{G,b,gi:x.gi,no:x.no}:null}).filter(Boolean)}
 function kasaAciAta(gi,no,a){const g=st.gruplar[gi];if(!g)return;if(!g.kasaAci||typeof g.kasaAci!=='object')g.kasaAci={};const v=aciN(a);if(v)g.kasaAci[no]=v;else delete g.kasaAci[no]}
@@ -1362,6 +1380,7 @@ function yerArac(){const t=$('#btnTasi');t.textContent=`✋ Taşıma modu: ${yer
  if(sk.length){$('#yerAd').textContent=`Seçili kasa: ${sk.map(x=>x.b.ad+(x.b.aci?` (${fmt(x.b.aci,0)}°)`:'')).join(', ')} — açı düğmeleri yalnızca bunları kendi yerinde çevirir`;$('#yerAd').style.color='var(--tu)'}
  else if(G){const d=yerDurum(G.gi);$('#yerAd').textContent=d.metin+(G.aci?` · grup açısı ${fmt(G.aci,1)}°`:'')+' — açı düğmeleri tüm grubu çevirir';$('#yerAd').style.color=d.sorun?'var(--kr)':''}
  const ay=$('#btnAyir');ay.hidden=!(sk.length===1&&sk[0].G.beds.length>1);if(!ay.hidden)ay.textContent=`✂ ${sk[0].b.ad} kasasını gruptan ayır`;
+ {const g=G&&G.g;$('#yerAra').textContent=g?`Kasa arası ${fmt(G.ar*100)} cm · sıra arası ${fmt(G.sa*100)} cm${g.durum==='yeni'?` (en az ${fmt(n0(st.alan.kasaMin,150))})`:''}`:'';$$('#yerSecili [data-ara]').forEach(b=>b.hidden=!G||!!sk.length);$('#yerAra').hidden=!G||!!sk.length}
  $('#btnSecimBirak').hidden=!sk.length;$('#btnTumunuSec').hidden=!G;$('#btnDondur').hidden=!!sk.length;
  $$('#yerSecili [data-it]').forEach(b=>b.hidden=!!sk.length&&!G)}
 $('#btnTasi').onclick=()=>{yer.tasima=!yer.tasima;if(!yer.tasima){yer.secili=null;yer.kasalar=[]}cizimCiz(true);if(yer.tasima)toast('Grubu sürükleyin; tek kasayı seçmek için üzerine dokunun (birden fazla seçebilirsiniz)')};
@@ -1394,7 +1413,8 @@ function yerBitir(e){const r=yer.r;if(r&&(!e||e.pointerId===r.id)){yer.r=null;$(
  $('#yerBilgi').style.color='';$('#yerBilgi').textContent='Grubu sürükleyerek taşıyın; kasaya dokunarak seçin (dokunduklarınız birlikte seçilir).';
  degisti();renderForm();cizimCiz(true)}
 $('#cizimKutu').addEventListener('pointerup',yerBitir);$('#cizimKutu').addEventListener('pointercancel',yerBitir);
-$('#yerSecili').addEventListener('click',e=>{const ba=e.target.closest('[data-aci]');if(ba){const sk=seciliKasalar(),da=+ba.dataset.aci;
+$('#yerSecili').addEventListener('click',e=>{const bA=e.target.closest('[data-ara]');if(bA){const g=st.gruplar[yer.secili];if(!g)return;const km=g.durum==='yeni'?n0(st.alan.kasaMin,150):0,d=+bA.dataset.ara;['aralik','siraArasi'].forEach(f=>g[f]=Math.max(km,Math.max(km,n0(g[f]))+d));degisti();renderForm();cizimCiz(true);return}
+ const ba=e.target.closest('[data-aci]');if(ba){const sk=seciliKasalar(),da=+ba.dataset.aci;
   if(sk.length)sk.forEach(x=>kasaAciAta(x.gi,x.no,x.b.aci+da));else{const g=st.gruplar[yer.secili];if(!g)return;g.aci=aciN(n0(g.aci)+da)}degisti();renderForm();cizimCiz(true);return}
  const b=e.target.closest('[data-it]');if(!b)return;const g=st.gruplar[yer.secili];if(!g)return;const[a,c]=b.dataset.it.split(',').map(Number);g.x=r2(n0(g.x)+a);g.y=r2(n0(g.y)+c);degisti();renderForm();cizimCiz(true)});
 $('#yerAci').addEventListener('change',e=>{const v=parseFloat(String(e.target.value).replace(',','.'));if(!Number.isFinite(v))return;const sk=seciliKasalar();
@@ -2047,7 +2067,7 @@ $('#evListe').addEventListener('click',e=>{const a=e.target.closest('[data-pid]'
  const d=e.target.closest('[data-silp]');if(d){const id=d.dataset.silp,ad=DB.projeler[id].meta.ad;if(!confirm(`"${ad}" silinsin mi? Bu işlem geri alınamaz.`))return;delete DB.projeler[id];DB.silinen=DB.silinen||{};DB.silinen[id]=Date.now();
   if(!Object.keys(DB.projeler).length){const nid=uid();DB.projeler[nid]=bosProje();DB.aktif=nid}else if(DB.aktif===id)DB.aktif=Object.keys(DB.projeler)[0];
   st=onar(DB.projeler[DB.aktif]);DB.projeler[DB.aktif]=st;H=hesapla(st);renderForm();oranGoster();kaydet();evCiz();toast('Silindi')}});
-function projeAc(id){DB.aktif=id;st=onar(DB.projeler[id]);DB.projeler[id]=st;ucGorsel=null;renderForm();oranGoster();const t0=st._t;degisti();st._t=t0;kaydet();if(U3)U3.ilk=0;sekme('girdi')}
+function projeAc(id){DB.aktif=id;YS=null;st=onar(DB.projeler[id]);DB.projeler[id]=st;ucGorsel=null;renderForm();oranGoster();const t0=st._t;degisti();st._t=t0;kaydet();if(U3)U3.ilk=0;sekme('girdi')}
 function projeEkle(p){const id=uid();p._t=Date.now();DB.projeler[id]=p;projeAc(id);toast('Çalışma oluşturuldu')}
 $('#evYeni').onclick=()=>projeEkle(bosProje());$('#evOrnek').onclick=()=>projeEkle(ornekProje());
 /* Adım rehberi */

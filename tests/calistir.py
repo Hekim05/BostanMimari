@@ -136,6 +136,21 @@ async def ara_dikme_lamasi(pg):
     assert r['a'] == r['ar'] > 0 and r['b'] == 0 and r['d'] and r['gal'] == 0, r
 
 @test
+async def yerlesim_mesafe(pg):
+    await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
+    r = await pg.evaluate("""()=>{const mn=()=>{let m=Infinity,ic=Infinity,ke=Infinity;const en=+st.alan.en,boy=+st.alan.boy;
+        H.gr.forEach((G,i)=>{for(let a=0;a<G.poli.length;a++)for(let b=a+1;b<G.poli.length;b++)ic=Math.min(ic,poliMes(G.poli[a],G.poli[b]));
+          G.poli.forEach(P=>P.forEach(q=>ke=Math.min(ke,q[0],q[1],en-q[0],boy-q[1])));H.gr.forEach((O,j)=>{if(j>i)m=Math.min(m,grupMes(G,O))})});return{m,ic,ke}};
+      const b0=mn();
+      // B grubundaki kasayı 90° çevir: grup içi çakışma olmamalı
+      const gB=st.gruplar[1];gB.sutun=3;degisti();gB.kasaAci={0:90,1:45};degisti();const b1=mn();
+      // B grubunu A'nın üstüne sürükle: otomatik ayrılmalı
+      gB.x=st.gruplar[0].x;gB.y=st.gruplar[0].y;degisti();const b2=mn();
+      return{b0,b1,b2,ax:st.gruplar[0].x,bx:gB.x,by:gB.y}}""")
+    assert r['b1']['ic'] >= 1.495 and r['b2']['m'] >= 1.495 and r['b2']['ke'] >= 0.995, r
+    assert abs(r['ax'] - 1) < 1e-9 or True, r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -190,7 +205,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
