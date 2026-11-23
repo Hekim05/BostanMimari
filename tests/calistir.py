@@ -128,6 +128,14 @@ async def hazirlik_klasoru(pg):
         await pg.click(f'[data-on="{k}"]'); await pg.wait_for_timeout(150)
 
 @test
+async def ara_dikme_lamasi(pg):
+    await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
+    r = await pg.evaluate("""()=>{const G=H.gr.find(g=>g.k.m==='ahsap'&&g.k.araTop>0);const say=g=>parcalar(g).filter(x=>/lama 40×3/.test(x.kalem)).reduce((a,x)=>a+x.adet,0);
+      const a=say(G),ar=G.k.araTop,d=JSON.stringify(dayanim(G,st)).includes('dikey lama dahil');G.g.araLama='hayir';const b=say(G);G.g.araLama='evet';
+      const gal=H.gr.find(g=>g.k.m==='galvaniz');return{a,ar,b,d,gal:gal?say(gal):0}}""")
+    assert r['a'] == r['ar'] > 0 and r['b'] == 0 and r['d'] and r['gal'] == 0, r
+
+@test
 async def sulama_detayi(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>{const G=H.gr.find(x=>x.d);const s=svgSulamaDetay(G,st);const d=new DOMParser().parseFromString(s,'image/svg+xml');
@@ -170,7 +178,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
