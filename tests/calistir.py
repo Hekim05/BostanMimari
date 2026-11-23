@@ -232,6 +232,14 @@ async def sinira_hizala(pg):
     assert all(abs(a - (r['boy'] - 1.5)) < 0.011 for a in r['alt']), r
 
 @test
+async def aci_esitle(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:40,boy:30};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:2,y:2,sutun:3,kasaAci:{0:7,1:-12,2:183}}),yeniGrup(1,{x:3,y:9,sutun:2,aci:20})];projeEkle(p);sekme('cizim');
+      const d=()=>H.gr.flatMap(G=>G.beds.map(b=>aciN(G.aci+b.aci)));yer.secili=0;yer.kasalar=[{gi:0,no:0},{gi:0,no:1},{gi:0,no:2},{gi:1,no:0},{gi:1,no:1}];aciEsitle('0');const a=d();
+      yer.kasalar=[{gi:1,no:0},{gi:0,no:0}];aciEsitle('ilk');const b=d();return{a,b}}""")
+    assert all(x in (0, 180) for x in r['a']), r
+    assert r['b'][0] == r['b'][3], r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -286,7 +294,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, aci_esitle, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
