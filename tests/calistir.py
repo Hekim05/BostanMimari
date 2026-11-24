@@ -256,6 +256,22 @@ async def sulama_en_az(pg):
     assert all(b <= 40 for b in r['bos']), r     # ıslanma genişliği aşılmadı
 
 @test
+async def alana_sigdir(pg):
+    r = await pg.evaluate("""()=>{const p=bosProje();p.alan={...p.alan,en:18,boy:12};p.gruplar=[yeniGrup(0,{L:300,W:120,H:45,x:3,y:3,sutun:1})];projeEkle(p);
+      const c=alanKapasite(H.gr[0]);alanaSigdir(0);const G=H.gr[0];let m=Infinity,ke=Infinity;
+      for(let i=0;i<G.poli.length;i++){G.poli[i].forEach(q=>ke=Math.min(ke,q[0],q[1],18-q[0],12-q[1]));for(let j=i+1;j<G.poli.length;j++)m=Math.min(m,poliMes(G.poli[i],G.poli[j]))}
+      return{n:c.n,kasa:G.beds.length,m,ke,uu:H.sorun.filter(b=>b.sev!=='ok').map(b=>b.baslik)}}""")
+    assert r['n'] == 12 and r['kasa'] == 12, r
+    assert r['m'] >= 1.495 and r['ke'] >= 0.995, r
+    assert not any('sınır' in b or 'üst üste' in b for b in r['uu']), r
+
+@test
+async def denetim_sirasi(pg):
+    await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
+    r = await pg.evaluate("""()=>{sekme('denetim');const ilk=document.querySelector('#bulgular > .bulgu');return{ilk:ilk&&ilk.className,muhAcik:$('#muhKart').open,ok:document.querySelectorAll('#bulgular details .bulgu.ok').length}}""")
+    assert r['ilk'] and 'ok' not in r['ilk'].split() and not r['muhAcik'] and r['ok'] > 0, r
+
+@test
 async def sorgu(pg):
     await pg.evaluate(ORNEK); await pg.wait_for_timeout(300)
     r = await pg.evaluate("""()=>({v:sorgula('vida kaç adet')[0],e:sorgula('EPDM nedir')[0],k:sorgula('kış').map(x=>x.baslik),y:sorgula('xyzq').length})""")
@@ -310,7 +326,7 @@ async def main():
         time.sleep(0.8); url = f'http://127.0.0.1:{port}/'
         async with async_playwright() as p:
             b = await p.chromium.launch()
-            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, aci_esitle, ana_hat_agaci, sulama_en_az, sorgu, sulama_detayi, esitleme]:
+            for t in [surum_eslesmesi, acilis_ve_calismalar, hesap_tutarliligi, dis_kose_l_profil, kasa_dayanimi, damla_hidroligi, malzeme_eslesmesi, metin_pdf, hazirlik_klasoru, ara_dikme_lamasi, yerlesim_mesafe, sulama_hatlari, gergi_secenegi, ortak_olcu, grup_belirleme, hizalama, geri_al_ve_oto, sinira_hizala, aci_esitle, ana_hat_agaci, sulama_en_az, alana_sigdir, denetim_sirasi, sorgu, sulama_detayi, esitleme]:
                 ctx = await b.new_context(service_workers='block', viewport={'width': 390, 'height': 844}, accept_downloads=True)
                 await t(ctx, url); await ctx.close()
             await b.close()
